@@ -4,9 +4,7 @@ lorax --
 A web service process designed to calculate and serve up phylogenetic trees, including:
     * Setting of tree calculation parameters and metadata
     * Storing input sequences
-    * Multiple sequence alignment, if necessary
     * Phylogenetic tree calculation
-    * Placement of additional sequences on trees
     * Serving up results
 
 '''
@@ -119,51 +117,44 @@ init_logging_to_stderr_and_file(verbosity,
                                     logfile_path)
 
 app = Flask('lorax')
-AutoIndex(app, browse_root=os.path.curdir)
+#AutoIndex(app, browse_root=os.path.curdir)
 
 @app.route('/config')
 def show_config():
     return str(config_data)
 
-@app.route('/trees/<familyname>', methods=['GET', 'POST'])
+@app.route('/trees/<familyname>/alignment', methods=['POST'])
 def create_family(familyname):
     if familyname == 'config.json':
         logger.error('User tried to overwrite config.json')
         abort(405)
     path = data_path/familyname
-    if request.method == 'GET':
-        if not path.is_dir():
-            logger.error('Path %s does not exist', path)
-            abort(404)
-        else:
-            return str(os.listdir(str(path)))
-    else:
-        # post data
-        if path.exists() and not path.is_dir():
-            logger.warn('Removing existing file in directory path name')
-            path.unlink()
-        if not path.is_dir():
-            logger.info("Creating directory %s", path)
-            path.mkdir()
-        try:
-            fasta = request.files['peptide']
-            ext = 'faa'
-        except KeyError:
-            fasta = request.files['DNA']
-            ext = 'fna'
-        except KeyError:
-            logger.error('unrecognized request')
-            abort(400)
-        if fasta.filename == '':
-            logger.warn('missing FASTA filename')
-            return redirect(request.url)
+    # post data
+    if path.exists() and not path.is_dir():
+        logger.warn('Removing existing file in directory path name')
+        path.unlink()
+    if not path.is_dir():
+        logger.info("Creating directory %s", path)
+        path.mkdir()
+    try:
+        fasta = request.files['peptide']
+        ext = 'faa'
+    except KeyError:
+        fasta = request.files['DNA']
+        ext = 'fna'
+    except KeyError:
+        logger.error('unrecognized request')
+        abort(400)
+    if fasta.filename == '':
+        logger.warn('missing FASTA filename')
+        return redirect(request.url)
 
-        infilename = 'input.' + ext
-        logger.info('Saving FASTA file %s.', infilename)
-        if (path.infilename).exists():
-            logger.warn('Overwriting existing %s', infilename)
-        fasta.save(str(path/infilename))
-        return 'Input file accepted'
+    infilename = 'input.' + ext
+    logger.info('Saving FASTA file for family "%s".', familyname)
+    if (path/infilename).exists():
+        logger.warn('Overwriting existing FASTA file for family %s', familyname)
+    fasta.save(str(path/infilename))
+    return 'Input file accepted\n'
 
 @app.route('/trees/<familyname>/FastTree')
 def calculate_FastTree(familyname):
@@ -171,9 +162,15 @@ def calculate_FastTree(familyname):
     builder = 'FastTree'
     if not inpath.is_dir():
         abort(404)
-    outpath = inpath/builder
+    try:
+        outpath = inpath/builder
+    except:
+        abort(404)
     if not outpath.exists():
-        outpath.mkdir()
+        try:
+            outpath.mkdir()
+        except:
+            abort(404)
     if (inpath/'input.fna').exists():
         infile = Path('..')/'input.fna'
         seq_type = 'DNA'

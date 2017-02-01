@@ -31,15 +31,12 @@ COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.  Al
 """
 PROJECT_HOME = 'https://github.com/LegumeFederation/lorax'
 DOCS_HOME = 'https://lorax.readthedocs.org/en/stable'
-
 DEFAULT_FILE_LOGLEVEL = logging.DEBUG
 DEFAULT_STDERR_LOGLEVEL = logging.INFO
 VERSION = __version__
 STARTTIME = datetime.now()
-ROOT_FILE_ENVVAR = 'LORAX_ROOT_FILE_PATH'
-
-LOG_SUBDIR = 'logs'
-LOGFILE_NAME = 'lorax.log'
+CONFIGFILE_NAME = 'config.json'
+TREEBUILDERS = ['FastTree', 'RaxML']
 #
 # global logger object
 #

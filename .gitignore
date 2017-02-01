@@ -57,9 +57,10 @@ dist
 ################
 docs/_build/
 
-# lorax test data #
-##########################
+# lorax test data and logs#
+###########################
 test/data
+test/logs
 
 # docutils #
 ############
