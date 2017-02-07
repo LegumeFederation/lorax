@@ -117,7 +117,7 @@ init_logging_to_stderr_and_file(verbosity,
                                     logfile_path)
 
 app = Flask('lorax')
-#AutoIndex(app, browse_root=os.path.curdir)
+AutoIndex(app, browse_root=os.path.curdir)
 
 @app.route('/config')
 def show_config():
