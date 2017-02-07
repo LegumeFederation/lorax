@@ -50,7 +50,8 @@ setup(
     zip_safe=False,
     install_requires=['flask',
                       'flask_autoindex',
-                      'celery'
+                      'celery',
+                      'tabulate'
                       ],
     entry_points={
                  'console_scripts':['lorax = lorax:__main__']
