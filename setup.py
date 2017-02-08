@@ -51,7 +51,7 @@ setup(
     install_requires=['flask',
                       'flask_autoindex',
                       'celery',
-                      'tabulate'
+                      'biopython'
                       ],
     entry_points={
                  'console_scripts':['lorax = lorax:__init__']
