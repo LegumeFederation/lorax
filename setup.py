@@ -59,7 +59,7 @@ setup(
     classifiers=['Development Status :: 3 - Alpha',
                  'Environment :: Console',
                  'Intended Audience :: Science/Research',
-                 'License :: OSI Approved :: BSD License ',
+                 'License :: OSI Approved :: BSD License',
                  'Operating System :: OS Independent',
                  'Programming Language :: Python :: 3.4',
                  'Programming Language :: Python :: 3.5',
