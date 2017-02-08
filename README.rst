@@ -50,14 +50,16 @@ URL                                 Interpretation
                                     name , and
                                     must not include special characters such as ``/`` or an
                                     error will be returned.  See the ``post_to_lorax.sh``
-                                    script for an example of how to post.
+                                    script for an example of how to post.  Returns a
+                                    JSON object that gives information about the submitted
+                                    sequences.
 
 ``/trees/<family>/FastTree``        A ``GET`` of this URL will cause a FastTree tree to be
                                     calculated and a Newick tree to be returned.  This
                                     operation may take a long time and result in a timeout, which
                                     is why polling methods are provided.
 
-``/trees/<family>/RaxML``           Same as above, execpt using RaxML as the tree builder.
+``/trees/<family>/RAxML``           Same as above, execpt using RAxML as the tree builder.
 
 ``/trees/<fam>/<meth>/status``      Returns -1 if tree calculation is ongoing, and the exit
                                     code of the tree-builder <meth> if calculation is complete.
@@ -69,3 +71,17 @@ URL                                 Interpretation
 
 =================================== ===========================================================
 
+Running lorax
+-------------
+
+A ``config.json`` file must exist in the current working directory; one may be obtained from the ``test`` directory
+of the repository along with demo shell scripts.  ``lorax`` is started as a command-line argument with optional
+``--host`` and ``--port`` arguments.
+
+Log files with time-stamped names will be created in the directory specified by ``paths/log`` in ``config.json``.
+The example that is shipped uses the ``log/`` directory.
+
+``lorax`` is intended to be run on localhost only and contains no authentication code.
+
+We recommend that ``lorax`` be run in a virtual environment.  However, the shell scripts will work for
+real environments as well.

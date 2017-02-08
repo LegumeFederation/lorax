@@ -1,22 +1,10 @@
 # -*- coding: utf-8 -*-
-'''Global constants and common helper functions.
+'''Configuration constants.
 '''
 #
 # library imports
 #
 import logging
-import sys
-import os
-import ast
-import json
-from datetime import datetime
-from pathlib import Path # python 3.4 or later
-from distutils.util import strtobool
-from distutils.version import StrictVersion
-#
-# 3rd-party module imports
-#
-from tabulate import tabulate
 #
 # module version--kept in its own file for setup.py
 #
@@ -34,11 +22,12 @@ DOCS_HOME = 'https://lorax.readthedocs.org/en/stable'
 DEFAULT_FILE_LOGLEVEL = logging.DEBUG
 DEFAULT_STDERR_LOGLEVEL = logging.INFO
 VERSION = __version__
-STARTTIME = datetime.now()
 CONFIGFILE_NAME = 'config.json'
 TREEBUILDERS = ['FastTree', 'RaxML']
-#
-# global logger object
-#
-logger = logging.getLogger('lorax')
-
+DIR_MODE = 0o755
+PEPTIDE_PART = 'peptide'
+DNA_PART = 'DNA'
+PEPTIDE_FILENAME = 'alignment.faa'
+DNA_FILENAME = 'alignment.fna'
+TREE_NAME = 'tree.nwk'
+ALIGNMENT_DATA_FILENAME = 'alignment_dat.json'

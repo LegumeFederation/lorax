@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 lorax --
 
@@ -11,30 +12,33 @@ A web service process designed to calculate and serve up phylogenetic trees, inc
 #
 # standard library imports
 #
-import locale
 import os
 import sys
 import logging
 import subprocess
 from pathlib import Path # python 3.4 or later
 import json
+import io
+from datetime import datetime
 #
 # third-party imports
 #
 from flask import Flask, request, redirect, abort
 from flask_autoindex import AutoIndex
-#
-# global logger object
-#
-logger = logging.getLogger('lorax')
+from Bio import SeqIO
 #
 # local imports
 #
-from .common import *
+from .config import *
+from .flaskrun import flaskrun
 #
-# set locale so grouping works
+# Global variables
 #
-locale.setlocale(locale.LC_ALL, 'en_US')
+STARTTIME = datetime.now()
+#
+# global logger object
+#
+logger = logging.getLogger(PROGRAM_NAME)
 #
 # Class definitions begin here
 #
@@ -77,7 +81,7 @@ def init_logging_to_stderr_and_file(verbosity,
         logfile_path = Path(logfile_path)/logfile_name
         if not logfile_path.parent.is_dir(): # create logs/ dir
             try:
-                logfile_path.parent.mkdir(mode=0o755, parents=True)
+                logfile_path.parent.mkdir(mode=DIR_MODE, parents=True)
             except OSError:
                 logger.error('Unable to create logfile directory "%s"',
                              logfile_path.parent)
@@ -116,17 +120,17 @@ init_logging_to_stderr_and_file(verbosity,
                                     no_logfile,
                                     logfile_path)
 
-app = Flask('lorax')
+app = Flask(PROGRAM_NAME)
 AutoIndex(app, browse_root=os.path.curdir)
 
 @app.route('/config')
 def show_config():
-    return str(config_data)
+    return json.dumps(config_data)
 
 @app.route('/trees/<familyname>/alignment', methods=['POST'])
 def create_family(familyname):
-    if familyname == 'config.json':
-        logger.error('User tried to overwrite config.json')
+    if familyname == CONFIGFILE_NAME:
+        logger.error('User tried to overwrite %s', CONFIGFILE_NAME)
         abort(405)
     path = data_path/familyname
     # post data
@@ -137,24 +141,38 @@ def create_family(familyname):
         logger.info("Creating directory %s", path)
         path.mkdir()
     try:
-        fasta = request.files['peptide']
-        ext = 'faa'
+        fasta = request.files[PEPTIDE_PART]
+        infilename = PEPTIDE_FILENAME
     except KeyError:
-        fasta = request.files['DNA']
-        ext = 'fna'
+        fasta = request.files[DNA_PART]
+        infilename = DNA_FILENAME
     except KeyError:
         logger.error('unrecognized request')
         abort(400)
-    if fasta.filename == '':
-        logger.warn('missing FASTA filename')
-        return redirect(request.url)
-
-    infilename = 'input.' + ext
+    try: # parse FASTA file
+        fasta_str_fh = io.StringIO(fasta.read().decode('UTF-8'))
+        parsed_fasta = SeqIO.parse(fasta_str_fh, 'fasta')
+        record_dict = SeqIO.to_dict(parsed_fasta)
+    except:
+        abort(404)
+    if len(record_dict) < 1: # empty FASTA
+        abort(404)
+    lengths = [len(rec.seq) for rec in record_dict.values()]
+    alignment_dict = {'sequences': len(record_dict),
+                      'max_length': max(lengths),
+                      'min_length': min(lengths),
+                      'total_length': sum(lengths),
+                      'overwrite': False}
     logger.info('Saving FASTA file for family "%s".', familyname)
     if (path/infilename).exists():
         logger.warn('Overwriting existing FASTA file for family %s', familyname)
-    fasta.save(str(path/infilename))
-    return 'Input file accepted\n'
+        alignment_dict['overwrite'] = True
+    with open(str(path/infilename), 'w') as fasta_outfh:
+        for seq in record_dict.values():
+            SeqIO.write(seq, fasta_outfh, 'fasta')
+    with open(str(path/ALIGNMENT_DATA_FILENAME), 'w') as align_data_fh:
+        json.dump(alignment_dict, align_data_fh)
+    return json.dumps(alignment_dict)
 
 @app.route('/trees/<familyname>/FastTree')
 def calculate_FastTree(familyname):
@@ -171,12 +189,12 @@ def calculate_FastTree(familyname):
             outpath.mkdir()
         except:
             abort(404)
-    if (inpath/'input.fna').exists():
-        infile = Path('..')/'input.fna'
-        seq_type = 'DNA'
-    elif (inpath/'input.faa').exists():
-        infile = Path('..')/'input.faa'
-        seq_type = 'peptide'
+    if (inpath/DNA_FILENAME).exists():
+        infile = Path('..')/DNA_FILENAME
+        seq_type = DNA_PART
+    elif (inpath/PEPTIDE_FILENAME).exists():
+        infile = Path('..')/PEPTIDE_FILENAME
+        seq_type = PEPTIDE_PART
     else:
         logger.error('Unable to find peptide or DNA sequence in request.')
         abort(404)
@@ -187,7 +205,7 @@ def calculate_FastTree(familyname):
     defaults = treebuilders[builder][seq_type]
     cmdlist = ['time', 'nice', 'FastTree'] + defaults + [str(infile)]
     logger.debug('Command line is %s', cmdlist)
-    nwk_path = outpath/ 'tree.nwk'
+    nwk_path = outpath/TREE_NAME
     if nwk_path.exists():
         logger.warn('Removing existing tree file in "%s".', familyname+'/'+builder)
         nwk_path.unlink()
@@ -216,41 +234,40 @@ def calculate_FastTree(familyname):
         logger.error('%s returned a non-zero result, check log for errors.', builder)
         abort(417)
 
-@app.route('/trees/<familyname>/RaxML')
-def calculate_RaxML(familyname):
+@app.route('/trees/<familyname>/RAxML')
+def calculate_RAxML(familyname):
     inpath = data_path/familyname
-    builder = 'RaxML'
+    builder = 'RAxML'
     if not inpath.is_dir():
         abort(404)
     outpath = inpath/builder
     if not outpath.exists():
         outpath.mkdir()
-    if (inpath/'input.fna').exists():
-        infile = Path('..')/'input.fna'
+    if (inpath/DNA_FILENAME).exists():
+        infile = Path('..')/DNA_FILENAME
         seq_type = 'DNA'
-    elif (inpath/'input.faa').exists():
-        infile = Path('..')/'input.faa'
+    elif (inpath/PEPTIDE_FILENAME).exists():
+        infile = Path('..')/PEPTIDE_FILENAME
         seq_type = 'peptide'
     else:
         logger.error('Unable to find peptide or DNA sequence in request.')
         abort(404)
     #
-    # calculate tree with RaxML
+    # calculate tree with RAxML
     #
     logger.debug('Calculating %s tree "%s" with %s.', seq_type, familyname, builder)
     defaults = treebuilders[builder][seq_type]
-    cmdlist = ['time', 'nice', 'raxmlHPC'] + defaults + [str(infile)]
+    cmdlist = ['time', 'nice', 'raxmlHPC'] + defaults + ['-n','production',
+                                                         '-T', '%d'%threads,
+                                                         '-s', str(infile)]
     logger.debug('Command line is %s', cmdlist)
-    nwk_path = outpath/ 'tree.nwk'
+    nwk_path = outpath/TREE_NAME
     if nwk_path.exists():
         logger.warn('Removing existing tree file in "%s".', familyname+'/'+builder)
         nwk_path.unlink()
     nwk_fh = nwk_path.open(mode='wb')
     err_fh = (outpath/'run.log').open(mode='wt')
     status_fh = (outpath/'status.txt').open(mode='wt')
-    environ = os.environ.copy()
-    if threads > 0:
-        environ['OMP_NUM_THREADS'] = str(threads)
     status_fh.write('-1\n') # signal that calculation has been started
     status_fh.close()
     status = subprocess.run(cmdlist,
@@ -274,7 +291,7 @@ def calculate_RaxML(familyname):
 def get_existing_tree(familyname, method):
     if method not in TREEBUILDERS:
         abort(404)
-    inpath = data_path/familyname/method/'tree.nwk'
+    inpath = data_path/familyname/method/TREE_NAME
     if not inpath.exists():
         abort(404)
     tree = inpath.open().read()
@@ -300,3 +317,5 @@ def get_status(familyname, method):
         abort(404)
     status = inpath.open().read()
     return status
+
+flaskrun(app)
