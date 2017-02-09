@@ -1,12 +1,14 @@
 Server for Phylogenetic Trees
 =============================
 
-``lorax`` calculates and serves up multiple sequence alignments and phylogenetic trees.
+``lorax`` "speaks for the trees" by calculating and serving up multiple sequence alignments
+ and phylogenetic trees.
 
 How does lorax calculate multiple sequence alignments?
 ------------------------------------------------------
-``lorax`` uses ``hmmalign`` to calculate multiple sequence alignments in either peptide or DNA
-space.  An HMM must be given to ``lorax``.
+``lorax`` uses a pre-calculated HMM and ``hmmalign`` to calculate multiple sequence alignments
+in either peptide or DNA
+space.
 
 How does lorax calculate phylogenetic trees?
 ---------------------------------------------
