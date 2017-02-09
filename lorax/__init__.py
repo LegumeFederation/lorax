@@ -25,7 +25,7 @@ from datetime import datetime
 #
 from flask import Flask, request, redirect, abort
 from flask_autoindex import AutoIndex
-from Bio import SeqIO
+from Bio import SeqIO, AlignIO
 #
 # local imports
 #
@@ -127,25 +127,24 @@ AutoIndex(app, browse_root=os.path.curdir)
 def show_config():
     return json.dumps(config_data)
 
-@app.route('/trees/<familyname>/alignment', methods=['POST'])
-def create_family(familyname):
+def create_fasta(familyname, data_name):
     if familyname == CONFIGFILE_NAME:
         logger.error('User tried to overwrite %s', CONFIGFILE_NAME)
         abort(405)
     path = data_path/familyname
     # post data
     if path.exists() and not path.is_dir():
-        logger.warn('Removing existing file in directory path name')
+        logger.warning('Removing existing file in directory path name')
         path.unlink()
     if not path.is_dir():
         logger.info("Creating directory %s", path)
         path.mkdir()
     try:
         fasta = request.files[PEPTIDE_PART]
-        infilename = PEPTIDE_FILENAME
+        infileext = PEPTIDE_EXT
     except KeyError:
         fasta = request.files[DNA_PART]
-        infilename = DNA_FILENAME
+        infileext = DNA_EXT
     except KeyError:
         logger.error('unrecognized request')
         abort(400)
@@ -158,21 +157,51 @@ def create_family(familyname):
     if len(record_dict) < 1: # empty FASTA
         abort(404)
     lengths = [len(rec.seq) for rec in record_dict.values()]
-    alignment_dict = {'sequences': len(record_dict),
+    fasta_dict = {'sequences': len(record_dict),
                       'max_length': max(lengths),
                       'min_length': min(lengths),
                       'total_length': sum(lengths),
                       'overwrite': False}
     logger.info('Saving FASTA file for family "%s".', familyname)
+    infilename = data_name + infileext
     if (path/infilename).exists():
-        logger.warn('Overwriting existing FASTA file for family %s', familyname)
+        logger.warning('Overwriting existing FASTA file for family %s', familyname)
         alignment_dict['overwrite'] = True
     with open(str(path/infilename), 'w') as fasta_outfh:
         for seq in record_dict.values():
             SeqIO.write(seq, fasta_outfh, 'fasta')
-    with open(str(path/ALIGNMENT_DATA_FILENAME), 'w') as align_data_fh:
-        json.dump(alignment_dict, align_data_fh)
-    return json.dumps(alignment_dict)
+    with open(str(path/SEQUENCE_DATA_FILENAME), 'w') as sequence_data_fh:
+        json.dump(fasta_dict, sequence_data_fh)
+    return json.dumps(fasta_dict)
+
+@app.route('/trees/<familyname>/alignment', methods=['POST'])
+def create_alignment(familyname):
+    create_fasta(familyname, ALIGNMENT_NAME)
+
+@app.route('/trees/<familyname>/sequences', methods=['POST'])
+def create_sequences(familyname):
+    create_fasta(familyname, SEQUENCES_NAME)
+
+@app.route('/trees/<familyname>/HMM', methods=['POST'])
+def create_HMM(familyname):
+    if familyname == CONFIGFILE_NAME:
+        logger.error('User tried to overwrite %s', CONFIGFILE_NAME)
+        abort(405)
+    path = data_path/familyname
+    # post data
+    if path.exists() and not path.is_dir():
+        logger.warning('Removing existing file in directory path name')
+        path.unlink()
+    if not path.is_dir():
+        logger.info("Creating directory %s", path)
+        path.mkdir()
+    try:
+        HMM = request.files['HMM']
+    except KeyError:
+        logger.error('unrecognized request for HMM')
+        abort(400)
+    HMM.save(str(path/HMM_FILENAME))
+    return 'HMM saved'
 
 @app.route('/trees/<familyname>/FastTree')
 def calculate_FastTree(familyname):
@@ -196,7 +225,7 @@ def calculate_FastTree(familyname):
         infile = Path('..')/PEPTIDE_FILENAME
         seq_type = PEPTIDE_PART
     else:
-        logger.error('Unable to find peptide or DNA sequence in request.')
+        logger.error('Unable to find peptide or DNA alignmentin request.')
         abort(404)
     #
     # calculate tree with FastTree
@@ -234,6 +263,55 @@ def calculate_FastTree(familyname):
         logger.error('%s returned a non-zero result, check log for errors.', builder)
         abort(417)
 
+@app.route('/trees/<familyname>/hmmalign')
+def calculate_HMMalign(familyname):
+    inpath = data_path/familyname
+    if (inpath/(SEQUENCES_NAME+DNA_EXT)).exists():
+        infile = inpath/(SEQUENCES_NAME+DNA_EXT)
+        outpath = inpath/(ALIGNMENT_NAME + DNA_PART)
+        seq_type = 'dna'
+    elif (inpath/(SEQUENCES_NAME+PEPTIDE_EXT)).exists():
+        infile = inpath/(SEQUENCES_NAME+PEPTIDE_EXT)
+        outpath = inpath/(ALIGNMENT_NAME + PEPTIDE_PART)
+        seq_type = 'amino'
+    else:
+        logger.error('Unable to find peptide or DNA sequences in request.')
+        abort(404)
+    #
+    # calculate alignment with hmmalign
+    #
+    logger.debug('Calculating %s alignment "%s" with hmmalign', seq_type, familyname)
+    defaults = config_data['hmmalign_defaults']
+    cmdlist = ['time', 'nice', 'hmmalign'] + defaults + ['--'+seq_type,
+                                                         HMM_FILENAME,
+                                                         str(infile)]
+    logger.debug('Command line is %s', cmdlist)
+    stockholm_path = inpath/'alignment.stockholm'
+    if stockholm_path.exists():
+        logger.warning('Removing existing stockholm alignment file in "%s".', familyname)
+        stockholm_path.unlink()
+    stockholm_fh = stockholm_path.open(mode='wb')
+    err_fh = (inpath/'run.log').open(mode='wt')
+    status_fh = (inpath/'status.txt').open(mode='wt')
+    status_fh.write('-1\n') # signal that calculation has been started
+    status_fh.close()
+    status = subprocess.run(cmdlist,
+                            stdout=stockholm_fh,
+                            stderr=err_fh,
+                            cwd=str(inpath))
+    stockholm_fh.close()
+    err_fh.close()
+    status_fh = (outpath/'status.txt').open(mode='wt')
+    status_fh.write("%d\n" %status.returncode)
+    status_fh.close()
+    if status.returncode == 0:
+        alignment = AlignIO.read(stockholm_path.open(mode='rU'), 'stockholm')
+        AlignIO.write(alignment, outpath.open(mode='w'), 'FASTA')
+        return 'Alignment calculated'
+    else:
+        logger.error('hmmalign returned a non-zero result, check log for errors.')
+        abort(417)
+
 @app.route('/trees/<familyname>/RAxML')
 def calculate_RAxML(familyname):
     inpath = data_path/familyname
@@ -250,7 +328,7 @@ def calculate_RAxML(familyname):
         infile = Path('..')/PEPTIDE_FILENAME
         seq_type = 'peptide'
     else:
-        logger.error('Unable to find peptide or DNA sequence in request.')
+        logger.error('Unable to find peptide or DNA alignment in request.')
         abort(404)
     #
     # calculate tree with RAxML

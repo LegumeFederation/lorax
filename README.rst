@@ -1,8 +1,12 @@
 Server for Phylogenetic Trees
 =============================
 
-``lorax`` is a REgiSTful web server that calculates and serves up phylogenetic trees.
+``lorax`` calculates and serves up multiple sequence alignments and phylogenetic trees.
 
+How does lorax calculate multiple sequence alignments?
+------------------------------------------------------
+``lorax`` uses ``hmmalign`` to calculate multiple sequence alignments in either peptide or DNA
+space.  An HMM must be given to ``lorax``.
 
 How does lorax calculate phylogenetic trees?
 ---------------------------------------------
@@ -41,18 +45,28 @@ URL                                 Interpretation
 
 ``/config``                         Returns the configuration in JSON representation.
 
+``/trees/<family>/sequences``       ``PUT`` a FASTA-formatted set of aligned sequences.
+                                    ID fields must be unique and use ``UTF-8`` encoding.
+                                    If the multipart key is ``peptide``, the sequences
+                                    are assumed to be protein sequences; if the key is
+                                    ``DNA``, DNA sequences are assumed.  ``<family>``
+                                    is used as a directory name and must not include
+                                    special characters such as ``/``.  See the
+                                    ''post_to_lorax.sh`` script in the test/ directory
+                                    for an example of how to post.  Returns a JSON
+                                    object that gives information about the number and
+                                    length of submitted sequences.
+
 ``/trees/<family>/alignment``       ``PUT`` a FASTA-formatted set of aligned
-                                    sequences.  Dash (``-``) characters are used as spacing
-                                    in alignments.  ID fields must be unique and use ``UTF-8`
-                                    encoding.  If the multipart key is ``peptide``, the FASTA is
-                                    assumed to be of peptide sequences; if the key is ``DNA, DNA
-                                    sequences are assumed.  <familyname> is used as a directory
-                                    name , and
-                                    must not include special characters such as ``/`` or an
-                                    error will be returned.  See the ``post_to_lorax.sh``
-                                    script for an example of how to post.  Returns a
-                                    JSON object that gives information about the submitted
-                                    sequences.
+                                    sequences.  Same as for sequences above, except
+                                    dash (``-``) characters are used as spacings in
+                                    alignments.
+
+``/trees/<family>/HMM``             ``PUT`` an HMM for use with ``hmmalign``.
+
+``/trees/<family>/hmmalign``        A ``GET`` of this URL will cause an HMM alignment
+                                    to be calculated.  This step is not needed if
+                                    an alignment is supplied.
 
 ``/trees/<family>/FastTree``        A ``GET`` of this URL will cause a FastTree tree to be
                                     calculated and a Newick tree to be returned.  This

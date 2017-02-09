@@ -3,6 +3,7 @@
   "no_logfile": false,
   "threads": 0,
   "subprocesses": 1,
+  "hmmalign_defaults": ["--trim", "--informat", "FASTA"],
   "treebuilders": {
     "FastTree": {
       "peptide": ["-nopr", "-log", "peptide.log"],
