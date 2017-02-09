@@ -146,7 +146,7 @@ def create_fasta(familyname, data_name):
         fasta = request.files[DNA_PART]
         infileext = DNA_EXT
     except KeyError:
-        logger.error('unrecognized request')
+        logger.error('unrecognized request for FASTA')
         abort(400)
     try: # parse FASTA file
         fasta_str_fh = io.StringIO(fasta.read().decode('UTF-8'))
@@ -166,7 +166,7 @@ def create_fasta(familyname, data_name):
     infilename = data_name + infileext
     if (path/infilename).exists():
         logger.warning('Overwriting existing FASTA file for family %s', familyname)
-        alignment_dict['overwrite'] = True
+        fasta_dict['overwrite'] = True
     with open(str(path/infilename), 'w') as fasta_outfh:
         for seq in record_dict.values():
             SeqIO.write(seq, fasta_outfh, 'fasta')
@@ -176,11 +176,11 @@ def create_fasta(familyname, data_name):
 
 @app.route('/trees/<familyname>/alignment', methods=['POST'])
 def create_alignment(familyname):
-    create_fasta(familyname, ALIGNMENT_NAME)
+    return create_fasta(familyname, ALIGNMENT_NAME)
 
 @app.route('/trees/<familyname>/sequences', methods=['POST'])
 def create_sequences(familyname):
-    create_fasta(familyname, SEQUENCES_NAME)
+    return create_fasta(familyname, SEQUENCES_NAME)
 
 @app.route('/trees/<familyname>/HMM', methods=['POST'])
 def create_HMM(familyname):
@@ -267,12 +267,12 @@ def calculate_FastTree(familyname):
 def calculate_HMMalign(familyname):
     inpath = data_path/familyname
     if (inpath/(SEQUENCES_NAME+DNA_EXT)).exists():
-        infile = inpath/(SEQUENCES_NAME+DNA_EXT)
-        outpath = inpath/(ALIGNMENT_NAME + DNA_PART)
+        infile = (SEQUENCES_NAME+DNA_EXT)
+        outpath = inpath/(ALIGNMENT_NAME + DNA_EXT)
         seq_type = 'dna'
     elif (inpath/(SEQUENCES_NAME+PEPTIDE_EXT)).exists():
-        infile = inpath/(SEQUENCES_NAME+PEPTIDE_EXT)
-        outpath = inpath/(ALIGNMENT_NAME + PEPTIDE_PART)
+        infile = (SEQUENCES_NAME+PEPTIDE_EXT)
+        outpath = inpath/(ALIGNMENT_NAME + PEPTIDE_EXT)
         seq_type = 'amino'
     else:
         logger.error('Unable to find peptide or DNA sequences in request.')
@@ -301,12 +301,13 @@ def calculate_HMMalign(familyname):
                             cwd=str(inpath))
     stockholm_fh.close()
     err_fh.close()
-    status_fh = (outpath/'status.txt').open(mode='wt')
+    status_fh = (inpath/'status.txt').open(mode='wt')
     status_fh.write("%d\n" %status.returncode)
     status_fh.close()
     if status.returncode == 0:
         alignment = AlignIO.read(stockholm_path.open(mode='rU'), 'stockholm')
-        AlignIO.write(alignment, outpath.open(mode='w'), 'FASTA')
+        print(outpath)
+        AlignIO.write(alignment, outpath.open(mode='w'), 'fasta')
         return 'Alignment calculated'
     else:
         logger.error('hmmalign returned a non-zero result, check log for errors.')
