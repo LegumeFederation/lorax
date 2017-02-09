@@ -345,6 +345,7 @@ def calculate_RAxML(familyname):
         nwk_path.unlink()
     nwk_fh = nwk_path.open(mode='wb')
     err_fh = (outpath/'run.log').open(mode='wt')
+    environ = os.environ.copy()
     status_fh = (outpath/'status.txt').open(mode='wt')
     status_fh.write('-1\n') # signal that calculation has been started
     status_fh.close()
