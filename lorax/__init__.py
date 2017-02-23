@@ -143,6 +143,7 @@ def init_logging_to_stderr_and_file(verbose,
     logger.debug('%s version %s', PROGRAM_NAME, VERSION)
     logger.debug('Run started at %s', START_TIMESTAMP)
 
+
 def get_file(subpath, type='data', mode='U'):
     '''
 
@@ -156,6 +157,7 @@ def get_file(subpath, type='data', mode='U'):
         return file_path.open(mode='r'+mode).read()
     except IOError as exc:
         return str(exc)
+
 
 def create_fasta(familyname, data_name, super=None):
     if not super:
@@ -281,6 +283,63 @@ def calculate_tree(familyname, builder):
     else:
         logger.error('%s returned a non-zero result, check log for errors.', builder)
         abort(417)
+
+def calculate_alignment(familyname, super=None):
+    if not super:
+        inpath = Path(config_data['paths']['data']) / familyname
+        hmm_path = HMM_FILENAME
+    else:
+        if super in ALL_FILENAMES:
+            abort(403)
+        inpath = Path(config_data['paths']['data']) / familyname / super
+        hmm_path = '../' + HMM_FILENAME
+
+    hmm_switches = {'peptide': 'amino',
+                    'DNA': 'dna'}
+    for key in SEQUENCE_EXTENSIONS.keys():
+        if (inpath / (SEQUENCES_NAME + SEQUENCE_EXTENSIONS[key])).exists():
+            infile = (SEQUENCES_NAME + SEQUENCE_EXTENSIONS[key])
+            outpath = inpath / (ALIGNMENT_NAME + SEQUENCE_EXTENSIONS[key])
+            seq_type = hmm_switches[key]
+            break
+    else:
+        logger.error('Unable to find sequences to align.')
+        abort(404)
+    #
+    # Align with hmmalign.
+    #
+    logger.debug('Calculating %s alignment "%s" with hmmalign', seq_type, familyname)
+    defaults = config_data['hmmalign_defaults']
+    cmdlist = ['time', 'nice', 'hmmalign'] + defaults + ['--' + seq_type,
+                                                         hmm_path,
+                                                         str(infile)]
+    logger.debug('Command line is %s', cmdlist)
+    stockholm_path = inpath / STOCKHOLM_FILE
+    if stockholm_path.exists():
+        logger.warning('Removing existing stockholm alignment file in "%s".', familyname)
+        stockholm_path.unlink()
+    stockholm_fh = stockholm_path.open(mode='wb')
+    err_fh = (inpath / RUN_LOG_NAME).open(mode='wt')
+    status_fh = (inpath / STATUS_FILE_NAME).open(mode='wt')
+    status_fh.write('-1\n')  # signal that calculation has been started
+    status_fh.close()
+    status = subprocess.run(cmdlist,
+                            stdout=stockholm_fh,
+                            stderr=err_fh,
+                            cwd=str(inpath))
+    stockholm_fh.close()
+    err_fh.close()
+    status_fh = (inpath / STATUS_FILE_NAME).open(mode='wt')
+    status_fh.write("%d\n" % status.returncode)
+    status_fh.close()
+    if status.returncode == 0:
+        alignment = AlignIO.read(stockholm_path.open(mode='rU'), 'stockholm')
+        print(outpath)
+        AlignIO.write(alignment, outpath.open(mode='w'), 'fasta')
+        return 'Alignment calculated'
+    else:
+        logger.error('hmmalign returned a non-zero result, check log for errors.')
+        abort(417)
 #
 # CLI entry point
 #
@@ -402,61 +461,23 @@ def create_HMM(family):
     return Response(json.dumps(hmmstats_dict), mimetype=JSON_MIMETYPE)
 
 
-@app.route('/trees/<familyname>/hmmalign')
-def calculate_HMMalign(familyname):
-    hmm_switches = {'peptide':'amino',
-                    'DNA': 'dna'}
-    inpath = Path(config_data['paths']['data'])/familyname
-    for key in SEQUENCE_EXTENSIONS.keys():
-        if (inpath/(SEQUENCES_NAME+SEQUENCE_EXTENSIONS[key])).exists():
-            infile = (SEQUENCES_NAME+SEQUENCE_EXTENSIONS[key])
-            outpath = inpath/(ALIGNMENT_NAME + SEQUENCE_EXTENSIONS[key])
-            seq_type = hmm_switches[key]
-            break
-    else:
-        logger.error('Unable to find sequences to align.')
-        abort(404)
-    #
-    # Align with hmmalign.
-    #
-    logger.debug('Calculating %s alignment "%s" with hmmalign', seq_type, familyname)
-    defaults = config_data['hmmalign_defaults']
-    cmdlist = ['time', 'nice', 'hmmalign'] + defaults + ['--' + seq_type,
-                                                         HMM_FILENAME,
-                                                         str(infile)]
-    logger.debug('Command line is %s', cmdlist)
-    stockholm_path = inpath/STOCKHOLM_FILE
-    if stockholm_path.exists():
-        logger.warning('Removing existing stockholm alignment file in "%s".', familyname)
-        stockholm_path.unlink()
-    stockholm_fh = stockholm_path.open(mode='wb')
-    err_fh = (inpath/RUN_LOG_NAME).open(mode='wt')
-    status_fh = (inpath/STATUS_FILE_NAME).open(mode='wt')
-    status_fh.write('-1\n') # signal that calculation has been started
-    status_fh.close()
-    status = subprocess.run(cmdlist,
-                            stdout=stockholm_fh,
-                            stderr=err_fh,
-                            cwd=str(inpath))
-    stockholm_fh.close()
-    err_fh.close()
-    status_fh = (inpath/STATUS_FILE_NAME).open(mode='wt')
-    status_fh.write("%d\n" %status.returncode)
-    status_fh.close()
-    if status.returncode == 0:
-        alignment = AlignIO.read(stockholm_path.open(mode='rU'), 'stockholm')
-        print(outpath)
-        AlignIO.write(alignment, outpath.open(mode='w'), 'fasta')
-        return 'Alignment calculated'
-    else:
-        logger.error('hmmalign returned a non-zero result, check log for errors.')
-        abort(417)
+@app.route('/trees/<family>/hmmalign')
+def calculate_HMMalign(family):
+    return calculate_alignment(family)
+
+
+@app.route('/trees/<family>.<sup>/hmmalign')
+def calculate_HMMalign_super(family, sup):
+    return calculate_alignment(family, super=sup)
 
 
 @app.route('/trees/<familyname>/FastTree')
 def calculate_FastTree(familyname):
     return calculate_tree(familyname, 'FastTree')
 
+@app.route('/trees/<family>.<super>/FastTree')
+def calculate_FastTree_super(family, super):
+    return calculate_tree(family+'/'+super, 'FastTree')
 
 @app.route('/trees/<familyname>/RAxML')
 def calculate_RAxML(familyname):
@@ -473,6 +494,11 @@ def get_existing_tree(familyname, method):
     return Response(inpath.open().read(), mimetype=NEWICK_MIMETYPE)
 
 
+@app.route('/trees/<family>.<sup>/<method>/'+TREE_NAME)
+def get_existing_tree_super(family, method, sup):
+    return get_existing_tree(family+'/'+sup, method)
+
+
 @app.route('/trees/<familyname>/<method>/'+RUN_LOG_NAME)
 def get_log(familyname, method):
     if method not in config_data['treebuilders']:
@@ -481,6 +507,12 @@ def get_log(familyname, method):
     if not inpath.exists():
         abort(404)
     return Response(inpath.open().read(), mimetype=TEXT_MIMETYPE)
+
+
+@app.route('/trees/<family>.<sup>/<method>/'+RUN_LOG_NAME)
+def get_log_super(family, method, sup):
+    return get_log(family+'/'+sup, method)
+
 
 @app.route('/trees/<familyname>/<method>/status')
 def get_status(familyname, method):
@@ -491,3 +523,8 @@ def get_status(familyname, method):
         abort(404)
     status = inpath.open().read()
     return status
+
+
+@app.route('/trees/<family>.<sup>/<method>/status')
+def get_status_super(family, method, sup):
+    return get_status(family+'/'+sup, method)

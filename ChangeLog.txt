@@ -1,3 +1,6 @@
+v0.5
+
+Added superfamily targets.
 
 Added test_all.sh script to do full testing.
 

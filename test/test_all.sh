@@ -127,6 +127,22 @@ if [ "$?" -eq 1 ] ; then
    exit 1
 fi
 
+# Post superfamily.
+./post_FASTA.sh ${verbose_flag}  peptide zeama.faa aspartic_peptidases.myseqs sequences
+if [ "$?" -eq 1 ] ; then
+   exit 1
+fi
+
+# Test superfamily.
+test_GET /trees/aspartic_peptidases.myseqs/hmmalign
+
+test_GET /trees/aspartic_peptidases.myseqs/FastTree
+
+test_GET /trees/aspartic_peptidases.myseqs/FastTree/status
+
+test_GET /trees/aspartic_peptidases.myseqs/FastTree/tree.nwk
+
+test_GET /trees/aspartic_peptidases.myseqs/FastTree/run_log.txt
 
 echo "lorax tests completed successfully."
 exit 0

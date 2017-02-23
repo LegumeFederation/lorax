@@ -1,8 +1,7 @@
 Server for Phylogenetic Trees
 =============================
 
-``lorax`` "speaks for the trees" by calculating and serving up multiple sequence alignments
- and phylogenetic trees.
+lorax "speaks for the trees" by calculating multiple sequence alignments and trees.
 
 How does lorax calculate multiple sequence alignments?
 ------------------------------------------------------
@@ -105,6 +104,12 @@ URL                                 Interpretation
                                     cannot be a reserved name such as ``FastTree``.  These
                                     sequences will be concatenated to the existing family
                                     sequences, with ``<super>`` prepending ID strings.
+
+``/trees/<f>.<s>/<meth>/status``    Returns status of a superfamily tree calculation.
+
+``/trees/<f>.<s>/<meth>/tree.nwk``  Returns tree of a superfamily.
+
+``/trees/<f>.<s>/<m>/run_log.txt``  Returns the log file of a superfamily tree calculation.
 
 
 =================================== ===========================================================
