@@ -1,0 +1,44 @@
+
+Added test_all.sh script to do full testing.
+
+Changed "tree" target to tree.nwk.
+
+Compute stats on HMM files and return as part of HMM addition.  If hmmstats fails,
+abort with 417 and delete the HMM file.
+
+Added /trees/families.json target.
+
+More run-time arguments:
+Usage: lorax [OPTIONS]
+
+Options:
+  -d, --debug             Enable (unsafe) debugging.  [default: False]
+  -v, --verbose           Log debugging info to stderr.  [default: False]
+  -q, --quiet             Suppress low-level log info.  [default: False]
+  --no_logfile            Suppress logging to file.  [default: False]
+  -c, --config_file TEXT  Configuration file name.  [default: config.json]
+  --port TEXT             Port on which to listen.  [default: 58927]
+  --host TEXT             Host IP on which to listen  [default: 127.0.0.1]
+  --version               Show the version and exit.
+  --help                  Show this message and exit.
+
+  Joel Berendzen <joelb@ncgr.org>. Copyright (C) 2017, The National Center
+  for Genome Resources.  All rights reserved. https://github.com/ncgr/lorax
+
+Renamed /config target as /config.json
+
+Returned JSON objects are now reponses of type 'application/json'.
+
+Added /log.txt target that returns the current log file.
+
+Added click as a dependency, removed flaskrun.py.
+
+Moved config.py code to __init__.py.
+
+Removed AutoIndex of / directory.
+
+Changed HMM from POST to PUT for consistency with HTML specs.  Added put_HMM.sh script.
+
+Removed test for <family> naming, anything that passes Path addition will work.
+
+v 0.4

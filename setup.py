@@ -49,12 +49,12 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=['flask',
-                      'flask_autoindex',
+                      'click',
                       'celery',
                       'biopython'
                       ],
     entry_points={
-                 'console_scripts':['lorax = lorax:__init__']
+                 'console_scripts':['lorax = lorax:cli']
                 },
     classifiers=['Development Status :: 3 - Alpha',
                  'Environment :: Console',

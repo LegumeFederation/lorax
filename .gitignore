@@ -57,6 +57,10 @@ dist
 ################
 docs/_build/
 
+# build directory#
+##################
+build/
+
 # lorax test data and logs#
 ###########################
 test/data

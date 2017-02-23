@@ -1,0 +1,132 @@
+#!/bin/bash
+# Test all lorax targets.
+#
+# Usage:
+#       test_all.sh [-v]
+#
+# Options:
+#       -v  verbose mode, shows all returns.
+#
+#
+# Before running this script, lorax should be started in a
+# separate window and the environmental variables LORAX_HOST
+# and LORAX_PORT must be defined.
+#
+
+#
+# Process option (verbose flag)
+#
+_V=0
+verbose_flag=""
+while getopts "v" OPTION
+do
+   case $OPTION in
+     v) _V=1
+	verbose_flag="-v"
+        ;;
+   esac
+done
+#
+# Check environmental variables
+#
+if [ -z "$LORAX_HOST" ] ; then
+	echo "Must set LORAX_HOST before running this script"
+	exit 1
+fi
+if [ -z "$LORAX_PORT" ] ; then
+	echo "Must set LORAX_PORT before running this script"
+	exit 1
+fi
+#
+# Functions
+#
+test_GET () {
+   # Tests HTTP return code of commands, optionally printing results.
+   # Arguments:
+   #         $1 - target URL
+   #         $2 - expected return code (200 if not supplied)
+   #
+   tmpfile=$(mktemp /tmp/lorax-test_all.XXXXX)
+   if [ -z "${2}" ] ; then
+      code="200"
+   else
+      code="${2}"
+   fi
+   status=$(curl -s -o ${tmpfile} -w '%{http_code}' ${LORAX_HOST}:${LORAX_PORT}${1})
+   if [ "${status}" -eq "${code}" ]; then
+      echo "GET ${1} returned HTTP code ${status} as expected."
+      if [[ $_V -eq 1 ]]; then
+	 echo "Response is:"
+         cat ${tmpfile}
+         echo ""
+	 echo ""
+      fi
+      rm "$tmpfile"
+   else
+      echo "FATAL ERROR--GET ${1} returned HTTP code ${status}, expected ${2}."
+      echo "Full response is:"
+      cat ${tmpfile}
+      echo ""
+      rm "$tmpfile"
+      exit 1
+   fi
+}
+
+test_GET /config.json
+
+# GET a bad target throws a 404.
+test_GET /badtarget 404
+
+test_GET /log.txt
+
+test_GET /trees/families.json
+
+# Post sequences.
+./post_FASTA.sh ${verbose_flag}  peptide aspartic_peptidases.faa aspartic_peptidases sequences
+if [ "$?" -eq 1 ] ; then
+   exit 1
+fi
+
+# Post non-FASTA file throws a 406.
+ ./post_FASTA.sh ${verbose_flag}  peptide 59026816.hmm bad_seqs sequences 406
+if [ "$?" -eq 1 ] ; then
+   exit 1
+fi
+
+# Post alignment.
+./post_FASTA.sh ${verbose_flag}  peptide aspartic_peptidases_aligned.faa prealigned alignment
+if [ "$?" -eq 1 ] ; then
+   exit 1
+fi
+
+# Post an invalid HMM throws a 406.
+./put_HMM.sh ${verbose_flag} aspartic_peptidases.faa prealigned 406
+if [ "$?" -eq 1 ] ; then
+   exit 1
+fi
+
+# Post a valid HMM.
+./put_HMM.sh ${verbose_flag} 59026816.hmm aspartic_peptidases
+if [ "$?" -eq 1 ] ; then
+   exit 1
+fi
+
+test_GET /trees/aspartic_peptidases/hmmalign
+
+test_GET /trees/aspartic_peptidases/FastTree
+
+test_GET /trees/aspartic_peptidases/FastTree/status
+
+test_GET /trees/aspartic_peptidases/FastTree/tree.nwk
+
+test_GET /trees/aspartic_peptidases/FastTree/run_log.txt
+
+# Post superfamily to forbidden name.
+./post_FASTA.sh ${verbose_flag}  peptide zeama.faa prealigned.FastTree sequences 403
+if [ "$?" -eq 1 ] ; then
+   exit 1
+fi
+
+
+echo "lorax tests completed successfully."
+exit 0
