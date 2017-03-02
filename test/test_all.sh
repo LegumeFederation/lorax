@@ -16,6 +16,7 @@
 #
 # Process option (verbose flag)
 #
+SLEEPTIME=1
 _V=0
 verbose_flag=""
 while getopts "v" OPTION
@@ -72,6 +73,15 @@ test_GET () {
    fi
 }
 
+poll_until_positive() {
+   echo -n "Polling $1"
+   while [ `curl -s ${LORAX_HOST}:${LORAX_PORT}${1}` -lt 0 ]; do
+     echo -n "."
+     sleep $SLEEPTIME
+   done
+   echo "done."
+}
+
 test_GET /config.json
 
 # GET a bad target throws a 404.
@@ -115,7 +125,7 @@ test_GET /trees/aspartic_peptidases/hmmalign
 
 test_GET /trees/aspartic_peptidases/FastTree
 
-test_GET /trees/aspartic_peptidases/FastTree/status
+poll_until_positive /trees/aspartic_peptidases/FastTree/status
 
 test_GET /trees/aspartic_peptidases/FastTree/tree.nwk
 
@@ -134,11 +144,9 @@ if [ "$?" -eq 1 ] ; then
 fi
 
 # Test superfamily.
-test_GET /trees/aspartic_peptidases.myseqs/hmmalign
+test_GET /trees/aspartic_peptidases.myseqs/hmmalign_FastTree
 
-test_GET /trees/aspartic_peptidases.myseqs/FastTree
-
-test_GET /trees/aspartic_peptidases.myseqs/FastTree/status
+poll_until_positive /trees/aspartic_peptidases.myseqs/FastTree/status
 
 test_GET /trees/aspartic_peptidases.myseqs/FastTree/tree.nwk
 

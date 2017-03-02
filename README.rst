@@ -91,6 +91,9 @@ URL                                 Interpretation
 
 ``/trees/<family>/RAxML``           Same as above, execpt using RAxML as the tree builder.
 
+``/trees/<fam>/hmmalign_FastTree``  A ``GET`` of this URL will cause the alignment and tree-
+                                    building steps to be chained.
+
 ``/trees/<fam>/<meth>/status``      Returns -1 if tree calculation is ongoing, and the exit
                                     code of the tree-builder <meth> if calculation is complete.
 
@@ -121,7 +124,6 @@ A ``config.json`` file must exist in the current working directory; one may be o
 of the repository along with demo shell scripts.  ``lorax`` is started as a command-line argument with the following
 options:
 
-::
 
   -d, --debug             Enable (unsafe) debugging.  [default: False]
   -v, --verbose           Log debugging info to stderr.  [default: False]

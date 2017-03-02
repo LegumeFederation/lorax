@@ -27,6 +27,7 @@ from collections import OrderedDict # python 3.1 or later
 import click
 from flask import Flask, Response, request, abort
 from Bio import SeqIO, AlignIO
+from flask_rq2 import RQ
 #
 # local imports
 #
@@ -52,8 +53,9 @@ SEQUENCE_EXTENSIONS = OrderedDict([
     ('peptide','.faa')
 ])
 
-# Tree builder names
+# Calculation names.  None of these may contain an underscore.
 TREE_BUILDERS = ['FastTree', 'RAxML']
+ALIGNERS = ['hmmalign']
 # File names
 CONFIGFILE_NAME = 'config.json'
 SEQUENCES_NAME = 'sequences'
@@ -81,11 +83,15 @@ NEWICK_MIMETYPE = 'text/plain'
 JSON_MIMETYPE = 'application/json'
 FASTA_MIMETYPE = 'text/plain'
 TEXT_MIMETYPE = 'text/plain'
+# hmmalign stuff
+HMM_SWITCHES = {'peptide': 'amino',
+                'DNA': 'dna'}
 #
 # global objects
 #
 logger = logging.getLogger(PROGRAM_NAME)
 app = Flask(PROGRAM_NAME)
+rq = RQ(app)
 config_data = None      # JSON config data, plus others, will be here
 #
 # Class definitions
@@ -145,11 +151,11 @@ def init_logging_to_stderr_and_file(verbose,
 
 
 def get_file(subpath, type='data', mode='U'):
-    '''
+    '''Get a file, returning exceptions if they exist.
 
-    :param subpath: path within data or log directories
-    :param type: 'data' or 'log'
-    :param mode: 'U' for string, 'b' for binary
+    :param subpath: path within data or log directories.
+    :param type: 'data' or 'log'.
+    :param mode: 'U' for string, 'b' for binary.
     :return:
     '''
     file_path = Path(config_data['paths'][type])/subpath
@@ -227,119 +233,233 @@ def create_fasta(familyname, data_name, super=None):
     return Response(json.dumps(fasta_dict), mimetype=JSON_MIMETYPE)
 
 
-def calculate_tree(familyname, builder):
-    inpath = Path(config_data['paths']['data']) / familyname
-    if not inpath.is_dir():
-        abort(428)
-    outpath = inpath / builder
-    if not outpath.exists():
-        outpath.mkdir()
-    for key in SEQUENCE_EXTENSIONS.keys():
-        if (inpath / (ALIGNMENT_NAME + SEQUENCE_EXTENSIONS[key])).exists():
-            infile = Path('..') / (ALIGNMENT_NAME + SEQUENCE_EXTENSIONS[key])
-            seq_type = key
-            break
-    else:
-        logger.error('Unable to find sequence type in request.')
-        abort(404)
-    #
-    # calculate tree
-    #
-    logger.debug('Calculating %s tree "%s" with %s.', seq_type, familyname, builder)
-    defaults = config_data['treebuilders'][builder][seq_type]
+def write_status(path, code):
+    '''Write a numeric status to file.
 
-    nwk_path = outpath / TREE_NAME
-    if nwk_path.exists():
-        logger.warning('Removing existing tree file in "%s".', familyname + '/' + builder)
-        nwk_path.unlink()
-    nwk_fh = nwk_path.open(mode='wb')
-    err_fh = (outpath / RUN_LOG_NAME).open(mode='wt')
-    status_fh = (outpath / STATUS_FILE_NAME).open(mode='wt')
-    environ = os.environ.copy()
-    if config_data['threads'] > 0:
-        environ['OMP_NUM_THREADS'] = str(config_data['threads'])
-    status_fh.write('-1\n')  # signal that calculation has been started
-    status_fh.close()
-    if builder == 'FastTree':
-        cmdlist = ['time', 'nice', 'FastTree'] + defaults + [str(infile)]
-    elif builder == 'RAxML':
-        cmdlist = ['time', 'nice', 'raxmlHPC'] + defaults + ['-n', 'production',
-                                                             '-T', '%d' % config_data['threads'],
-                                                             '-s', str(infile)]
-    logger.debug('Command line is %s', cmdlist)
-    status = subprocess.run(cmdlist,
-                            stdout=nwk_fh,
-                            stderr=err_fh,
-                            cwd=str(outpath),
-                            env=environ)
-    nwk_fh.close()
-    err_fh.close()
-    status_fh = (outpath / STATUS_FILE_NAME).open(mode='wt')
-    status_fh.write("%d\n" % status.returncode)
-    status_fh.close()
+    :param path:
+    :param code:
+    :return:
+    '''
+    with path.open(mode='wt') as status_fh:
+        status_fh.write("%d\n" % code)
+
+
+@rq.job('FastTree')
+def run_subprocess_with_status(out_path,
+                               err_path,
+                               cmdlist,
+                               cwd,
+                               environment,
+                               status_path):
+    '''
+
+    :param out_path: Path to which stdout gets sent.
+    :param err_path: Path to which stderr gets sent.
+    :param cmdlist: List of commands to be sent.
+    :param cwd: Path to working directory.
+    :param environment: Environment of the subprocess.
+    :param status_path: Path to status log file.
+    :return: Return code of subprocess.
+    '''
+    with out_path.open(mode='wb') as out_fh:
+        with err_path.open(mode='wt') as err_fh:
+            status = subprocess.run(cmdlist,
+                                    stdout=out_fh,
+                                    stderr=err_fh,
+                                    cwd=str(cwd),
+                                    env=environment)
+    write_status(status_path, status.returncode)
+    return status.returncode
+
+
+@rq.job('hmmalign')
+@rq.job('FastTree')
+def align_with_FASTA_output(out_path,
+                            err_path,
+                            cmdlist,
+                            cwd,
+                            environment,
+                            status_path,
+                            fasta):
+    '''
+
+    :param out_path: Path to which stdout gets sent.
+    :param err_path: Path to which stderr gets sent.
+    :param cmdlist: List of commands to be sent.
+    :param cwd: Path to working directory.
+    :param environment: Environment of the subprocess.
+    :param status_path: Path to status log file.
+    :return: Return code of subprocess.
+    '''
+    with out_path.open(mode='wb') as out_fh:
+        with err_path.open(mode='wt') as err_fh:
+            status = subprocess.run(cmdlist,
+                                    stdout=out_fh,
+                                    stderr=err_fh,
+                                    cwd=str(cwd),
+                                    env=environment)
+    write_status(status_path, status.returncode)
     if status.returncode == 0:
-        nwk_file = nwk_path.open().read()
-        return nwk_file
-    else:
-        logger.error('%s returned a non-zero result, check log for errors.', builder)
-        abort(417)
+        alignment = AlignIO.read(out_path.open(mode='rU'), 'stockholm')
+        AlignIO.write(alignment, fasta.open(mode='w'), 'fasta')
+    return status.returncode
 
-def calculate_alignment(familyname, super=None):
+
+def queue_calculation(config,
+                      familyname,
+                      calculation,
+                      super=None):
+    '''Submit alignment or tree-building jobs or both to queue.
+
+    :param config: configuration dictionary.
+    :param familyname: Name of previously-created family.
+    :param calculation: Name of calculation to be done.
+    :option super: Name of superfamily directory.
+    :return: JobID
+    '''
+    #
+    # Get calculation type(s).
+    #
+    calculation_components = calculation.split('_')
+    if len(calculation_components) == 2:
+        if calculation_components[0] in ALIGNERS:
+            aligner = calculation_components[0]
+        else:
+            logger.error('Unrecognized aligner %s.', calculation_components[0])
+            abort(404)
+        if calculation_components[1] in TREE_BUILDERS:
+            tree_builder = calculation_components[1]
+        else:
+            logger.error('Unrecognized tree builder %s.', calculation_components[1])
+            abort(404)
+    elif calculation in ALIGNERS:
+        aligner = calculation
+        tree_builder = None
+    elif calculation in TREE_BUILDERS:
+        aligner = None
+        tree_builder = calculation
+    #
+    # Get paths to things we might need for either calculation.
+    #
     if not super:
-        inpath = Path(config_data['paths']['data']) / familyname
-        hmm_path = HMM_FILENAME
+        alignment_dir = Path(config_data['paths']['data']) / familyname
+        hmm_path = Path(HMM_FILENAME)
     else:
         if super in ALL_FILENAMES:
+            logger.error('Super name is a reserved name, "%s".', super)
             abort(403)
-        inpath = Path(config_data['paths']['data']) / familyname / super
-        hmm_path = '../' + HMM_FILENAME
+        alignment_dir = Path(config_data['paths']['data']) / familyname / super
+        hmm_path = Path('..') / HMM_FILENAME
+    #
+    # Check for prerequisites and determine sequence types.
+    #
+    if not alignment_dir.is_dir():
+        logger.error('Directory was not previously created for %s.', alignment_dir)
+        abort(428)
+    if aligner is not None: # will do an alignment.
+        stockholm_path = alignment_dir / STOCKHOLM_FILE
+        alignment_status_path = alignment_dir / STATUS_FILE_NAME
+        alignment_log_path = alignment_dir / RUN_LOG_NAME
+        for key in SEQUENCE_EXTENSIONS.keys():
+            if (alignment_dir/(SEQUENCES_NAME+SEQUENCE_EXTENSIONS[key])).exists():
+                seqfile = SEQUENCES_NAME+SEQUENCE_EXTENSIONS[key]
+                alignment_output_path = alignment_dir/(ALIGNMENT_NAME+SEQUENCE_EXTENSIONS[key])
+                hmm_seq_type = HMM_SWITCHES[key]
 
-    hmm_switches = {'peptide': 'amino',
-                    'DNA': 'dna'}
-    for key in SEQUENCE_EXTENSIONS.keys():
-        if (inpath / (SEQUENCES_NAME + SEQUENCE_EXTENSIONS[key])).exists():
-            infile = (SEQUENCES_NAME + SEQUENCE_EXTENSIONS[key])
-            outpath = inpath / (ALIGNMENT_NAME + SEQUENCE_EXTENSIONS[key])
-            seq_type = hmm_switches[key]
-            break
+                # These are only used if building a tree.
+                alignment_input_path = Path('..')/(ALIGNMENT_NAME+SEQUENCE_EXTENSIONS[key])
+                seq_type = key
+                break
+        else:
+            logger.error('Unable to find sequences to align.')
+            abort(404)
+    if tree_builder is not None: # will build a tree.
+        tree_dir = alignment_dir / tree_builder
+        treebuilder_status_path = tree_dir / STATUS_FILE_NAME
+        tree_path = tree_dir / TREE_NAME
+        tree_log_path = tree_dir / RUN_LOG_NAME
+        if not tree_dir.exists():
+            tree_dir.mkdir()
+        if aligner is None: # building tree with alignment already done.
+            for key in SEQUENCE_EXTENSIONS.keys():
+                if (alignment_dir / (ALIGNMENT_NAME + SEQUENCE_EXTENSIONS[key])).exists():
+                    alignment_input_path = Path('..')/(ALIGNMENT_NAME + SEQUENCE_EXTENSIONS[key])
+                    seq_type = key
+                    break
+            else:
+                logger.error('Unable to find aligned sequences.')
+                abort(404)
+    #
+    # Modify the environment to select the number of threads, if requested.
+    #
+    environ = os.environ.copy()
+    if config['threads'] > 0:
+        environ['OMP_NUM_THREADS'] = str(config['threads'])
+    #
+    # Marshal command-line arguments.
+    #
+    if aligner == 'hmmalign':
+        hmmalign_command = ['time', 'nice', 'hmmalign'] + \
+                           config_data['hmmalign_defaults'] + \
+                           ['--' + hmm_seq_type, str(hmm_path), str(seqfile)]
+    if tree_builder == 'FastTree':
+        tree_command = ['time', 'nice', 'FastTree'] \
+                  + config['treebuilders'][tree_builder][seq_type] \
+                  + [str(alignment_input_path)]
+    elif tree_builder == 'RAxML':
+        tree_command = ['time', 'nice', 'raxmlHPC'] \
+                  + treebuilder_args \
+                  + ['-n',
+                     'production',
+                     '-T',
+                     '%d' % config_data['threads'],
+                     '-s', str(alignment_input_path)]
+    #
+    # Log command line and initialize status files.
+    #
+    if aligner is not None:
+        logger.debug('Alignment command line is %s.', hmmalign_command)
+        write_status(alignment_status_path, -1)
+    if tree_builder is not None:
+        logger.debug('Tree builder command line is %s.', tree_command)
+        write_status(treebuilder_status_path, -1)
+    #
+    # Queue processes.
+    #
+    if aligner is not None and tree_builder is not None:
+        align_with_FASTA_output(stockholm_path,
+                                alignment_log_path,
+                                hmmalign_command,
+                                alignment_dir,
+                                environ,
+                                alignment_status_path,
+                                alignment_output_path)
+        run_subprocess_with_status.queue(tree_path,
+                                   tree_log_path,
+                                   tree_command,
+                                   tree_dir,
+                                   environ,
+                                   treebuilder_status_path)
+        return 'Alignment and tree building queued.'
+    elif aligner is not None:
+        align_with_FASTA_output(stockholm_path,
+                                alignment_log_path,
+                                hmmalign_command,
+                                alignment_dir,
+                                environ,
+                                alignment_status_path,
+                                alignment_output_path)
+        return 'alignment queued.'
+    elif tree_builder is not None:
+        run_subprocess_with_status.queue(tree_path,
+                                   tree_log_path,
+                                   tree_command,
+                                   tree_dir,
+                                   environ,
+                                   treebuilder_status_path)
+        return 'Tree building queued.'
     else:
-        logger.error('Unable to find sequences to align.')
         abort(404)
-    #
-    # Align with hmmalign.
-    #
-    logger.debug('Calculating %s alignment "%s" with hmmalign', seq_type, familyname)
-    defaults = config_data['hmmalign_defaults']
-    cmdlist = ['time', 'nice', 'hmmalign'] + defaults + ['--' + seq_type,
-                                                         hmm_path,
-                                                         str(infile)]
-    logger.debug('Command line is %s', cmdlist)
-    stockholm_path = inpath / STOCKHOLM_FILE
-    if stockholm_path.exists():
-        logger.warning('Removing existing stockholm alignment file in "%s".', familyname)
-        stockholm_path.unlink()
-    stockholm_fh = stockholm_path.open(mode='wb')
-    err_fh = (inpath / RUN_LOG_NAME).open(mode='wt')
-    status_fh = (inpath / STATUS_FILE_NAME).open(mode='wt')
-    status_fh.write('-1\n')  # signal that calculation has been started
-    status_fh.close()
-    status = subprocess.run(cmdlist,
-                            stdout=stockholm_fh,
-                            stderr=err_fh,
-                            cwd=str(inpath))
-    stockholm_fh.close()
-    err_fh.close()
-    status_fh = (inpath / STATUS_FILE_NAME).open(mode='wt')
-    status_fh.write("%d\n" % status.returncode)
-    status_fh.close()
-    if status.returncode == 0:
-        alignment = AlignIO.read(stockholm_path.open(mode='rU'), 'stockholm')
-        print(outpath)
-        AlignIO.write(alignment, outpath.open(mode='w'), 'fasta')
-        return 'Alignment calculated'
-    else:
-        logger.error('hmmalign returned a non-zero result, check log for errors.')
-        abort(417)
 #
 # CLI entry point
 #
@@ -383,6 +503,7 @@ def cli(debug, verbose, quiet, no_logfile, config_file, port, host):
     app.run(debug=debug,
             host=host,
             port=port)
+    rq.init_app(app)
 #
 # Target definitions begin here.
 #
@@ -461,27 +582,41 @@ def create_HMM(family):
     return Response(json.dumps(hmmstats_dict), mimetype=JSON_MIMETYPE)
 
 
-@app.route('/trees/<family>/hmmalign')
-def calculate_HMMalign(family):
-    return calculate_alignment(family)
+def bind_calculation(method, superfamily=False):
+    '''A factory for uniquely-named functions with route decorators applied.
+
+    :param method: Name of resulting method.
+    :return: Route-decorated function.
+    '''
+    if not superfamily:
+        def _calculate(family):
+            return queue_calculation(config_data,
+                                     family,
+                                     method)
+        _calculate.__name__ = 'calculate_' + method
+        _calculate = app.route('/trees/<family>/'+method)(_calculate)
+        return _calculate
+    else:
+        def _calculate(family, sup):
+            return queue_calculation(config_data,
+                                     family,
+                                     method,
+                                     super=sup)
+        _calculate.__name__ = 'calculate_' + method + '_superfamily'
+        _calculate = app.route('/trees/<family>.<sup>/'+method)(_calculate)
+        return _calculate
 
 
-@app.route('/trees/<family>.<sup>/hmmalign')
-def calculate_HMMalign_super(family, sup):
-    return calculate_alignment(family, super=sup)
-
-
-@app.route('/trees/<familyname>/FastTree')
-def calculate_FastTree(familyname):
-    return calculate_tree(familyname, 'FastTree')
-
-@app.route('/trees/<family>.<super>/FastTree')
-def calculate_FastTree_super(family, super):
-    return calculate_tree(family+'/'+super, 'FastTree')
-
-@app.route('/trees/<familyname>/RAxML')
-def calculate_RAxML(familyname):
-    return calculate_tree(familyname, 'RAxML')
+calculation_methods = []
+for aligner in ALIGNERS:
+    calculation_methods.append(bind_calculation(aligner))
+    calculation_methods.append(bind_calculation(aligner, superfamily=True))
+    for builder in TREE_BUILDERS:
+        calculation_methods.append(bind_calculation(aligner+'_'+builder))
+        calculation_methods.append(bind_calculation(aligner+'_'+builder, superfamily=True))
+for builder in TREE_BUILDERS:
+    calculation_methods.append(bind_calculation(builder))
+    calculation_methods.append(bind_calculation(builder, superfamily=True))
 
 
 @app.route('/trees/<familyname>/<method>/'+TREE_NAME)
