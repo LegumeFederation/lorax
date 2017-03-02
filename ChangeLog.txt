@@ -1,3 +1,11 @@
+v0.6
+
+Added /trees/<family>/hmmalign_FastTree target to chain calculations.
+
+Added a polling method in test_all.sh to poll a URL until >= 0, useful for status polls.
+
+Queueing for FastTree calculation via rq added.  Expects a queue named "FastTree".
+
 v0.5
 
 Added superfamily targets.
