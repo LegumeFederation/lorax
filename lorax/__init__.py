@@ -33,10 +33,8 @@ from flask_rq2 import RQ
 #
 from .version import version as __version__ # noqa
 #
-# Global constants
+# Global constants (not configurable).
 #
-START_TIMESTAMP = datetime.now().strftime('%Y%m%d-%H%M%S')
-PROGRAM_NAME = 'lorax'
 AUTHOR = 'Joel Berendzen'
 EMAIL = 'joelb@ncgr.org'
 COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.  All rights reserved.
@@ -44,55 +42,66 @@ COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.  Al
 PROJECT_HOME = 'https://github.com/ncgr/lorax'
 DEFAULT_FILE_LOGLEVEL = logging.DEBUG
 DEFAULT_STDERR_LOGLEVEL = logging.INFO
-LOGFILE_LINK_NAME = 'lorax.log'
-VERSION = __version__
-DIR_MODE = 0o755
-# Sequence type dictionary
+# File-name-related variables.
 SEQUENCE_EXTENSIONS = OrderedDict([
     ('DNA','.fna'),
     ('peptide','.faa')
 ])
-
-# Calculation names.  None of these may contain an underscore.
-TREE_BUILDERS = ['FastTree', 'RAxML']
-ALIGNERS = ['hmmalign']
-# File names
 CONFIGFILE_NAME = 'config.json'
 SEQUENCES_NAME = 'sequences'
 ALIGNMENT_NAME = 'alignment'
 RUN_LOG_NAME = 'run_log.txt'
-STATUS_FILE_NAME = 'status.txt'
-STOCKHOLM_FILE = 'alignment.stockholm'
+STATUS_NAME = 'status.txt'
+STOCKHOLM_NAME = 'alignment.stockholm'
 TREE_NAME = 'tree.nwk'
-SEQUENCE_DATA_FILENAME = 'sequence_data.json'
+SEQUENCE_DATA_NAME = 'sequence_data.json'
 HMM_FILENAME = 'family.hmm'
-HMMSTATS_FILE = 'hmmstats.json'
+HMMSTATS_NAME = 'hmmstats.json'
 ALL_FILENAMES = [CONFIGFILE_NAME,
                  ALIGNMENT_NAME+SEQUENCE_EXTENSIONS['DNA'],
                  ALIGNMENT_NAME+SEQUENCE_EXTENSIONS['peptide'],
                  SEQUENCES_NAME+SEQUENCE_EXTENSIONS['DNA'],
                  SEQUENCES_NAME+SEQUENCE_EXTENSIONS['peptide'],
                  HMM_FILENAME,
-                 STATUS_FILE_NAME,
-                 SEQUENCE_DATA_FILENAME,
+                 STATUS_NAME,
+                 SEQUENCE_DATA_NAME,
                  RUN_LOG_NAME,
-                 STOCKHOLM_FILE,
-                 HMMSTATS_FILE] + TREE_BUILDERS
-# MIME types
+                 STOCKHOLM_NAME,
+                 HMMSTATS_NAME] + ['FastTree', 'RAxML']
+# MIME types.
 NEWICK_MIMETYPE = 'text/plain'
 JSON_MIMETYPE = 'application/json'
 FASTA_MIMETYPE = 'text/plain'
 TEXT_MIMETYPE = 'text/plain'
-# hmmalign stuff
+# hmmalign stuff.
 HMM_SWITCHES = {'peptide': 'amino',
                 'DNA': 'dna'}
 #
-# global objects
+START_TIMESTAMP = datetime.now().strftime('%Y%m%d-%H%M%S')
 #
-logger = logging.getLogger(PROGRAM_NAME)
-app = Flask(PROGRAM_NAME)
+# Dynamic global objects.
+#
+logger = logging.getLogger(__name__)
+app = Flask(__name__)
 rq = RQ(app)
-config_data = None      # JSON config data, plus others, will be here
+environ = os.environ.copy()
+#
+# Get configuration variables.
+#
+app.config.from_object('lorax.default_settings.ProductionConfig')
+app.config.from_envvar('LORAX_SETTINGS', silent=True)
+#
+# Do overrides of environmental variables.
+#
+for envvar in app.config['ENVVARS']:
+    lorax_envvar = 'LORAX_' + envvar
+    if lorax_envvar in environ:
+        app.config[envvar] = environ[lorax_envvar]
+
+if app.config['DEBUG']:
+    for key in app.config:
+        print('%s =  %s' %(key, app.config[key]))
+
 #
 # Class definitions
 #
@@ -101,6 +110,7 @@ class CleanInfoFormatter(logging.Formatter):
     '''
     def __init__(self, fmt = '%(levelname)s: %(message)s'):
         logging.Formatter.__init__(self, fmt)
+
 
     def format(self, record):
         if record.levelno == logging.INFO:
@@ -131,11 +141,11 @@ def init_logging_to_stderr_and_file(verbose,
     logger.addHandler(stderrHandler)
 
     if not no_logfile: # start a log file
-        logfile_name = PROGRAM_NAME + '-'+ START_TIMESTAMP+ '.log'
+        logfile_name = __name__ + '-'+ START_TIMESTAMP+ '.log'
         logfile_path = Path(logfile_dir)/logfile_name
         if not logfile_path.parent.is_dir(): # create logs/ dir
             try:
-                logfile_path.parent.mkdir(mode=DIR_MODE, parents=True)
+                logfile_path.parent.mkdir(mode=app.config['PATHS']['mode'], parents=True)
             except OSError:
                 logger.error('Unable to create logfile directory "%s"',
                              logfile_path.parent)
@@ -146,7 +156,7 @@ def init_logging_to_stderr_and_file(verbose,
         logfileHandler.setLevel(file_log_level)
         logger.addHandler(logfileHandler)
     logger.debug('Command line: "%s"', ' '.join(sys.argv))
-    logger.debug('%s version %s', PROGRAM_NAME, VERSION)
+    logger.debug('%s version %s', __name__, __version__)
     logger.debug('Run started at %s', START_TIMESTAMP)
 
 
@@ -158,7 +168,7 @@ def get_file(subpath, type='data', mode='U'):
     :param mode: 'U' for string, 'b' for binary.
     :return:
     '''
-    file_path = Path(config_data['paths'][type])/subpath
+    file_path = Path(app.config['PATHS'][type])/subpath
     try:
         return file_path.open(mode='r'+mode).read()
     except IOError as exc:
@@ -167,11 +177,11 @@ def get_file(subpath, type='data', mode='U'):
 
 def create_fasta(familyname, data_name, super=None):
     if not super:
-        path = Path(config_data['paths']['data']) / familyname
+        path = Path(app.config['PATHS']['data']) / familyname
     else:
         if super in ALL_FILENAMES:
             abort(403)
-        path = Path(config_data['paths']['data']) / familyname / super
+        path = Path(app.config['PATHS']['data']) / familyname / super
     # post data
     if path.exists() and not path.is_dir():
         logger.warning('Removing existing file in directory path name')
@@ -200,7 +210,7 @@ def create_fasta(familyname, data_name, super=None):
     lengths = [len(rec.seq) for rec in record_dict.values()]
     infilename = data_name + infileext
     if super: # Do super processing
-        sub_path = Path(config_data['paths']['data']) / familyname / infilename
+        sub_path = Path(app.config['PATHS']['data']) / familyname / infilename
         sub_parsed_fasta = SeqIO.parse(str(sub_path), 'fasta')
         sub_record_dict = SeqIO.to_dict(sub_parsed_fasta)
         for rec in record_dict.values():
@@ -228,7 +238,7 @@ def create_fasta(familyname, data_name, super=None):
     with open(str(path / infilename), 'w') as fasta_outfh:
         for seq in record_dict.values():
             SeqIO.write(seq, fasta_outfh, 'fasta')
-    with open(str(path / SEQUENCE_DATA_FILENAME), 'w') as sequence_data_fh:
+    with open(str(path / SEQUENCE_DATA_NAME), 'w') as sequence_data_fh:
         json.dump(fasta_dict, sequence_data_fh)
     return Response(json.dumps(fasta_dict), mimetype=JSON_MIMETYPE)
 
@@ -244,7 +254,6 @@ def write_status(path, code):
         status_fh.write("%d\n" % code)
 
 
-@rq.job('FastTree')
 def run_subprocess_with_status(out_path,
                                err_path,
                                cmdlist,
@@ -272,8 +281,6 @@ def run_subprocess_with_status(out_path,
     return status.returncode
 
 
-@rq.job('hmmalign')
-@rq.job('FastTree')
 def align_with_FASTA_output(out_path,
                             err_path,
                             cmdlist,
@@ -305,13 +312,12 @@ def align_with_FASTA_output(out_path,
     return status.returncode
 
 
-def queue_calculation(config,
-                      familyname,
+def queue_calculation(familyname,
                       calculation,
                       super=None):
     '''Submit alignment or tree-building jobs or both to queue.
 
-    :param config: configuration dictionary.
+    :param config: app configuration dictionary.
     :param familyname: Name of previously-created family.
     :param calculation: Name of calculation to be done.
     :option super: Name of superfamily directory.
@@ -322,33 +328,33 @@ def queue_calculation(config,
     #
     calculation_components = calculation.split('_')
     if len(calculation_components) == 2:
-        if calculation_components[0] in ALIGNERS:
+        if calculation_components[0] in list(app.config['ALIGNERS'].keys()):
             aligner = calculation_components[0]
         else:
             logger.error('Unrecognized aligner %s.', calculation_components[0])
             abort(404)
-        if calculation_components[1] in TREE_BUILDERS:
+        if calculation_components[1] in list(app.config['TREEBUILDERS'].keys()):
             tree_builder = calculation_components[1]
         else:
             logger.error('Unrecognized tree builder %s.', calculation_components[1])
             abort(404)
-    elif calculation in ALIGNERS:
+    elif calculation in list(app.config['ALIGNERS'].keys()):
         aligner = calculation
         tree_builder = None
-    elif calculation in TREE_BUILDERS:
+    elif calculation in list(app.config['TREEBUILDERS'].keys()):
         aligner = None
         tree_builder = calculation
     #
     # Get paths to things we might need for either calculation.
     #
     if not super:
-        alignment_dir = Path(config_data['paths']['data']) / familyname
+        alignment_dir = Path(app.config['PATHS']['data']) / familyname
         hmm_path = Path(HMM_FILENAME)
     else:
         if super in ALL_FILENAMES:
             logger.error('Super name is a reserved name, "%s".', super)
             abort(403)
-        alignment_dir = Path(config_data['paths']['data']) / familyname / super
+        alignment_dir = Path(app.config['PATHS']['data']) / familyname / super
         hmm_path = Path('..') / HMM_FILENAME
     #
     # Check for prerequisites and determine sequence types.
@@ -357,8 +363,8 @@ def queue_calculation(config,
         logger.error('Directory was not previously created for %s.', alignment_dir)
         abort(428)
     if aligner is not None: # will do an alignment.
-        stockholm_path = alignment_dir / STOCKHOLM_FILE
-        alignment_status_path = alignment_dir / STATUS_FILE_NAME
+        stockholm_path = alignment_dir / STOCKHOLM_NAME
+        alignment_status_path = alignment_dir / STATUS_NAME
         alignment_log_path = alignment_dir / RUN_LOG_NAME
         for key in SEQUENCE_EXTENSIONS.keys():
             if (alignment_dir/(SEQUENCES_NAME+SEQUENCE_EXTENSIONS[key])).exists():
@@ -375,7 +381,7 @@ def queue_calculation(config,
             abort(404)
     if tree_builder is not None: # will build a tree.
         tree_dir = alignment_dir / tree_builder
-        treebuilder_status_path = tree_dir / STATUS_FILE_NAME
+        treebuilder_status_path = tree_dir / STATUS_NAME
         tree_path = tree_dir / TREE_NAME
         tree_log_path = tree_dir / RUN_LOG_NAME
         if not tree_dir.exists():
@@ -392,19 +398,18 @@ def queue_calculation(config,
     #
     # Modify the environment to select the number of threads, if requested.
     #
-    environ = os.environ.copy()
-    if config['threads'] > 0:
-        environ['OMP_NUM_THREADS'] = str(config['threads'])
+    if app.config['THREADS'] > 0:
+        environ['OMP_NUM_THREADS'] = str(app.config['THREADS'])
     #
     # Marshal command-line arguments.
     #
     if aligner == 'hmmalign':
-        hmmalign_command = ['time', 'nice', 'hmmalign'] + \
-                           config_data['hmmalign_defaults'] + \
+        aligner_command = ['time', 'nice', 'hmmalign'] + \
+                           app.config['ALIGNERS'][aligner] + \
                            ['--' + hmm_seq_type, str(hmm_path), str(seqfile)]
     if tree_builder == 'FastTree':
         tree_command = ['time', 'nice', 'FastTree'] \
-                  + config['treebuilders'][tree_builder][seq_type] \
+                  + app.config['TREEBUILDERS'][tree_builder][seq_type] \
                   + [str(alignment_input_path)]
     elif tree_builder == 'RAxML':
         tree_command = ['time', 'nice', 'raxmlHPC'] \
@@ -412,13 +417,13 @@ def queue_calculation(config,
                   + ['-n',
                      'production',
                      '-T',
-                     '%d' % config_data['threads'],
+                     '%d' % app.config['THREADS'],
                      '-s', str(alignment_input_path)]
     #
     # Log command line and initialize status files.
     #
     if aligner is not None:
-        logger.debug('Alignment command line is %s.', hmmalign_command)
+        logger.debug('Alignment command line is %s.', aligner_command)
         write_status(alignment_status_path, -1)
     if tree_builder is not None:
         logger.debug('Tree builder command line is %s.', tree_command)
@@ -426,44 +431,55 @@ def queue_calculation(config,
     #
     # Queue processes.
     #
+    align_queue = rq.get_queue(app.config['ALIGNMENT_QUEUE'])
+    tree_queue = rq.get_queue(app.config['TREE_QUEUE'])
     if aligner is not None and tree_builder is not None:
-        align_with_FASTA_output(stockholm_path,
-                                alignment_log_path,
-                                hmmalign_command,
-                                alignment_dir,
-                                environ,
-                                alignment_status_path,
-                                alignment_output_path)
-        run_subprocess_with_status.queue(tree_path,
-                                   tree_log_path,
-                                   tree_command,
-                                   tree_dir,
-                                   environ,
-                                   treebuilder_status_path)
+        align_job = align_queue.enqueue(align_with_FASTA_output,
+                                        args=(stockholm_path,
+                                              alignment_log_path,
+                                              aligner_command,
+                                              alignment_dir,
+                                              environ,
+                                              alignment_status_path,
+                                              alignment_output_path)
+                                        )
+        tree_job = tree_queue.enqueue(run_subprocess_with_status,
+                                      args=(tree_path,
+                                            tree_log_path,
+                                            tree_command,
+                                            tree_dir,
+                                            environ,
+                                            treebuilder_status_path),
+                                      depends_on=align_job
+                                      )
         return 'Alignment and tree building queued.'
     elif aligner is not None:
-        align_with_FASTA_output(stockholm_path,
-                                alignment_log_path,
-                                hmmalign_command,
-                                alignment_dir,
-                                environ,
-                                alignment_status_path,
-                                alignment_output_path)
+        align_job = align_queue.enqueue(align_with_FASTA_output,
+                                        args=(stockholm_path,
+                                              alignment_log_path,
+                                              aligner_command,
+                                              alignment_dir,
+                                              environ,
+                                              alignment_status_path,
+                                              alignment_output_path)
+                                        )
         return 'alignment queued.'
     elif tree_builder is not None:
-        run_subprocess_with_status.queue(tree_path,
-                                   tree_log_path,
-                                   tree_command,
-                                   tree_dir,
-                                   environ,
-                                   treebuilder_status_path)
+        tree_job = tree_queue.enqueue(run_subprocess_with_status,
+                                      args=(tree_path,
+                                            tree_log_path,
+                                            tree_command,
+                                            tree_dir,
+                                            environ,
+                                            treebuilder_status_path)
+                                      )
         return 'Tree building queued.'
     else:
         abort(404)
 #
 # CLI entry point
 #
-@click.command(epilog=AUTHOR + ' <'+EMAIL+'>. ' + COPYRIGHT + PROJECT_HOME)
+@click.command(epilog='AUTHOR' + ' <'+EMAIL+'>. ' + COPYRIGHT + PROJECT_HOME)
 @click.option('-d', '--debug', is_flag=True, show_default=True,
               default=False, help='Enable (unsafe) debugging.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True,
@@ -479,48 +495,36 @@ def queue_calculation(config,
                help='Port on which to listen.')
 @click.option('--host', default='127.0.0.1', show_default=True,
                help='Host IP on which to listen')
-@click.version_option(version=VERSION, prog_name=PROGRAM_NAME)
+@click.version_option(version=__version__, prog_name=__name__)
 def cli(debug, verbose, quiet, no_logfile, config_file, port, host):
-    global app, config_data
-    try:
-        config_fh = Path(config_file).open()
-    except FileNotFoundError:
-        logger.error('Fatal--Config file "%s" not found in current directory.', config_file)
-        sys.exit(1)
-
-    config_data = json.load(config_fh)
-    config_data['version'] = VERSION
-    config_data['program'] = PROGRAM_NAME
-    config_data['start_timestamp'] = START_TIMESTAMP
-
+    global app
     #
     # configure logging (possibly to file)
     #
     init_logging_to_stderr_and_file(verbose,
                                     quiet,
                                     no_logfile,
-                                    Path(config_data["paths"]["log"]))
-    app.run(debug=debug,
-            host=host,
-            port=port)
+                                    Path(app.config['PATHS']["log"]))
+    app.run(debug=app.config['DEBUG'],
+            host=app.config['HOST'],
+            port=app.config['PORT'])
     rq.init_app(app)
 #
 # Target definitions begin here.
 #
-@app.route('/config.json')
-def show_config():
-    return Response(json.dumps(config_data), mimetype='application/json')
-
-
 @app.route('/log.txt')
 def show_log():
-    content = get_file(PROGRAM_NAME+'-'+START_TIMESTAMP+'.log', type='log')
+    content = get_file(__name__ +
+                       '-' +
+                       START_TIMESTAMP +
+                       '.log',
+                       type='log')
     return Response(content, mimetype='text/plain')
 
 
 @app.route('/trees/families.json')
 def return_families():
-    directory_list = os.listdir(path=config_data['paths']['data'])
+    directory_list = os.listdir(path=app.config['PATHS']['data'])
     directory_list.sort()
     return Response(json.dumps(directory_list), mimetype=JSON_MIMETYPE)
 
@@ -543,7 +547,7 @@ def create_superfamily_sequences(family, super):
 @app.route('/trees/<family>/HMM', methods=['PUT'])
 def create_HMM(family):
     try:
-        hmm_path = Path(config_data['paths']['data'])/family/HMM_FILENAME
+        hmm_path = Path(app.config['PATHS']['data'])/family/HMM_FILENAME
         hmm_fh = hmm_path.open('wb')
     except: # e.g., if family has not been created
         logger.error('Unable to create "%s".', str(hmm_path))
@@ -577,7 +581,7 @@ def create_HMM(family):
                 hmmstats_dict['compKL'] = float(fields[9])
             except: # format error on hmmstats, maybe version changed from 3.1b2?
                 hmmstats_dict['statfields'] = fields
-    with (hmm_path.parent/HMMSTATS_FILE).open(mode='w') as hmmstats_fh:
+    with (hmm_path.parent/HMMSTATS_NAME).open(mode='w') as hmmstats_fh:
         json.dump(hmmstats_dict, hmmstats_fh)
     return Response(json.dumps(hmmstats_dict), mimetype=JSON_MIMETYPE)
 
@@ -590,16 +594,14 @@ def bind_calculation(method, superfamily=False):
     '''
     if not superfamily:
         def _calculate(family):
-            return queue_calculation(config_data,
-                                     family,
+            return queue_calculation(family,
                                      method)
         _calculate.__name__ = 'calculate_' + method
         _calculate = app.route('/trees/<family>/'+method)(_calculate)
         return _calculate
     else:
         def _calculate(family, sup):
-            return queue_calculation(config_data,
-                                     family,
+            return queue_calculation(family,
                                      method,
                                      super=sup)
         _calculate.__name__ = 'calculate_' + method + '_superfamily'
@@ -608,22 +610,22 @@ def bind_calculation(method, superfamily=False):
 
 
 calculation_methods = []
-for aligner in ALIGNERS:
+for aligner in list(app.config['ALIGNERS'].keys()):
     calculation_methods.append(bind_calculation(aligner))
     calculation_methods.append(bind_calculation(aligner, superfamily=True))
-    for builder in TREE_BUILDERS:
+    for builder in list(app.config['TREEBUILDERS'].keys()):
         calculation_methods.append(bind_calculation(aligner+'_'+builder))
         calculation_methods.append(bind_calculation(aligner+'_'+builder, superfamily=True))
-for builder in TREE_BUILDERS:
+for builder in list(app.config['TREEBUILDERS'].keys()):
     calculation_methods.append(bind_calculation(builder))
     calculation_methods.append(bind_calculation(builder, superfamily=True))
 
 
 @app.route('/trees/<familyname>/<method>/'+TREE_NAME)
 def get_existing_tree(familyname, method):
-    if method not in config_data['treebuilders']:
+    if method not in app.config['TREEBUILDERS']:
         abort(404)
-    inpath = Path(config_data['paths']['data'])/familyname/method/TREE_NAME
+    inpath = Path(app.config['PATHS']['data'])/familyname/method/TREE_NAME
     if not inpath.exists():
         abort(404)
     return Response(inpath.open().read(), mimetype=NEWICK_MIMETYPE)
@@ -636,9 +638,12 @@ def get_existing_tree_super(family, method, sup):
 
 @app.route('/trees/<familyname>/<method>/'+RUN_LOG_NAME)
 def get_log(familyname, method):
-    if method not in config_data['treebuilders']:
-        abort(404)
-    inpath = Path(config_data['paths']['data'])/familyname/method/RUN_LOG_NAME
+    if method in list(app.config['TREEBUILDERS'].keys()):
+        inpath = Path(app.config['PATHS']['data'])/familyname/method/RUN_LOG_NAME
+    elif method in list(app.config['ALIGNERS'].keys()):
+        inpath = Path(app.config['PATHS']['data'])/familyname/RUN_LOG_NAME
+    else:
+        abort(428)
     if not inpath.exists():
         abort(404)
     return Response(inpath.open().read(), mimetype=TEXT_MIMETYPE)
@@ -651,9 +656,12 @@ def get_log_super(family, method, sup):
 
 @app.route('/trees/<familyname>/<method>/status')
 def get_status(familyname, method):
-    if method not in config_data['treebuilders']:
-        abort(404)
-    inpath = Path(config_data['paths']['data'])/familyname/method/STATUS_FILE_NAME
+    if method in list(app.config['TREEBUILDERS'].keys()):
+        inpath = Path(app.config['PATHS']['data'])/familyname/method/STATUS_NAME
+    elif method in list(app.config['ALIGNERS'].keys()):
+        inpath = Path(app.config['PATHS']['data']) /familyname /STATUS_NAME
+    else:
+        abort(428)
     if not inpath.exists():
         abort(404)
     status = inpath.open().read()

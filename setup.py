@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-lorax -- server for phylogenetic trees
+lorax -- I speak for the (phylogenetic) trees.
 '''
 
 # Developers, install with
@@ -19,8 +19,6 @@ name = 'lorax'
 if sys.version_info < (3,4,0,'final',0):
     raise SystemExit('Python 3.4 or later is required!')
 
-
-
 # get version from version.py
 version_dict = {}
 version_path = convert_path(name+'/version.py')
@@ -37,7 +35,7 @@ setup(
     name=name,
     version=version,
     data_files=examplefiles,
-    url='http://github.com/LegumeFederation/lorax',
+    url='http://github.com/ncgr/lorax',
     keywords=['science', 'biology', 'bioinformatics', 'genomics',
               'sequence', 'curation'],
     license='BSD',
@@ -48,15 +46,13 @@ setup(
     packages=[name],
     include_package_data=True,
     zip_safe=False,
-    install_requires=['flask',
-                      'click',
-                      'Flask-RQ2',
+    install_requires=['Flask-RQ2',
                       'biopython'
                       ],
     entry_points={
                  'console_scripts':['lorax = lorax:cli']
                 },
-    classifiers=['Development Status :: 3 - Alpha',
+    classifiers=['Development Status :: 4 - Beta',
                  'Environment :: Console',
                  'Intended Audience :: Science/Research',
                  'License :: OSI Approved :: BSD License',

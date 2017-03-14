@@ -1,3 +1,9 @@
+
+
+Removed /config target as insecure.
+
+Changed configuration from config.json to a Flask-standard pyfile.  See default_settings.py.
+
 v0.6
 
 Added /trees/<family>/hmmalign_FastTree target to chain calculations.

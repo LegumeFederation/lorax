@@ -74,15 +74,13 @@ test_GET () {
 }
 
 poll_until_positive() {
-   echo -n "Polling $1"
+   echo -n "Polling ${1} "
    while [ `curl -s ${LORAX_HOST}:${LORAX_PORT}${1}` -lt 0 ]; do
      echo -n "."
      sleep $SLEEPTIME
    done
-   echo "done."
+   echo " done."
 }
-
-test_GET /config.json
 
 # GET a bad target throws a 404.
 test_GET /badtarget 404
@@ -123,6 +121,10 @@ fi
 
 test_GET /trees/aspartic_peptidases/hmmalign
 
+poll_until_positive /trees/aspartic_peptidases/hmmalign/status
+
+test_GET /trees/aspartic_peptidases/hmmalign/run_log.txt
+
 test_GET /trees/aspartic_peptidases/FastTree
 
 poll_until_positive /trees/aspartic_peptidases/FastTree/status
@@ -152,5 +154,6 @@ test_GET /trees/aspartic_peptidases.myseqs/FastTree/tree.nwk
 
 test_GET /trees/aspartic_peptidases.myseqs/FastTree/run_log.txt
 
+rm -r data/*  # remove files
 echo "lorax tests completed successfully."
 exit 0

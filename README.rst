@@ -42,9 +42,6 @@ data will result in over-writing.
 =================================== ===========================================================
 URL                                 Interpretation
 =================================== ===========================================================
-``/config.json``                    A ``GET`` of this URL returns the configuration in JSON,
-                                    including version string.
-
 ``/log.txt``                        A ``GET`` of this URL returns the log file of the current
                                     run.
 
