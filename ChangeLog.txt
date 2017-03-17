@@ -1,4 +1,12 @@
+v0.7
 
+Methods now return job_IDs.
+
+Config parameters are settable via environmental variables starting with "LORAX_".
+
+Configuration parameters are now settable by instance as a pyfile.
+
+Improved logfile content.
 
 Removed /config target as insecure.
 

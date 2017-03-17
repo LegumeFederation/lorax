@@ -14,11 +14,9 @@ A web service process designed to calculate and serve up phylogenetic trees, inc
 #
 import os
 import sys
-import logging
 import subprocess
 import json
 import io
-from datetime import datetime
 from pathlib import Path # python 3.4 or later
 from collections import OrderedDict # python 3.1 or later
 #
@@ -33,15 +31,13 @@ from flask_rq2 import RQ
 #
 from .version import version as __version__ # noqa
 #
-# Global constants (not configurable).
+# Non-configurable global constants.
 #
 AUTHOR = 'Joel Berendzen'
 EMAIL = 'joelb@ncgr.org'
 COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.  All rights reserved.
 """
 PROJECT_HOME = 'https://github.com/ncgr/lorax'
-DEFAULT_FILE_LOGLEVEL = logging.DEBUG
-DEFAULT_STDERR_LOGLEVEL = logging.INFO
 # File-name-related variables.
 SEQUENCE_EXTENSIONS = OrderedDict([
     ('DNA','.fna'),
@@ -77,89 +73,62 @@ TEXT_MIMETYPE = 'text/plain'
 HMM_SWITCHES = {'peptide': 'amino',
                 'DNA': 'dna'}
 #
-START_TIMESTAMP = datetime.now().strftime('%Y%m%d-%H%M%S')
+# Create an app object.
 #
-# Dynamic global objects.
+app = Flask(__name__, instance_relative_config=True)
 #
-logger = logging.getLogger(__name__)
-app = Flask(__name__)
-rq = RQ(app)
-environ = os.environ.copy()
+# Get configuration variables from object.
 #
-# Get configuration variables.
+config_dict = {
+    'base': 'lorax.config.BaseConfig',
+    'development': 'lorax.config.DevelopmentConfig',
+    'test': 'lorax.config.TestConfig',
+    'production': 'lorax.config.ProductionConfig'
+}
+config_name = os.getenv('LORAX_CONFIGURATION', 'base')
+if config_name not in config_dict:
+    print('ERROR -- configuration "%s" not known.' %config_name)
+    sys.exit(1)
+app.config.from_object(config_dict[config_name])
 #
-app.config.from_object('lorax.default_settings.ProductionConfig')
-app.config.from_envvar('LORAX_SETTINGS', silent=True)
+# Get instance-specific configuration, if it exists.
 #
-# Do overrides of environmental variables.
+pyfile_name = os.getenv('LORAX_SETTINGS', app.config['SETTINGS'])
+app.config.from_pyfile(pyfile_name, silent=True)
 #
-for envvar in app.config['ENVVARS']:
-    lorax_envvar = 'LORAX_' + envvar
-    if lorax_envvar in environ:
-        app.config[envvar] = environ[lorax_envvar]
-
+# Do overrides from environmental variables.
+#
+for lorax_envvar, envvar in [(i, i[6:])
+                             for i in sorted(os.environ)
+                             if i.startswith('LORAX_')]:
+    value = os.environ[lorax_envvar]
+    if value == 'True':
+        value = True
+    elif value == 'False':
+        value = False
+    else:
+        try:
+            value = int(value)
+        except ValueError:
+            pass
+    app.config[envvar] = value
+#
+# Set version in config.
+#
+app.config['VERSION'] = __version__
+#
+# Print configuration dictionary if in debug mode.
+#
 if app.config['DEBUG']:
-    for key in app.config:
+    for key in sorted(app.config):
         print('%s =  %s' %(key, app.config[key]))
-
 #
-# Class definitions
+# Create a global RQ object.
 #
-class CleanInfoFormatter(logging.Formatter):
-    '''A logging formatter for stderr usage
-    '''
-    def __init__(self, fmt = '%(levelname)s: %(message)s'):
-        logging.Formatter.__init__(self, fmt)
-
-
-    def format(self, record):
-        if record.levelno == logging.INFO:
-            return record.getMessage()
-        return logging.Formatter.format(self, record)
+rq = RQ(app)
 #
-# Helper function definitions begin here.
+# Function defs start here.
 #
-def init_logging_to_stderr_and_file(verbose,
-                                    quiet,
-                                    no_logfile,
-                                    logfile_dir):
-    '''Log to stderr and to a log file at different level
-    '''
-    if verbose:
-        stderr_log_level = logging.DEBUG
-    else:
-        stderr_log_level = DEFAULT_STDERR_LOGLEVEL
-    if quiet:
-        file_log_level = logging.ERROR
-    else:
-        file_log_level = DEFAULT_FILE_LOGLEVEL
-    logger.setLevel(min(file_log_level, stderr_log_level))
-    stderrHandler = logging.StreamHandler(sys.stderr)
-    stderrFormatter = CleanInfoFormatter()
-    stderrHandler.setFormatter(stderrFormatter)
-    stderrHandler.setLevel(stderr_log_level)
-    logger.addHandler(stderrHandler)
-
-    if not no_logfile: # start a log file
-        logfile_name = __name__ + '-'+ START_TIMESTAMP+ '.log'
-        logfile_path = Path(logfile_dir)/logfile_name
-        if not logfile_path.parent.is_dir(): # create logs/ dir
-            try:
-                logfile_path.parent.mkdir(mode=app.config['PATHS']['mode'], parents=True)
-            except OSError:
-                logger.error('Unable to create logfile directory "%s"',
-                             logfile_path.parent)
-                raise OSError
-        logfileHandler = logging.FileHandler(str(logfile_path))
-        logfileFormatter = logging.Formatter('%(levelname)s: %(message)s')
-        logfileHandler.setFormatter(logfileFormatter)
-        logfileHandler.setLevel(file_log_level)
-        logger.addHandler(logfileHandler)
-    logger.debug('Command line: "%s"', ' '.join(sys.argv))
-    logger.debug('%s version %s', __name__, __version__)
-    logger.debug('Run started at %s', START_TIMESTAMP)
-
-
 def get_file(subpath, type='data', mode='U'):
     '''Get a file, returning exceptions if they exist.
 
@@ -176,6 +145,13 @@ def get_file(subpath, type='data', mode='U'):
 
 
 def create_fasta(familyname, data_name, super=None):
+    '''Verify and characterize a FASTA file and save it to disk.
+
+    :param familyname:
+    :param data_name:
+    :param super:
+    :return:
+    '''
     if not super:
         path = Path(app.config['PATHS']['data']) / familyname
     else:
@@ -184,10 +160,10 @@ def create_fasta(familyname, data_name, super=None):
         path = Path(app.config['PATHS']['data']) / familyname / super
     # post data
     if path.exists() and not path.is_dir():
-        logger.warning('Removing existing file in directory path name')
+        app.mylogger.warning('Removing existing file in directory path name')
         path.unlink()
     if not path.is_dir():
-        logger.info("Creating directory %s", path)
+        app.mylogger.info("Creating directory %s", path)
         path.mkdir()
     for sequence_type in SEQUENCE_EXTENSIONS.keys():
         if sequence_type in request.files:
@@ -195,17 +171,17 @@ def create_fasta(familyname, data_name, super=None):
             infileext = SEQUENCE_EXTENSIONS[sequence_type]
             break
     else:
-        logger.error('unrecognized request for FASTA')
+        app.mylogger.error('unrecognized request for FASTA')
         abort(400)
     try:  # parse FASTA file
         fasta_str_fh = io.StringIO(fasta.read().decode('UTF-8'))
         parsed_fasta = SeqIO.parse(fasta_str_fh, 'fasta')
         record_dict = SeqIO.to_dict(parsed_fasta)
     except:
-        logger.error('unparseable FASTA')
+        app.mylogger.error('Unparseable FASTA requested for family "%s".', familyname)
         abort(406)
     if len(record_dict) < 1:  # empty FASTA
-        logger.error('empty FASTA')
+        app.mylogger.error('Empty FASTA for family "%s".', familyname)
         abort(406)
     lengths = [len(rec.seq) for rec in record_dict.values()]
     infilename = data_name + infileext
@@ -231,9 +207,9 @@ def create_fasta(familyname, data_name, super=None):
                       'min_length': min(lengths),
                       'total_length': sum(lengths),
                       'overwrite': False}
-    logger.info('Saving FASTA file for family "%s".', familyname)
+    app.mylogger.info('Saving FASTA file for family "%s".', familyname)
     if (path / infilename).exists():
-        logger.warning('Overwriting existing FASTA file for family %s', familyname)
+        app.mylogger.warning('Overwriting existing FASTA file for family %s', familyname)
         fasta_dict['overwrite'] = True
     with open(str(path / infilename), 'w') as fasta_outfh:
         for seq in record_dict.values():
@@ -258,9 +234,10 @@ def run_subprocess_with_status(out_path,
                                err_path,
                                cmdlist,
                                cwd,
-                               environment,
-                               status_path):
-    '''
+                               status_path,
+                               post_process,
+                               post_args):
+    '''Run a subprocess, writing a status file.
 
     :param out_path: Path to which stdout gets sent.
     :param err_path: Path to which stderr gets sent.
@@ -270,46 +247,51 @@ def run_subprocess_with_status(out_path,
     :param status_path: Path to status log file.
     :return: Return code of subprocess.
     '''
+    #
+    # Modify the environment to select the number of threads, if requested.
+    #
+    environ = os.environ.copy()
+    if app.config['THREADS'] > 0:
+        environ['OMP_NUM_THREADS'] = str(app.config['THREADS'])
     with out_path.open(mode='wb') as out_fh:
         with err_path.open(mode='wt') as err_fh:
             status = subprocess.run(cmdlist,
                                     stdout=out_fh,
                                     stderr=err_fh,
                                     cwd=str(cwd),
-                                    env=environment)
+                                    env=environ)
     write_status(status_path, status.returncode)
+    if post_process is not None:
+        post_process(out_path,
+                     err_path,
+                     cwd,
+                     status,
+                     *post_args)
     return status.returncode
 
+def job_data_as_response(job, queue):
+    job_dict = {'job_ID': job.id,
+                'queue': queue
+                }
+    return Response(json.dumps(job_dict), mimetype=JSON_MIMETYPE)
 
-def align_with_FASTA_output(out_path,
-                            err_path,
-                            cmdlist,
-                            cwd,
-                            environment,
-                            status_path,
-                            fasta):
-    '''
+def convert_stockholm_to_FASTA(out_path,
+                               err_path,
+                               cwd,
+                               status,
+                               fasta):
+    '''Convert a Stockholm-format alignment file to FASTA.
 
     :param out_path: Path to which stdout gets sent.
     :param err_path: Path to which stderr gets sent.
-    :param cmdlist: List of commands to be sent.
-    :param cwd: Path to working directory.
-    :param environment: Environment of the subprocess.
-    :param status_path: Path to status log file.
+    :param status: Status object from subprocess.
+    :param fasta: Path to FASTA file to be created.
+    :param status_path: Path to s.
     :return: Return code of subprocess.
     '''
-    with out_path.open(mode='wb') as out_fh:
-        with err_path.open(mode='wt') as err_fh:
-            status = subprocess.run(cmdlist,
-                                    stdout=out_fh,
-                                    stderr=err_fh,
-                                    cwd=str(cwd),
-                                    env=environment)
-    write_status(status_path, status.returncode)
     if status.returncode == 0:
         alignment = AlignIO.read(out_path.open(mode='rU'), 'stockholm')
         AlignIO.write(alignment, fasta.open(mode='w'), 'fasta')
-    return status.returncode
 
 
 def queue_calculation(familyname,
@@ -331,12 +313,12 @@ def queue_calculation(familyname,
         if calculation_components[0] in list(app.config['ALIGNERS'].keys()):
             aligner = calculation_components[0]
         else:
-            logger.error('Unrecognized aligner %s.', calculation_components[0])
+            app.mylogger.error('Unrecognized aligner %s.', calculation_components[0])
             abort(404)
         if calculation_components[1] in list(app.config['TREEBUILDERS'].keys()):
             tree_builder = calculation_components[1]
         else:
-            logger.error('Unrecognized tree builder %s.', calculation_components[1])
+            app.mylogger.error('Unrecognized tree builder %s.', calculation_components[1])
             abort(404)
     elif calculation in list(app.config['ALIGNERS'].keys()):
         aligner = calculation
@@ -352,7 +334,7 @@ def queue_calculation(familyname,
         hmm_path = Path(HMM_FILENAME)
     else:
         if super in ALL_FILENAMES:
-            logger.error('Super name is a reserved name, "%s".', super)
+            app.mylogger.error('Super name is a reserved name, "%s".', super)
             abort(403)
         alignment_dir = Path(app.config['PATHS']['data']) / familyname / super
         hmm_path = Path('..') / HMM_FILENAME
@@ -360,7 +342,7 @@ def queue_calculation(familyname,
     # Check for prerequisites and determine sequence types.
     #
     if not alignment_dir.is_dir():
-        logger.error('Directory was not previously created for %s.', alignment_dir)
+        app.mylogger.error('Directory was not previously created for %s.', alignment_dir)
         abort(428)
     if aligner is not None: # will do an alignment.
         stockholm_path = alignment_dir / STOCKHOLM_NAME
@@ -377,7 +359,7 @@ def queue_calculation(familyname,
                 seq_type = key
                 break
         else:
-            logger.error('Unable to find sequences to align.')
+            app.mylogger.error('Unable to find sequences to align.')
             abort(404)
     if tree_builder is not None: # will build a tree.
         tree_dir = alignment_dir / tree_builder
@@ -393,13 +375,8 @@ def queue_calculation(familyname,
                     seq_type = key
                     break
             else:
-                logger.error('Unable to find aligned sequences.')
+                app.mylogger.error('Unable to find aligned sequences.')
                 abort(404)
-    #
-    # Modify the environment to select the number of threads, if requested.
-    #
-    if app.config['THREADS'] > 0:
-        environ['OMP_NUM_THREADS'] = str(app.config['THREADS'])
     #
     # Marshal command-line arguments.
     #
@@ -423,10 +400,10 @@ def queue_calculation(familyname,
     # Log command line and initialize status files.
     #
     if aligner is not None:
-        logger.debug('Alignment command line is %s.', aligner_command)
+        app.mylogger.debug('Alignment command line is %s.', aligner_command)
         write_status(alignment_status_path, -1)
     if tree_builder is not None:
-        logger.debug('Tree builder command line is %s.', tree_command)
+        app.mylogger.debug('Tree builder command line is %s.', tree_command)
         write_status(treebuilder_status_path, -1)
     #
     # Queue processes.
@@ -434,90 +411,81 @@ def queue_calculation(familyname,
     align_queue = rq.get_queue(app.config['ALIGNMENT_QUEUE'])
     tree_queue = rq.get_queue(app.config['TREE_QUEUE'])
     if aligner is not None and tree_builder is not None:
-        align_job = align_queue.enqueue(align_with_FASTA_output,
+        align_job = align_queue.enqueue(run_subprocess_with_status,
                                         args=(stockholm_path,
                                               alignment_log_path,
                                               aligner_command,
                                               alignment_dir,
-                                              environ,
                                               alignment_status_path,
-                                              alignment_output_path)
+                                              convert_stockholm_to_FASTA,
+                                              (alignment_output_path,)
+                                               )
                                         )
         tree_job = tree_queue.enqueue(run_subprocess_with_status,
                                       args=(tree_path,
                                             tree_log_path,
                                             tree_command,
                                             tree_dir,
-                                            environ,
-                                            treebuilder_status_path),
+                                            treebuilder_status_path,
+                                            None,
+                                            None),
                                       depends_on=align_job
                                       )
-        return 'Alignment and tree building queued.'
+        return job_data_as_response(tree_job, app.config['TREE_QUEUE'])
     elif aligner is not None:
-        align_job = align_queue.enqueue(align_with_FASTA_output,
+        align_job = align_queue.enqueue(run_subprocess_with_status,
                                         args=(stockholm_path,
                                               alignment_log_path,
                                               aligner_command,
                                               alignment_dir,
-                                              environ,
                                               alignment_status_path,
-                                              alignment_output_path)
+                                              convert_stockholm_to_FASTA,
+                                              (alignment_output_path,)
+                                               )
                                         )
-        return 'alignment queued.'
+        return job_data_as_response(align_job, app.config['ALIGNMENT_QUEUE'])
     elif tree_builder is not None:
         tree_job = tree_queue.enqueue(run_subprocess_with_status,
                                       args=(tree_path,
                                             tree_log_path,
                                             tree_command,
                                             tree_dir,
-                                            environ,
-                                            treebuilder_status_path)
+                                            treebuilder_status_path,
+                                            None,
+                                            None)
                                       )
-        return 'Tree building queued.'
+        return job_data_as_response(tree_job, app.config['TREE_QUEUE'])
     else:
         abort(404)
 #
-# CLI entry point
+# CLI entry point.
 #
 @click.command(epilog='AUTHOR' + ' <'+EMAIL+'>. ' + COPYRIGHT + PROJECT_HOME)
-@click.option('-d', '--debug', is_flag=True, show_default=True,
-              default=False, help='Enable (unsafe) debugging.')
-@click.option('-v', '--verbose', is_flag=True, show_default=True,
-              default=False, help='Log debugging info to stderr.')
-@click.option('-q', '--quiet', is_flag=True, show_default=True,
-              default=False, help='Suppress low-level log info.')
-@click.option('--no_logfile', is_flag=True, show_default=True,
-              default=False, help='Suppress logging to file.')
-@click.option('-c', '--config_file', default=CONFIGFILE_NAME,
-              show_default=True,
-               help='Configuration file name.')
-@click.option('--port', default='58927', show_default=True,
-               help='Port on which to listen.')
-@click.option('--host', default='127.0.0.1', show_default=True,
-               help='Host IP on which to listen')
 @click.version_option(version=__version__, prog_name=__name__)
-def cli(debug, verbose, quiet, no_logfile, config_file, port, host):
+def cli():
     global app
+    from .logging import init_logging_to_stderr_and_file
     #
-    # configure logging (possibly to file)
+    # Configure logging, the Flask app, and RQ.
     #
-    init_logging_to_stderr_and_file(verbose,
-                                    quiet,
-                                    no_logfile,
-                                    Path(app.config['PATHS']["log"]))
-    app.run(debug=app.config['DEBUG'],
-            host=app.config['HOST'],
-            port=app.config['PORT'])
+    debug = app.config['DEBUG']
+    host = app.config['HOST']
+    port = app.config['PORT']
+    version = app.config['VERSION']
+    print('lorax version %s is listening on http://%s:%d/' %(version,
+                                                           host,
+                                                           port))
+    init_logging_to_stderr_and_file(app)
+    app.run(debug=debug,
+            host=host,
+            port=port)
     rq.init_app(app)
 #
 # Target definitions begin here.
 #
 @app.route('/log.txt')
 def show_log():
-    content = get_file(__name__ +
-                       '-' +
-                       START_TIMESTAMP +
-                       '.log',
+    content = get_file(app.config['LOGFILE_NAME'],
                        type='log')
     return Response(content, mimetype='text/plain')
 
@@ -550,7 +518,7 @@ def create_HMM(family):
         hmm_path = Path(app.config['PATHS']['data'])/family/HMM_FILENAME
         hmm_fh = hmm_path.open('wb')
     except: # e.g., if family has not been created
-        logger.error('Unable to create "%s".', str(hmm_path))
+        app.mylogger.error('Unable to create "%s".', str(hmm_path))
         abort(400)
     hmm_fh.write(request.data)
     hmm_fh.close()
@@ -559,7 +527,7 @@ def create_HMM(family):
                                                   universal_newlines=True,
                                                   cwd=str(hmm_path.parent))
     except subprocess.CalledProcessError:
-        logger.error('Not a valid HMM file for family %s, removing.', family)
+        app.mylogger.error('Not a valid HMM file for family %s, removing.', family)
         hmm_path.unlink()
         abort(406)
     hmmstats_dict = {}
@@ -671,3 +639,6 @@ def get_status(familyname, method):
 @app.route('/trees/<family>.<sup>/<method>/status')
 def get_status_super(family, method, sup):
     return get_status(family+'/'+sup, method)
+
+if __name__ == '__main__':
+    cli()

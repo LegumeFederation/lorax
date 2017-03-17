@@ -10,4 +10,4 @@ if [ -z "$LORAX_PORT" ] ; then
 	exit 1
 fi
 PYTHON="$LORAX_PYTHON"
-lorax --host ${LORAX_HOST} --port ${LORAX_PORT}
+lorax
