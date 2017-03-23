@@ -73,6 +73,39 @@ test_GET () {
    fi
 }
 
+test_DELETE () {
+   # Tests HTTP return code of commands, optionally printing results.
+   # Arguments:
+   #         $1 - target URL
+   #         $2 - expected return code (200 if not supplied)
+   #
+   tmpfile=$(mktemp /tmp/lorax-test_all.XXXXX)
+   if [ -z "${2}" ] ; then
+      code="200"
+   else
+      code="${2}"
+   fi
+   status=$(curl -s -o ${tmpfile} -w '%{http_code}' -X 'DELETE' ${LORAX_HOST}:${LORAX_PORT}${1})
+   if [ "${status}" -eq "${code}" ]; then
+      echo "DELETE ${1} returned HTTP code ${status} as expected."
+      if [[ $_V -eq 1 ]]; then
+	 echo "Response is:"
+         cat ${tmpfile}
+         echo ""
+	 echo ""
+      fi
+      rm "$tmpfile"
+   else
+      echo "FATAL ERROR--GET ${1} returned HTTP code ${status}, expected ${2}."
+      echo "Full response is:"
+      cat ${tmpfile}
+      echo ""
+      rm "$tmpfile"
+      exit 1
+   fi
+}
+
+
 poll_until_positive() {
    echo -n "Polling ${1} "
    while [ `curl -s ${LORAX_HOST}:${LORAX_PORT}${1}` -lt 0 ]; do
@@ -153,6 +186,10 @@ poll_until_positive /trees/aspartic_peptidases.myseqs/FastTree/status
 test_GET /trees/aspartic_peptidases.myseqs/FastTree/tree.nwk
 
 test_GET /trees/aspartic_peptidases.myseqs/FastTree/run_log.txt
+
+test_DELETE /trees/aspartic_paptidases.FastTree 403  # forbidden to remove subdirs this way
+
+test_DELETE /trees/aspartic_peptidases.myseqs
 
 rm -r data/*  # remove files
 echo "lorax tests completed successfully."

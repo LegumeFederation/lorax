@@ -24,7 +24,7 @@ Tree Builder   Description
 FastTree      `FastTree <https://www.microbesonline.org/fasttree/>`_ is the fastest tree-builder
               and is the default tree-building algorithm.  
 
-RaxML         `RaxML <http://sco.h-its.org/exelixis/web/software/raxml/index.html>`_ is believed
+RAxML         `RAxML <http://sco.h-its.org/exelixis/web/software/raxml/index.html>`_ is believed
               to be the more accurate tree-building algorithm, but at its fastest is probably
               100x slower than FastTree.  It is possible to the RaxML EPA algorithm to do
               placement of test sequences on existing RaxML trees.
@@ -105,6 +105,8 @@ URL                                 Interpretation
                                     sequences will be concatenated to the existing family
                                     sequences, with ``<super>`` prepending ID strings.
 
+``/trees/<family>.<superfamily>/``  ``DELETE`` a superfamily.
+
 ``/trees/<f>.<s>/<meth>/status``    Returns status of a superfamily tree calculation.
 
 ``/trees/<f>.<s>/<meth>/tree.nwk``  Returns tree of a superfamily.
@@ -114,29 +116,60 @@ URL                                 Interpretation
 
 =================================== ===========================================================
 
+Configuration
+-------------
+
+``lorax`` is complex and configured in multiple layers.  The lowest layer is from variables in the
+``config.py`` file in the distribution, which defines multiple classes of configuration variable
+settings.  These configuration modes are selected among at run time via the value of the
+environmental variable ``LORAX_CONFIGURATION``:
+
+===================== ============================================================================
+LORAX_CONFIGURATION   Interpretation
+===================== ============================================================================
+``base``              A vanilla mode suitable for manual testing without debugging on.
+
+``development``       A full debugging mode, not secure, highly verbose, and with synchronous
+                      operation (no queues).
+
+``testing``           A mode suitable for running test suites.
+
+``deployment``        Production mode, with logging to file.
+
+===================== ============================================================================
+
+The next level of configuration is via the pyfile ``config.cfg``.  Values placed in this file
+overlay values from ``config.py``.  The location of this file is instance-relative.
+
+The lowest level of configuration is via environmental variables which begin with ``LORAX_`` and
+which follow the values specified in the configuration pyfile.
+
 Running lorax
 -------------
 
-A ``config.json`` file must exist in the current working directory; one may be obtained from the ``test`` directory
-of the repository along with demo shell scripts.  ``lorax`` is started as a command-line argument with the following
-options:
+ ``lorax`` can be run via command line with no arguments.
 
+If asynchronouse queues are switched on (modes other than ``development``), then ``redis``
+will need to be started at the address specified by the configuration variable ``RQ_REDIS_URL``.
+After that, two RQ work queues will need to be started as well:
 
-  -d, --debug             Enable (unsafe) debugging.  [default: False]
-  -v, --verbose           Log debugging info to stderr.  [default: False]
-  -q, --quiet             Suppress low-level log info.  [default: False]
-  --no_logfile            Suppress logging to file.  [default: False]
-  -c, --config_file TEXT  Configuration file name.  [default: config.json]
-  --port TEXT             Port on which to listen.  [default: 58927]
-  --host TEXT             Host IP on which to listen  [default: 127.0.0.1]
-  --version               Show the version and exit.
-  --help                  Show this message and exit.
+    rqworker treebuilding
+    rqworker alignment
 
+It is also useful to run a dashboard (via ``rq-dashboard``).
 
-Log files with time-stamped names will be created in the directory specified by ``paths/log`` in ``config.json``.
-The example that is shipped uses the ``log/`` directory.
+``lorax`` is intended to be run in a trusted environment and contains no authentication.  It should be
+run on ports that are accessible only to trusted hosts.  Running ``lorax`` on a public port opens the
+possibility of denial-of-service attacks.
 
-``lorax`` is intended to be run in a trusted environment and contains no authentication code.
+We recommend that ``lorax`` be run in a virtual environment if on a shared server.  However, the shell
+scripts willwork for real environments as well.
 
-We recommend that ``lorax`` be run in a virtual environment if on a shared server.  However, the shell scripts will
-work for real environments as well.
+Files
+-----
+
+Log files with time-stamped names will be created in the directory specified by ``PATHS['log']``, by
+default an instance-relative ``log/`` directory.
+
+Data files are created in the directory specified by ``PATHS['data']``, by default an instance-relative
+``data/`` directory.  In deployment, this will usually be an absolute path.

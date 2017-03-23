@@ -1,6 +1,31 @@
 v0.7
 
-Methods now return job_IDs.
+Names of executables are now configuration parameters.  This allows for overriding of executable
+names on platforms where the name may vary.
+
+Added DELETE target for superfamiles.
+
+Calculation methods now return JSON dictionaries of job listings that include the following:
+    id: id string
+    description: description string, e.g., "FastTree tree of superfamily aspartic_peptidases.myseqs"
+    status: job.status, e.g., "deferred"
+    tasktype: "align" or "tree"
+    taskname: name of aligner or builder
+    family: name of family
+    superfamily: name of superfamily
+    is_queued: True if queued.  This will not be true until after alignment in some cases.
+    is_started: True if job is running.
+    is_finished: True if job is finished (since queue was reset).
+    is_failed: True if job failed due to an error.
+    created_at: ISO format job creation time or "None".
+    enqueued_at: ISO format time of queueing or "None".
+    ended_at: ISO format ending time or "None".
+    started_at: ISO format start time or "None".
+    estimated_job_time: Estimated run time (wallclock) in seconds.
+    queue_name: Name of queue (for future queries)
+    queue_position: position in queue, if queued, or length of queue if not.
+    estimated_queue_time: Estimated wallclock time of preceding jobs, in seconds.
+For now all estimated times are bogus and simply placeholders until timing models are established.
 
 Config parameters are settable via environmental variables starting with "LORAX_".
 

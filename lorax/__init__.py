@@ -17,6 +17,8 @@ import sys
 import subprocess
 import json
 import io
+import shutil
+from datetime import datetime
 from pathlib import Path # python 3.4 or later
 from collections import OrderedDict # python 3.1 or later
 #
@@ -43,7 +45,6 @@ SEQUENCE_EXTENSIONS = OrderedDict([
     ('DNA','.fna'),
     ('peptide','.faa')
 ])
-CONFIGFILE_NAME = 'config.json'
 SEQUENCES_NAME = 'sequences'
 ALIGNMENT_NAME = 'alignment'
 RUN_LOG_NAME = 'run_log.txt'
@@ -53,7 +54,8 @@ TREE_NAME = 'tree.nwk'
 SEQUENCE_DATA_NAME = 'sequence_data.json'
 HMM_FILENAME = 'family.hmm'
 HMMSTATS_NAME = 'hmmstats.json'
-ALL_FILENAMES = [CONFIGFILE_NAME,
+FAMILIES_NAME = 'families.json'
+ALL_FILENAMES = ['', # don't allow null name
                  ALIGNMENT_NAME+SEQUENCE_EXTENSIONS['DNA'],
                  ALIGNMENT_NAME+SEQUENCE_EXTENSIONS['peptide'],
                  SEQUENCES_NAME+SEQUENCE_EXTENSIONS['DNA'],
@@ -63,7 +65,8 @@ ALL_FILENAMES = [CONFIGFILE_NAME,
                  SEQUENCE_DATA_NAME,
                  RUN_LOG_NAME,
                  STOCKHOLM_NAME,
-                 HMMSTATS_NAME] + ['FastTree', 'RAxML']
+                 HMMSTATS_NAME,
+                 FAMILIES_NAME] + ['FastTree', 'RAxML']
 # MIME types.
 NEWICK_MIMETYPE = 'text/plain'
 JSON_MIMETYPE = 'application/json'
@@ -269,11 +272,70 @@ def run_subprocess_with_status(out_path,
                      *post_args)
     return status.returncode
 
-def job_data_as_response(job, queue):
-    job_dict = {'job_ID': job.id,
-                'queue': queue
+def datetime_to_isoformat(time):
+    if time is None:
+        return 'None'
+    else:
+        return datetime.isoformat(time)
+
+def job_data_as_response(job, q):
+    '''Return a JSON dictionary of job parameters.
+
+    :param job: Job object.
+    :param q: Queue object.
+    :return: Response of JSON data.
+    '''
+    job_ids = q.get_job_ids()
+    if job.id in job_ids:
+        queue_position = job_ids.index(job.id)
+    else:
+        queue_position = len(job_ids)
+    queue_time = 0
+    # needs testing before shipping
+    #if queue_position > 1:
+    #    for otherjob in job_ids[:queue_position-1]:
+    #        queue_time += q.fetch_job(otherjob).estimated_time
+
+    job_dict = {'id': job.id,
+                'description': job.description,
+                'status': job.status,
+                'tasktype': job.tasktype,
+                'taskname': job.taskname,
+                'family': job.family,
+                'superfamily': job.superfamily,
+                # booleans
+                'is_queued': job.is_queued,
+                'is_started': job.is_started,
+                'is_finished': job.is_finished,
+                'is_failed': job.is_failed,
+                # times
+                'created_at': datetime_to_isoformat(job.created_at),
+                'enqueued_at': datetime_to_isoformat(job.enqueued_at),
+                'ended_at': datetime_to_isoformat(job.ended_at),
+                'started_at': datetime_to_isoformat(job.started_at),
+                'estimated_job_time': job.estimated_time,
+                # queue data
+                'queue_name': q.name,
+                'queue_position': queue_position,
+                'estimated_queue_time': queue_time
                 }
     return Response(json.dumps(job_dict), mimetype=JSON_MIMETYPE)
+
+
+def estimate_job_time(task, aligner, family, superfamily):
+    '''Placeholder for alignment calculation time estimate.
+
+    :param task:
+    :param aligner:
+    :param family:
+    :param superfamily:
+    :return:
+    '''
+    if task == 'alignment':
+        return 10
+    elif task == 'tree':
+        return 60
+
 
 def convert_stockholm_to_FASTA(out_path,
                                err_path,
@@ -292,6 +354,31 @@ def convert_stockholm_to_FASTA(out_path,
     if status.returncode == 0:
         alignment = AlignIO.read(out_path.open(mode='rU'), 'stockholm')
         AlignIO.write(alignment, fasta.open(mode='w'), 'fasta')
+
+def set_job_description(tasktype, taskname, job, family, superfamily):
+    '''Set the job description.
+
+    :param taskname: Type of task (string).
+    :param taskname: Name of task (string).
+    :param job: rc job object.
+    :param family: Name of family.
+    :param superfamily: Name of superfamily.
+    :return:
+    '''
+    job.tasktype = tasktype
+    job.taskname = taskname
+    job.family = family
+    job.superfamily = superfamily
+    job.estimated_time = estimate_job_time(tasktype, taskname, family, superfamily)
+    if superfamily is None:
+        job.description = '%s %s of family %s' %(job.taskname,
+                                                 job.tasktype,
+                                                 job.family)
+    else:
+        job.description = '%s %s of superfamily %s.%s' %(job.taskname,
+                                                         job.tasktype,
+                                                         job.family,
+                                                         job.superfamily)
 
 
 def queue_calculation(familyname,
@@ -381,15 +468,15 @@ def queue_calculation(familyname,
     # Marshal command-line arguments.
     #
     if aligner == 'hmmalign':
-        aligner_command = ['time', 'nice', 'hmmalign'] + \
+        aligner_command = ['time', 'nice', app.config['HMMALIGN_EXE']]+ \
                            app.config['ALIGNERS'][aligner] + \
                            ['--' + hmm_seq_type, str(hmm_path), str(seqfile)]
     if tree_builder == 'FastTree':
-        tree_command = ['time', 'nice', 'FastTree'] \
+        tree_command = ['time', 'nice', app.config['FASTTREE_EXE']] \
                   + app.config['TREEBUILDERS'][tree_builder][seq_type] \
                   + [str(alignment_input_path)]
     elif tree_builder == 'RAxML':
-        tree_command = ['time', 'nice', 'raxmlHPC'] \
+        tree_command = ['time', 'nice', app.config['RAXML_EXE']] \
                   + treebuilder_args \
                   + ['-n',
                      'production',
@@ -421,6 +508,7 @@ def queue_calculation(familyname,
                                               (alignment_output_path,)
                                                )
                                         )
+        set_job_description('alignment', aligner, align_job, familyname, super)
         tree_job = tree_queue.enqueue(run_subprocess_with_status,
                                       args=(tree_path,
                                             tree_log_path,
@@ -431,7 +519,8 @@ def queue_calculation(familyname,
                                             None),
                                       depends_on=align_job
                                       )
-        return job_data_as_response(tree_job, app.config['TREE_QUEUE'])
+        set_job_description('tree', tree_builder, tree_job, familyname, super)
+        return job_data_as_response(tree_job, tree_queue)
     elif aligner is not None:
         align_job = align_queue.enqueue(run_subprocess_with_status,
                                         args=(stockholm_path,
@@ -443,7 +532,8 @@ def queue_calculation(familyname,
                                               (alignment_output_path,)
                                                )
                                         )
-        return job_data_as_response(align_job, app.config['ALIGNMENT_QUEUE'])
+        set_job_description('alignment', aligner, align_job, familyname, super)
+        return job_data_as_response(align_job, align_queue)
     elif tree_builder is not None:
         tree_job = tree_queue.enqueue(run_subprocess_with_status,
                                       args=(tree_path,
@@ -454,7 +544,8 @@ def queue_calculation(familyname,
                                             None,
                                             None)
                                       )
-        return job_data_as_response(tree_job, app.config['TREE_QUEUE'])
+        set_job_description('tree', tree_builder, tree_job, familyname, super)
+        return job_data_as_response(tree_job, tree_queue)
     else:
         abort(404)
 #
@@ -490,7 +581,7 @@ def show_log():
     return Response(content, mimetype='text/plain')
 
 
-@app.route('/trees/families.json')
+@app.route('/trees/'+FAMILIES_NAME)
 def return_families():
     directory_list = os.listdir(path=app.config['PATHS']['data'])
     directory_list.sort()
@@ -505,6 +596,18 @@ def create_alignment(family):
 @app.route('/trees/<family>/sequences', methods=['POST'])
 def create_sequences(family):
     return create_fasta(family, SEQUENCES_NAME)
+
+@app.route('/trees/<family>.<super>', methods=['DELETE'])
+def delete_superfamily(family, super):
+    if super in ALL_FILENAMES:
+        abort(403)
+    path = Path(app.config['PATHS']['data']) / family / super
+    if not path.exists():
+        abort(403)
+
+    shutil.rmtree(str(path))
+    return 'Deleted "%s.%s".' %(family,super)
+
 
 
 @app.route('/trees/<family>.<super>/sequences', methods=['POST'])

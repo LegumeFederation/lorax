@@ -74,6 +74,7 @@ class BaseConfig(object):
     ALIGNERS = {
         'hmmalign': ["--trim", "--informat", "FASTA"] # command-line arguments
     }
+    HMMALIGN_EXE = 'hmmalign'
     #
     # Definitions for tree-building algorithms.
     #
@@ -87,7 +88,8 @@ class BaseConfig(object):
           "DNA": ["-d"]
         }
     }
-
+    FASTTREE_EXE = 'FastTree'
+    RAXML_EXE = 'raxmlHPC'
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
