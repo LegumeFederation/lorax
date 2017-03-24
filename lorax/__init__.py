@@ -13,33 +13,28 @@ A web service process designed to calculate and serve up phylogenetic trees, inc
 # standard library imports
 #
 import os
-import sys
 import subprocess
 import json
 import io
 import shutil
 from datetime import datetime
-from pathlib import Path # python 3.4 or later
-from collections import OrderedDict # python 3.1 or later
+from pathlib import Path # python 3.4
+from collections import OrderedDict # python 3.1
 #
 # third-party imports
 #
-import click
 from flask import Flask, Response, request, abort
-from Bio import SeqIO, AlignIO
+from Bio import SeqIO, AlignIO, Phylo
 from flask_rq2 import RQ
+import rq_dashboard
+from ete3 import Tree
 #
 # local imports
 #
-from .version import version as __version__ # noqa
+from lorax.config import configure_app
 #
 # Non-configurable global constants.
 #
-AUTHOR = 'Joel Berendzen'
-EMAIL = 'joelb@ncgr.org'
-COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.  All rights reserved.
-"""
-PROJECT_HOME = 'https://github.com/ncgr/lorax'
 # File-name-related variables.
 SEQUENCE_EXTENSIONS = OrderedDict([
     ('DNA','.fna'),
@@ -50,6 +45,7 @@ ALIGNMENT_NAME = 'alignment'
 RUN_LOG_NAME = 'run_log.txt'
 STATUS_NAME = 'status.txt'
 STOCKHOLM_NAME = 'alignment.stockholm'
+RAW_TREE_NAME = 'tree_raw.nwk'
 TREE_NAME = 'tree.nwk'
 SEQUENCE_DATA_NAME = 'sequence_data.json'
 HMM_FILENAME = 'family.hmm'
@@ -76,61 +72,19 @@ TEXT_MIMETYPE = 'text/plain'
 HMM_SWITCHES = {'peptide': 'amino',
                 'DNA': 'dna'}
 #
-# Create an app object.
+# Create an app object and configure it.
 #
 app = Flask(__name__, instance_relative_config=True)
+configure_app(app)
 #
-# Get configuration variables from object.
-#
-config_dict = {
-    'base': 'lorax.config.BaseConfig',
-    'development': 'lorax.config.DevelopmentConfig',
-    'test': 'lorax.config.TestConfig',
-    'production': 'lorax.config.ProductionConfig'
-}
-config_name = os.getenv('LORAX_CONFIGURATION', 'base')
-if config_name not in config_dict:
-    print('ERROR -- configuration "%s" not known.' %config_name)
-    sys.exit(1)
-app.config.from_object(config_dict[config_name])
-#
-# Get instance-specific configuration, if it exists.
-#
-pyfile_name = os.getenv('LORAX_SETTINGS', app.config['SETTINGS'])
-app.config.from_pyfile(pyfile_name, silent=True)
-#
-# Do overrides from environmental variables.
-#
-for lorax_envvar, envvar in [(i, i[6:])
-                             for i in sorted(os.environ)
-                             if i.startswith('LORAX_')]:
-    value = os.environ[lorax_envvar]
-    if value == 'True':
-        value = True
-    elif value == 'False':
-        value = False
-    else:
-        try:
-            value = int(value)
-        except ValueError:
-            pass
-    app.config[envvar] = value
-#
-# Set version in config.
-#
-app.config['VERSION'] = __version__
-#
-# Print configuration dictionary if in debug mode.
-#
-if app.config['DEBUG']:
-    for key in sorted(app.config):
-        print('%s =  %s' %(key, app.config[key]))
-#
-# Create a global RQ object.
+# Create a global RQ object, with dashboard at /rq.
 #
 rq = RQ(app)
+if not app.config['RQ_ASYNC']:
+    app.config.from_object(rq_dashboard.default_settings)
+    app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 #
-# Function defs start here.
+# Helper function defs start here.
 #
 def get_file(subpath, type='data', mode='U'):
     '''Get a file, returning exceptions if they exist.
@@ -272,11 +226,13 @@ def run_subprocess_with_status(out_path,
                      *post_args)
     return status.returncode
 
+
 def datetime_to_isoformat(time):
     if time is None:
         return 'None'
     else:
         return datetime.isoformat(time)
+
 
 def job_data_as_response(job, q):
     '''Return a JSON dictionary of job parameters.
@@ -344,8 +300,8 @@ def convert_stockholm_to_FASTA(out_path,
                                fasta):
     '''Convert a Stockholm-format alignment file to FASTA.
 
-    :param out_path: Path to which stdout gets sent.
-    :param err_path: Path to which stderr gets sent.
+    :param out_path: Path to which stdout was sent.
+    :param err_path: Path to which stderr was sent.
     :param status: Status object from subprocess.
     :param fasta: Path to FASTA file to be created.
     :param status_path: Path to s.
@@ -354,6 +310,39 @@ def convert_stockholm_to_FASTA(out_path,
     if status.returncode == 0:
         alignment = AlignIO.read(out_path.open(mode='rU'), 'stockholm')
         AlignIO.write(alignment, fasta.open(mode='w'), 'fasta')
+
+
+
+def cleanup_tree(raw_path,
+                 err_path,
+                 cwd,
+                 status,
+                 clean_path,
+                 make_rooted,
+                 root_name):
+    '''Ladderize output tree.
+
+    :param raw_path: Path to which raw tree was sent.
+    :param err_path: Path to which stderr was sent.
+    :param status: Status object from subprocess.
+    :param fasta: Path to cleaned-up tree will be sent.
+    :param status_path: Path to s.
+    :return: Return code of subprocess.
+    '''
+    if status.returncode == 0:
+        # commented stuff is Phylo, new stuff is ete3
+        #tree = Phylo.read(raw_path.open(mode='rU'), 'newick')
+        tree = Tree(str(raw_path))
+
+        if make_rooted:
+            root = tree.get_midpoint_outgroup()
+            root.name = root_name
+            tree.set_outgroup(root)
+            #tree.root_at_midpoint()
+        tree.ladderize()
+        #Phylo.write(tree, clean_path.open(mode='w'), 'newick')
+        tree.write(format=1, outfile=str(clean_path), format_root_node=True)
+
 
 def set_job_description(tasktype, taskname, job, family, superfamily):
     '''Set the job description.
@@ -451,6 +440,7 @@ def queue_calculation(familyname,
     if tree_builder is not None: # will build a tree.
         tree_dir = alignment_dir / tree_builder
         treebuilder_status_path = tree_dir / STATUS_NAME
+        raw_tree_path = tree_dir / RAW_TREE_NAME
         tree_path = tree_dir / TREE_NAME
         tree_log_path = tree_dir / RUN_LOG_NAME
         if not tree_dir.exists():
@@ -510,13 +500,13 @@ def queue_calculation(familyname,
                                         )
         set_job_description('alignment', aligner, align_job, familyname, super)
         tree_job = tree_queue.enqueue(run_subprocess_with_status,
-                                      args=(tree_path,
+                                      args=(raw_tree_path,
                                             tree_log_path,
                                             tree_command,
                                             tree_dir,
                                             treebuilder_status_path,
-                                            None,
-                                            None),
+                                            cleanup_tree,
+                                            (tree_path, True, familyname)),
                                       depends_on=align_job
                                       )
         set_job_description('tree', tree_builder, tree_job, familyname, super)
@@ -536,41 +526,19 @@ def queue_calculation(familyname,
         return job_data_as_response(align_job, align_queue)
     elif tree_builder is not None:
         tree_job = tree_queue.enqueue(run_subprocess_with_status,
-                                      args=(tree_path,
+                                      args=(raw_tree_path,
                                             tree_log_path,
                                             tree_command,
                                             tree_dir,
                                             treebuilder_status_path,
-                                            None,
-                                            None)
+                                            cleanup_tree,
+                                            (tree_path, True, familyname))
                                       )
         set_job_description('tree', tree_builder, tree_job, familyname, super)
         return job_data_as_response(tree_job, tree_queue)
     else:
         abort(404)
-#
-# CLI entry point.
-#
-@click.command(epilog='AUTHOR' + ' <'+EMAIL+'>. ' + COPYRIGHT + PROJECT_HOME)
-@click.version_option(version=__version__, prog_name=__name__)
-def cli():
-    global app
-    from .logging import init_logging_to_stderr_and_file
-    #
-    # Configure logging, the Flask app, and RQ.
-    #
-    debug = app.config['DEBUG']
-    host = app.config['HOST']
-    port = app.config['PORT']
-    version = app.config['VERSION']
-    print('lorax version %s is listening on http://%s:%d/' %(version,
-                                                           host,
-                                                           port))
-    init_logging_to_stderr_and_file(app)
-    app.run(debug=debug,
-            host=host,
-            port=port)
-    rq.init_app(app)
+
 #
 # Target definitions begin here.
 #
@@ -597,6 +565,7 @@ def create_alignment(family):
 def create_sequences(family):
     return create_fasta(family, SEQUENCES_NAME)
 
+
 @app.route('/trees/<family>.<super>', methods=['DELETE'])
 def delete_superfamily(family, super):
     if super in ALL_FILENAMES:
@@ -607,7 +576,6 @@ def delete_superfamily(family, super):
 
     shutil.rmtree(str(path))
     return 'Deleted "%s.%s".' %(family,super)
-
 
 
 @app.route('/trees/<family>.<super>/sequences', methods=['POST'])
@@ -743,5 +711,3 @@ def get_status(familyname, method):
 def get_status_super(family, method, sup):
     return get_status(family+'/'+sup, method)
 
-if __name__ == '__main__':
-    cli()

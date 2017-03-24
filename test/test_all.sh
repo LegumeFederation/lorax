@@ -191,6 +191,8 @@ test_DELETE /trees/aspartic_paptidases.FastTree 403  # forbidden to remove subdi
 
 test_DELETE /trees/aspartic_peptidases.myseqs
 
-rm -r data/*  # remove files
+if [[ $_V -eq 0 ]]; then
+ rm -r data/*  # remove files
+fi
 echo "lorax tests completed successfully."
 exit 0

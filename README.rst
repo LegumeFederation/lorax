@@ -45,6 +45,9 @@ URL                                 Interpretation
 ``/log.txt``                        A ``GET`` of this URL returns the log file of the current
                                     run.
 
+``/rq``                             A dashboard of the queues used by RQ, if asynchronous
+                                    queueing is in use.
+
 ``/trees/families.json``            A ``GET`` of this URL returns a JSON list of defined
                                     families.
 

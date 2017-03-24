@@ -1,3 +1,12 @@
+Changed the tree output to be rooted, entailing a change in the exact Newick format used.
+Root node names are family names.  Trees are now ladderized.  ete3 is now a dependency.
+
+Added the /rq dashboard target. rq_dashboard is now a dependency.
+
+Added commands.
+
+Changed startup methods considerably.  See the startup scripts for details.
+
 v0.7
 
 Names of executables are now configuration parameters.  This allows for overriding of executable
