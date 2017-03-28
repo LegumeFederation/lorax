@@ -93,7 +93,7 @@ tmpfile=$(mktemp /tmp/post_FASTA.XXX)
 status=$(curl -s -o ${tmpfile} -w '%{http_code}' -F "${type}=@${2}" ${LORAX_HOST}:${LORAX_PORT}${full_target})
 if [ "${status}" -eq "${code}" ]; then
    echo "POST of ${2} to ${full_target} returned HTTP code ${status} as expected."
-   if [[ $_V -eq 1 ]]; then
+   if [ "$_V" -eq 1 ]; then
       echo "Response is:"
       cat ${tmpfile}
       echo ""

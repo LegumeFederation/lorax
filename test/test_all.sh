@@ -56,7 +56,7 @@ test_GET () {
    status=$(curl -s -o ${tmpfile} -w '%{http_code}' ${LORAX_HOST}:${LORAX_PORT}${1})
    if [ "${status}" -eq "${code}" ]; then
       echo "GET ${1} returned HTTP code ${status} as expected."
-      if [[ $_V -eq 1 ]]; then
+      if [ "$_V" -eq 1 ]; then
 	 echo "Response is:"
          cat ${tmpfile}
          echo ""
@@ -88,7 +88,7 @@ test_DELETE () {
    status=$(curl -s -o ${tmpfile} -w '%{http_code}' -X 'DELETE' ${LORAX_HOST}:${LORAX_PORT}${1})
    if [ "${status}" -eq "${code}" ]; then
       echo "DELETE ${1} returned HTTP code ${status} as expected."
-      if [[ $_V -eq 1 ]]; then
+      if [ "$_V" -eq 1 ]; then
 	 echo "Response is:"
          cat ${tmpfile}
          echo ""
@@ -201,7 +201,7 @@ test_DELETE /trees/aspartic_paptidases.FastTree 403  # forbidden to remove subdi
 
 test_DELETE /trees/aspartic_peptidases.myseqs
 
-if [[ $_V -eq 0 ]]; then
+if [ "$_V" -eq 0 ]; then
  rm -r data/*  # remove data if not verbose
 fi
 echo "lorax tests completed successfully."

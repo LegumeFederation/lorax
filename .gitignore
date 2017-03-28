@@ -65,6 +65,7 @@ build/
 ###########################
 test/data
 test/logs
+instance/config.cfg
 
 # docutils #
 ############

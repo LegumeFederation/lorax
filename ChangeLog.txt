@@ -1,3 +1,11 @@
+Logging format is now configurable
+
+Added commands for easier setup:
+   * copy_test_files
+   * get_config
+   * set_config
+   * test_logging
+
 Added PhyD3 files to static and template folders.
 
 Added GET method for /alignment target to return MSA's.

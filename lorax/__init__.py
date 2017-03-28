@@ -120,10 +120,10 @@ def create_fasta(familyname, data_name, super=None):
         path = Path(app.config['PATHS']['data']) / familyname / super
     # post data
     if path.exists() and not path.is_dir():
-        app.mylogger.warning('Removing existing file in directory path name')
+        app.logger.warning('Removing existing file in directory path name')
         path.unlink()
     if not path.is_dir():
-        app.mylogger.debug("Creating directory %s", path)
+        app.logger.debug("Creating directory %s", path)
         path.mkdir()
     for sequence_type in SEQUENCE_EXTENSIONS.keys():
         if sequence_type in request.files:
@@ -131,17 +131,17 @@ def create_fasta(familyname, data_name, super=None):
             infileext = SEQUENCE_EXTENSIONS[sequence_type]
             break
     else:
-        app.mylogger.error('unrecognized request for FASTA')
+        app.logger.error('unrecognized request for FASTA')
         abort(400)
     try:  # parse FASTA file
         fasta_str_fh = io.StringIO(fasta.read().decode('UTF-8'))
         parsed_fasta = SeqIO.parse(fasta_str_fh, 'fasta')
         record_dict = SeqIO.to_dict(parsed_fasta)
     except:
-        app.mylogger.error('Unparseable FASTA requested for family "%s".', familyname)
+        app.logger.error('Unparseable FASTA requested for family "%s".', familyname)
         abort(406)
     if len(record_dict) < 1:  # empty FASTA
-        app.mylogger.error('Empty FASTA for family "%s".', familyname)
+        app.logger.error('Empty FASTA for family "%s".', familyname)
         abort(406)
     lengths = [len(rec.seq) for rec in record_dict.values()]
     infilename = data_name + infileext
@@ -167,9 +167,9 @@ def create_fasta(familyname, data_name, super=None):
                       'min_length': min(lengths),
                       'total_length': sum(lengths),
                       'overwrite': False}
-    app.mylogger.debug('Saving FASTA file for family "%s".', familyname)
+    app.logger.debug('Saving FASTA file for family "%s".', familyname)
     if (path / infilename).exists():
-        app.mylogger.warning('Overwriting existing FASTA file for family %s', familyname)
+        app.logger.warning('Overwriting existing FASTA file for family %s', familyname)
         fasta_dict['overwrite'] = True
     with open(str(path / infilename), 'w') as fasta_outfh:
         for seq in record_dict.values():
@@ -389,12 +389,12 @@ def queue_calculation(familyname,
         if calculation_components[0] in list(app.config['ALIGNERS'].keys()):
             aligner = calculation_components[0]
         else:
-            app.mylogger.error('Unrecognized aligner %s.', calculation_components[0])
+            app.logger.error('Unrecognized aligner %s.', calculation_components[0])
             abort(404)
         if calculation_components[1] in list(app.config['TREEBUILDERS'].keys()):
             tree_builder = calculation_components[1]
         else:
-            app.mylogger.error('Unrecognized tree builder %s.', calculation_components[1])
+            app.logger.error('Unrecognized tree builder %s.', calculation_components[1])
             abort(404)
     elif calculation in list(app.config['ALIGNERS'].keys()):
         aligner = calculation
@@ -410,7 +410,7 @@ def queue_calculation(familyname,
         hmm_path = Path(HMM_FILENAME)
     else:
         if super in ALL_FILENAMES:
-            app.mylogger.error('Super name is a reserved name, "%s".', super)
+            app.logger.error('Super name is a reserved name, "%s".', super)
             abort(403)
         alignment_dir = Path(app.config['PATHS']['data']) / familyname / super
         hmm_path = Path('..') / HMM_FILENAME
@@ -418,7 +418,7 @@ def queue_calculation(familyname,
     # Check for prerequisites and determine sequence types.
     #
     if not alignment_dir.is_dir():
-        app.mylogger.error('Directory was not previously created for %s.', alignment_dir)
+        app.logger.error('Directory was not previously created for %s.', alignment_dir)
         abort(428)
     if aligner is not None: # will do an alignment.
         stockholm_path = alignment_dir / STOCKHOLM_NAME
@@ -435,7 +435,7 @@ def queue_calculation(familyname,
                 seq_type = key
                 break
         else:
-            app.mylogger.error('Unable to find sequences to align.')
+            app.logger.error('Unable to find sequences to align.')
             abort(404)
     if tree_builder is not None: # will build a tree.
         tree_dir = alignment_dir / tree_builder
@@ -453,7 +453,7 @@ def queue_calculation(familyname,
                     seq_type = key
                     break
             else:
-                app.mylogger.error('Unable to find aligned sequences.')
+                app.logger.error('Unable to find aligned sequences.')
                 abort(404)
     #
     # Marshal command-line arguments.
@@ -478,10 +478,10 @@ def queue_calculation(familyname,
     # Log command line and initialize status files.
     #
     if aligner is not None:
-        app.mylogger.debug('Alignment command line is %s.', aligner_command)
+        app.logger.debug('Alignment command line is %s.', aligner_command)
         write_status(alignment_status_path, -1)
     if tree_builder is not None:
-        app.mylogger.debug('Tree builder command line is %s.', tree_command)
+        app.logger.debug('Tree builder command line is %s.', tree_command)
         write_status(treebuilder_status_path, -1)
     #
     # Queue processes.
@@ -616,7 +616,7 @@ def create_HMM(family):
         hmm_path = Path(app.config['PATHS']['data'])/family/HMM_FILENAME
         hmm_fh = hmm_path.open('wb')
     except: # e.g., if family has not been created
-        app.mylogger.error('Unable to create "%s".', str(hmm_path))
+        app.logger.error('Unable to create "%s".', str(hmm_path))
         abort(400)
     hmm_fh.write(request.data)
     hmm_fh.close()
@@ -625,7 +625,7 @@ def create_HMM(family):
                                                   universal_newlines=True,
                                                   cwd=str(hmm_path.parent))
     except subprocess.CalledProcessError:
-        app.mylogger.error('Not a valid HMM file for family %s, removing.', family)
+        app.logger.error('Not a valid HMM file for family %s, removing.', family)
         hmm_path.unlink()
         abort(406)
     hmmstats_dict = {}

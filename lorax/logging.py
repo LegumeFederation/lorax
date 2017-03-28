@@ -25,12 +25,34 @@ from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from pathlib import Path # python 3.4
 #
-# Local imports
+# Third-party imports.
 #
-from .version import version as __version__ # noqa
+from flask import request
+#
+# Global variables.
+#
+DEFAULT_FILE_LOGLEVEL = logging.INFO
+DEFAULT_STDERR_LOGLEVEL = logging.WARNING
 
-DEFAULT_FILE_LOGLEVEL = logging.DEBUG
-DEFAULT_STDERR_LOGLEVEL = logging.INFO
+
+class ContextualFilter(logging.Filter):
+    '''A logging filter with request-based info.'''
+    def filter(self, log_record):
+        log_record.utcnow = (datetime.utcnow()
+                         .strftime('%Y-%m-%d %H:%M:%S%Z'))
+        try:
+            log_record.url = request.path
+            log_record.method = request.method
+            #  Try to get the IP address of the user through reverse proxy
+            log_record.ip = request.environ.get('HTTP_X_REAL_IP',
+                                        request.remote_addr)
+        except RuntimeError:
+            log_record.url = ''
+            log_record.method = ''
+            log_record.ip = 'command'
+
+        return True
+
 
 def configure_logging(app):
     ''' Configure logging to stderr and a log file.
@@ -38,7 +60,7 @@ def configure_logging(app):
     :param app: 
     :return: 
     '''
-    app.mylogger = logging.getLogger('werkzeug')  # this is the logger we want
+    #app.logger = logging.getLogger('werkzeug')  # this is the logger we want
     if app.config['DEBUG']:
         stderr_log_level = logging.DEBUG
     else:
@@ -47,7 +69,12 @@ def configure_logging(app):
         file_log_level = logging.ERROR
     else:
         file_log_level = DEFAULT_FILE_LOGLEVEL
-    app.mylogger.setLevel(min(file_log_level, stderr_log_level))
+    app.logger.addFilter(ContextualFilter())
+    app.logger.setLevel(logging.DEBUG)
+    for handler in app.logger.handlers: # set levels on existing handlers
+        handler.setLevel(stderr_log_level)
+        handler.setFormatter(logging.Formatter(app.config['STDERR_LOG_FORMAT']))
+
     #
     # Start log file.
     #
@@ -62,30 +89,30 @@ def configure_logging(app):
             try:
                 logfile_path.parent.mkdir(mode=app.config['PATHS']['mode'], parents=True)
             except OSError:
-                app.mylogger.error('Unable to create logfile directory "%s"',
+                app.logger.error('Unable to create logfile directory "%s"',
                              logfile_path.parent)
                 raise OSError
         log_handler = RotatingFileHandler(str(logfile_path),
                                       maxBytes=app.config['LOGFILE_MAXBYTES'],
                                       backupCount=app.config['LOGFILE_BACKUPCOUNT'])
-        app.mylogger.addHandler(log_handler)
+        log_handler.setFormatter(logging.Formatter(app.config['FILE_LOG_FORMAT']))
+        app.logger.addHandler(log_handler)
     #
     # Do some logging on startup.
     #
-    app.mylogger.debug('Command line: "%s"', ' '.join(sys.argv))
-    app.mylogger.debug('%s version %s',
+    app.logger.debug('Command line: "%s"', ' '.join(sys.argv))
+    app.logger.debug('%s version %s',
                      app.config['LOGGER_NAME'],
                      app.config['VERSION'])
-    app.mylogger.debug('Run started at %s', datetime.now().strftime('%Y%m%d-%H%M%S'))
+    app.logger.debug('Run started at %s', datetime.now().strftime('%Y%m%d-%H%M%S'))
     if app.config['DEBUG']:
         for key in sorted(app.config):
             if 'LORAX_'+key in os.environ:
                 from_environ = ' <- from environment'
             else:
                 from_environ = ''
-            app.mylogger.debug('%s =  %s %s',
+            app.logger.debug('%s =  %s %s',
                                key,
                                app.config[key],
                                from_environ)
-
 

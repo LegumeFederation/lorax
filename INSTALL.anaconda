@@ -1,0 +1,21 @@
+Lorax was tested under Anaconda Python 3.5.  The following packages
+were installed with conda before doing the final pip install:
+
+package name     channel
+--------------   -------
+biopython        anaconda
+click            anaconda
+croniter         conda-forge
+flask            anaconda
+itsdangerous     anaconda
+jinja2           anaconda
+markupsafe       anaconda
+python-dateutil  anaconda
+redis            anaconda
+redis-py         anaconda
+rq               conda-forge
+six              anaconda
+werkzeug         anaconda
+
+After installing these packages then, "pip install lorax" should get the
+remaining packages directly from pypi.

@@ -1,0 +1,2 @@
+The ebuilds in the ebuilds/ directory are used for installation of lorax
+under Gentoo.  They are intended to go in a local overlay under dev-python/.

@@ -6,7 +6,8 @@ lorax is designed as a stand-alone cli rather than through Flask.
 # Standard library imports.
 #
 import sys
-import socket
+import pkg_resources
+import pkgutil
 from datetime import datetime
 from pydoc import locate
 from distutils.util import strtobool
@@ -20,6 +21,7 @@ from flask.cli import FlaskGroup
 # Local imports.
 #
 from .version import version
+from .logging import configure_logging
 #
 # Global variables.
 #
@@ -48,7 +50,7 @@ def create_data_dir(app):
         try:
             data_dir.mkdir(mode=app.config['PATHS']['mode'], parents=True)
         except OSError:
-            app.mylogger.error('Unable to create data directory "%s"',
+            app.logger.error('Unable to create data directory "%s"',
                              data_dir)
             raise OSError
 
@@ -64,8 +66,6 @@ def run():
     debug = current_app.config['DEBUG']
     configure_logging(current_app)
     create_data_dir(current_app)
-    print('Running lorax on http://%s:%d/.  ^C to stop.' %(host, port),
-          file=sys.stderr)
     current_app.run(host=host,
                     port=port,
                     debug=debug)
@@ -97,28 +97,77 @@ def set_config(var, value, type):
     value_type = locate(type)
     if value_type == bool:
         value = bool(strtobool(value))
-        print(value)
     else:
         value = value_type(value)
+    configure_logging(current_app)
     config_file_path = Path(current_app.instance_path)/current_app.config['SETTINGS']
-    current_app.mylogger.info('Instance configuration file at "%s".', str(config_file_path))
+    if not config_file_path.exists():
+        if not config_file_path.parent.exists():
+            config_file_path.parent.mkdir(mode=current_app.config['PATHS']['mode'],
+                                          parents=True)
+        with config_file_path.open(mode='w') as config_fh:
+            current_app.logger.warning('Creating instance config file at "%s".',
+                                      str(config_file_path))
+            print("""# -*- coding: utf-8 -*-
+'''Overrides of default lorax configurations.
+
+This file will be placed in an instance-specific folder and sourced
+after lorax.config but before environmental variables.  You may edit
+this file, but lorax set_config will append and possible supercede
+hand-edited values.
+
+Note that configuration variables are all-caps.  Types are from python
+typing rules.
+'''""", file=config_fh)
+
     with config_file_path.open( mode='a') as config_fh:
-        isodate = datetime.now().isoformat()
-        hostname = socket.gethostbyaddr(socket.gethostname())[0]
+        isodate = datetime.now().isoformat()[:-7]
         if isinstance(value, str):
             quote = '"'
         else:
             quote = ''
-        print('Setting %s to %s%s%s in config file "%s".' %(var,
-                                                            quote,
-                                                            value,
-                                                            quote,
-                                                            str(config_file_path)),
-              file=sys.stderr)
-        print('%s = %s%s%s # set on %s at %s' %(var,
+        current_app.logger.warning('Setting %s to %s%s%s in config file "%s".',
+                                     var,
+                                     quote,
+                                     value,
+                                     quote,
+                                     str(config_file_path))
+        print('%s = %s%s%s # set at %s' %(var,
                                             quote,
                                             value,
                                             quote,
-                                            hostname,
                                             isodate),
               file=config_fh)
+
+
+@cli.command()
+def test_logging():
+    '''Test logging at the different levels.
+    '''
+    configure_logging(current_app)
+    current_app.logger.debug('Debug message.')
+    current_app.logger.info('Info message.')
+    current_app.logger.warning('Warning message.')
+    current_app.logger.error('Error message.')
+
+
+@cli.command()
+@click.option('--force/--no-force', help='Force overwrites of existing files',
+              default=False)
+def copy_test_files(force):
+    '''Copy files from the test/ distribution directory to the current working directory.
+    
+    :return: 
+    '''
+    configure_logging(current_app)
+    test_files = pkg_resources.resource_listdir(__name__, '../test')
+    for filename in test_files:
+        path_string = '../test/' + filename
+        if not pkg_resources.resource_isdir(__name__, path_string):
+            current_app.logger.info('Creating file %s":', filename)
+            data = pkgutil.get_data(__name__, '../test/'+filename)
+            file_path = Path(filename)
+            if file_path.exists() and not force:
+                current_app.logger.error('File %s already exists.  Use --force to overwrite.', filename)
+            with file_path.open(mode='wb') as fh:
+                fh.write(data)
