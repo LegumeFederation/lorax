@@ -15,8 +15,8 @@ export LORAX_PYTHON="python" # may need to be python3, this i
 #
 #export LORAX_CONFIGURATION="default"
 #export LORAX_CONFIGURATION="development"
-#export LORAX_CONFIGURATION="testing"
-export LORAX_CONFIGURATION="production" # similar to default, but using gunicorn
+export LORAX_CONFIGURATION="testing"
+#export LORAX_CONFIGURATION="production" # similar to default, but using gunicorn
 #
 # These values are being derived from configuration files,
 # but they may also be set directly.  Note that they can't be
@@ -24,5 +24,7 @@ export LORAX_CONFIGURATION="production" # similar to default, but using gunicorn
 # other than the same directory as the lorax instance.  Note
 # also that running via gunicorn can overlay these values.
 #
-export LORAX_HOST=`lorax get_config_value HOST`
-export LORAX_PORT=`lorax get_config_value PORT`
+export LORAX_HOST=`lorax get_config HOST 2>/dev/null`
+export LORAX_PORT=`lorax get_config PORT 2>/dev/null`
+#
+env | grep "LORAX"

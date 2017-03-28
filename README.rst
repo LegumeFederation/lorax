@@ -97,7 +97,9 @@ URL                                 Interpretation
 ``/trees/<fam>/<meth>/status``      Returns -1 if tree calculation is ongoing, and the exit
                                     code of the tree-builder <meth> if calculation is complete.
 
-``/trees/<fam>/<meth>/tree.nwk``    Returns already-calculated tree without recalculating.
+``/trees/<fam>/<meth>/tree.nwk``    Returns already-calculated tree in Newick format.
+
+``/trees/<fam>/<meth>/tree.xml``    Returns already-calculated tree in phyloXML format.
 
 ``/trees/<fam>/<meth>/run_log.txt`` Returns the log file, including timings, of the tree
                                     calculation.
@@ -112,7 +114,11 @@ URL                                 Interpretation
 
 ``/trees/<f>.<s>/<meth>/status``    Returns status of a superfamily tree calculation.
 
-``/trees/<f>.<s>/<meth>/tree.nwk``  Returns tree of a superfamily.
+``/trees/<f>.<s>/<meth>/tree.nwk``  Returns tree of a superfamily in Newick format.
+
+
+``/trees/<f>.<s>/<meth>/tree.xml``  Returns tree of a superfamily in phyloXML format.
+
 
 ``/trees/<f>.<s>/<m>/run_log.txt``  Returns the log file of a superfamily tree calculation.
 

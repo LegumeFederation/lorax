@@ -1,3 +1,16 @@
+Added PhyD3 files to static and template folders.
+
+Added GET method for /alignment target to return MSA's.
+
+Created requirements.in and requirements.txt dependencies list via pip-sync.
+
+Removed ete3 in favor of biopython due to ete3 dependency problems with BSD.
+Less control over Newick formatting, though...trees may not appear to be rooted
+in some downstream programs.
+
+
+v0.8
+
 Changed the tree output to be rooted, entailing a change in the exact Newick format used.
 Root node names are family names.  Trees are now ladderized.  ete3 is now a dependency.
 

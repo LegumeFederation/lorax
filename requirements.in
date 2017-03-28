@@ -1,0 +1,4 @@
+# requirements.in
+Flask_RQ2
+biopython
+rq_dashboard

@@ -48,8 +48,7 @@ setup(
     zip_safe=False,
     install_requires=['Flask-RQ2',
                       'biopython',
-                      'rq_dashboard',
-                      'ete3'
+                      'rq_dashboard'
                       ],
     entry_points={
                  'console_scripts':['lorax = lorax.cli:cli']

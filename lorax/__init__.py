@@ -27,7 +27,6 @@ from flask import Flask, Response, request, abort
 from Bio import SeqIO, AlignIO, Phylo
 from flask_rq2 import RQ
 import rq_dashboard
-from ete3 import Tree
 #
 # local imports
 #
@@ -47,6 +46,7 @@ STATUS_NAME = 'status.txt'
 STOCKHOLM_NAME = 'alignment.stockholm'
 RAW_TREE_NAME = 'tree_raw.nwk'
 TREE_NAME = 'tree.nwk'
+PHYLOXML_NAME = 'tree.xml'
 SEQUENCE_DATA_NAME = 'sequence_data.json'
 HMM_FILENAME = 'family.hmm'
 HMMSTATS_NAME = 'hmmstats.json'
@@ -62,11 +62,12 @@ ALL_FILENAMES = ['', # don't allow null name
                  RUN_LOG_NAME,
                  STOCKHOLM_NAME,
                  HMMSTATS_NAME,
-                 FAMILIES_NAME] + ['FastTree', 'RAxML']
+                 FAMILIES_NAME,
+                 PHYLOXML_NAME] + ['FastTree', 'RAxML']
 # MIME types.
-NEWICK_MIMETYPE = 'text/plain'
+NEWICK_MIMETYPE = 'application/newick'
 JSON_MIMETYPE = 'application/json'
-FASTA_MIMETYPE = 'text/plain'
+FASTA_MIMETYPE = 'application/fasta'
 TEXT_MIMETYPE = 'text/plain'
 # hmmalign stuff.
 HMM_SWITCHES = {'peptide': 'amino',
@@ -74,7 +75,9 @@ HMM_SWITCHES = {'peptide': 'amino',
 #
 # Create an app object and configure it.
 #
-app = Flask(__name__, instance_relative_config=True)
+app = Flask(__name__,
+            instance_relative_config = True,
+            template_folder = 'templates')
 configure_app(app)
 #
 # Create a global RQ object, with dashboard at /rq.
@@ -120,7 +123,7 @@ def create_fasta(familyname, data_name, super=None):
         app.mylogger.warning('Removing existing file in directory path name')
         path.unlink()
     if not path.is_dir():
-        app.mylogger.info("Creating directory %s", path)
+        app.mylogger.debug("Creating directory %s", path)
         path.mkdir()
     for sequence_type in SEQUENCE_EXTENSIONS.keys():
         if sequence_type in request.files:
@@ -164,7 +167,7 @@ def create_fasta(familyname, data_name, super=None):
                       'min_length': min(lengths),
                       'total_length': sum(lengths),
                       'overwrite': False}
-    app.mylogger.info('Saving FASTA file for family "%s".', familyname)
+    app.mylogger.debug('Saving FASTA file for family "%s".', familyname)
     if (path / infilename).exists():
         app.mylogger.warning('Overwriting existing FASTA file for family %s', familyname)
         fasta_dict['overwrite'] = True
@@ -319,7 +322,8 @@ def cleanup_tree(raw_path,
                  status,
                  clean_path,
                  make_rooted,
-                 root_name):
+                 root_name,
+                 xml_path):
     '''Ladderize output tree.
 
     :param raw_path: Path to which raw tree was sent.
@@ -330,18 +334,14 @@ def cleanup_tree(raw_path,
     :return: Return code of subprocess.
     '''
     if status.returncode == 0:
-        # commented stuff is Phylo, new stuff is ete3
-        #tree = Phylo.read(raw_path.open(mode='rU'), 'newick')
-        tree = Tree(str(raw_path))
-
+        tree = Phylo.read(raw_path.open(mode='rU'), 'newick')
         if make_rooted:
-            root = tree.get_midpoint_outgroup()
-            root.name = root_name
-            tree.set_outgroup(root)
-            #tree.root_at_midpoint()
+            tree.root_at_midpoint()
         tree.ladderize()
-        #Phylo.write(tree, clean_path.open(mode='w'), 'newick')
-        tree.write(format=1, outfile=str(clean_path), format_root_node=True)
+        tree.root.name = root_name
+        Phylo.write(tree, clean_path.open(mode='w'), 'newick')
+        Phylo.write(tree, xml_path.open(mode='w'), 'phyloxml')
+
 
 
 def set_job_description(tasktype, taskname, job, family, superfamily):
@@ -442,6 +442,7 @@ def queue_calculation(familyname,
         treebuilder_status_path = tree_dir / STATUS_NAME
         raw_tree_path = tree_dir / RAW_TREE_NAME
         tree_path = tree_dir / TREE_NAME
+        phyloxml_path = tree_dir / PHYLOXML_NAME
         tree_log_path = tree_dir / RUN_LOG_NAME
         if not tree_dir.exists():
             tree_dir.mkdir()
@@ -506,7 +507,7 @@ def queue_calculation(familyname,
                                             tree_dir,
                                             treebuilder_status_path,
                                             cleanup_tree,
-                                            (tree_path, True, familyname)),
+                                            (tree_path, True, familyname, phyloxml_path)),
                                       depends_on=align_job
                                       )
         set_job_description('tree', tree_builder, tree_job, familyname, super)
@@ -532,7 +533,7 @@ def queue_calculation(familyname,
                                             tree_dir,
                                             treebuilder_status_path,
                                             cleanup_tree,
-                                            (tree_path, True, familyname))
+                                            (tree_path, True, familyname, phyloxml_path))
                                       )
         set_job_description('tree', tree_builder, tree_job, familyname, super)
         return job_data_as_response(tree_job, tree_queue)
@@ -556,9 +557,35 @@ def return_families():
     return Response(json.dumps(directory_list), mimetype=JSON_MIMETYPE)
 
 
-@app.route('/trees/<family>/alignment', methods=['POST'])
-def create_alignment(family):
-    return create_fasta(family, ALIGNMENT_NAME)
+@app.route('/trees/<family>/alignment', methods=['POST', 'GET'])
+def get_or_set_alignment(family):
+    if request.method == 'POST':
+        return create_fasta(family, ALIGNMENT_NAME)
+    elif request.method == 'GET':
+        alignment_path = Path(app.config['PATHS']['data']) / family / ALIGNMENT_NAME
+        for ext in SEQUENCE_EXTENSIONS.keys():
+            test_path = alignment_path.with_suffix(SEQUENCE_EXTENSIONS[ext])
+            if test_path.exists():
+                break
+        else:
+            abort(404)
+        return Response(test_path.open().read(), mimetype=FASTA_MIMETYPE)
+
+
+
+@app.route('/trees/<family>.<super>/alignment', methods=['POST', 'GET'])
+def get_or_set_alignment_super(family, super):
+    if request.method == 'POST':
+        return create_fasta(family, ALIGNMENT_NAME, super=super)
+    elif request.method == 'GET':
+        alignment_path = Path(app.config['PATHS']['data'])/family/super/ALIGNMENT_NAME
+        for ext in SEQUENCE_EXTENSIONS.keys():
+            test_path = alignment_path.with_suffix(SEQUENCE_EXTENSIONS[ext])
+            if test_path.exists():
+                break
+        else:
+            abort(404)
+        return Response(test_path.open().read(), mimetype=FASTA_MIMETYPE)
 
 
 @app.route('/trees/<family>/sequences', methods=['POST'])
@@ -674,6 +701,20 @@ def get_existing_tree(familyname, method):
 def get_existing_tree_super(family, method, sup):
     return get_existing_tree(family+'/'+sup, method)
 
+
+@app.route('/trees/<familyname>/<method>/'+PHYLOXML_NAME)
+def get_phyloxml_tree(familyname, method):
+    if method not in app.config['TREEBUILDERS']:
+        abort(404)
+    inpath = Path(app.config['PATHS']['data'])/familyname/method/PHYLOXML_NAME
+    if not inpath.exists():
+        abort(404)
+    return Response(inpath.open().read(), mimetype=NEWICK_MIMETYPE)
+
+
+@app.route('/trees/<family>.<sup>/<method>/'+PHYLOXML_NAME)
+def get_phyloxml_tree_super(family, method, sup):
+    return get_phyloxml_tree(family+'/'+sup, method)
 
 @app.route('/trees/<familyname>/<method>/'+RUN_LOG_NAME)
 def get_log(familyname, method):
