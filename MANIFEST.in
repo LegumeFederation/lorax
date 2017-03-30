@@ -1,5 +1,6 @@
-include requirements.txt
-recursive-include instance *
-recursive-incude test *
-recursive-include static *
-recursive-include templates *
+include *.txt
+include INSTALL.*
+recursive-include lorax/instance *
+recursive-incude lorax/test *
+recursive-include lorax/static *
+recursive-include lorax/templates *

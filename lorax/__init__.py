@@ -496,8 +496,9 @@ def queue_calculation(familyname,
                                               alignment_dir,
                                               alignment_status_path,
                                               convert_stockholm_to_FASTA,
-                                              (alignment_output_path,)
-                                               )
+                                              (alignment_output_path,),
+                                               ),
+                                        timeout=app.config['ALIGNMENT_QUEUE_TIMEOUT']
                                         )
         set_job_description('alignment', aligner, align_job, familyname, super)
         tree_job = tree_queue.enqueue(run_subprocess_with_status,
@@ -508,6 +509,7 @@ def queue_calculation(familyname,
                                             treebuilder_status_path,
                                             cleanup_tree,
                                             (tree_path, True, familyname, phyloxml_path)),
+                                      timeout=app.config['TREE_QUEUE_TIMEOUT'],
                                       depends_on=align_job
                                       )
         set_job_description('tree', tree_builder, tree_job, familyname, super)
@@ -521,7 +523,8 @@ def queue_calculation(familyname,
                                               alignment_status_path,
                                               convert_stockholm_to_FASTA,
                                               (alignment_output_path,)
-                                               )
+                                               ),
+                                        timeout=app.config['ALIGNMENT_QUEUE_TIMEOUT']
                                         )
         set_job_description('alignment', aligner, align_job, familyname, super)
         return job_data_as_response(align_job, align_queue)
@@ -533,7 +536,8 @@ def queue_calculation(familyname,
                                             tree_dir,
                                             treebuilder_status_path,
                                             cleanup_tree,
-                                            (tree_path, True, familyname, phyloxml_path))
+                                            (tree_path, True, familyname, phyloxml_path)),
+                                      timeout=app.config['TREE_QUEUE_TIMEOUT']
                                       )
         set_job_description('tree', tree_builder, tree_job, familyname, super)
         return job_data_as_response(tree_job, tree_queue)

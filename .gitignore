@@ -1,4 +1,4 @@
-# Compiled source #
+ns# Compiled source #
 ###################
 *.com
 *.class
@@ -63,9 +63,9 @@ build/
 
 # lorax test data and logs#
 ###########################
-test/data
-test/logs
-instance/config.cfg
+lorax/test/data
+lorax/test/logs
+instance/
 
 # docutils #
 ############

@@ -1,3 +1,11 @@
+v0.91
+
+Package data moved to proper level of hierarchy.
+
+ALIGNMENT_QUEUE_TIMEOUT and TREE_QUEUE_TIMEOUT config parameters.  Was defaulting to
+180 seconds.
+
+v0.9
 Logging format is now configurable
 
 Added commands for easier setup:

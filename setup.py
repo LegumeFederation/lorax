@@ -44,6 +44,11 @@ setup(
     author='Joel Berendzen',
     author_email='joelb@ncgr.org',
     packages=[name],
+    package_data = {'lorax': ['test/*',
+                              'templates/*',
+                              'static/js/*',
+                              'static/css/*,'
+                              'static/favicon.ico']},
     include_package_data=True,
     zip_safe=False,
     install_requires=['Flask-RQ2',

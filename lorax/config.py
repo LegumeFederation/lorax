@@ -83,6 +83,8 @@ class BaseConfig(object):
     RQ_REDIS_URL = "redis://localhost:6379/0"
     RQ_SCHEDULER_INTERVAL = 60
     RQ_SCHEDULER_QUEUE = ALIGNMENT_QUEUE
+    ALIGNMENT_QUEUE_TIMEOUT = 1000 # About 15 minutes, in seconds
+    TREE_QUEUE_TIMEOUT = 4 * 60 * 60 # 4 hours, in seconds
     #
     # Definitions for alignment algorithms.
     #
