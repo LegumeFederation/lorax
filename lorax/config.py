@@ -36,11 +36,9 @@ class BaseConfig(object):
     # Usually these paths should be absolute, but for testing these
     # are relative to the PWD of the lorax process.
     #
-    PATHS = {
-        'log': 'logs/',
-        'data': 'data/',
-        'mode': 0o755
-    }
+    DATA_PATH = 'data/'
+    LOG_PATH = 'logs/'
+    DIR_MODE = 0o755
     #
     # The DEBUG parameter has multiple implications:
     #           * access to python debugging via flask
@@ -158,7 +156,7 @@ def configure_app(app):
     #
     config_name = os.getenv('LORAX_CONFIGURATION', 'default')
     if config_name not in config_dict:
-        print('ERROR -- configuration "%s" not known.' % config_name,
+        print('ERROR -- configuration variable "%s" not known.' % config_name,
               file=sys.stderr)
         sys.exit(1)
     app.config.from_object(config_dict[config_name])

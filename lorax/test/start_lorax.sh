@@ -40,7 +40,7 @@ test_workers () {
       echo "${n_workers} workers for ${1} queue, OK."
    fi
 }
-async=`lorax get_config RQ_ASYNC`
+async=`lorax config_value RQ_ASYNC`
 if [[ $async -eq "True" ]]; then
    test_workers alignment 
    test_workers treebuilding

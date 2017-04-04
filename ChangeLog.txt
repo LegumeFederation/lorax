@@ -1,3 +1,15 @@
+v0.92
+
+get_config and set_config commands are now condensed to config_value
+which does set if VALUE is defined, set get if now.  If VAR is not
+defined, config_value lists all variables along with whether they were
+set from environmental variables or not.
+
+Broke up PATH from a dictionary to be three simple key:value objects:
+   * DATA_PATH
+   * LOG_PATH
+   * DIR_MODE
+
 v0.91
 
 Package data moved to proper level of hierarchy.

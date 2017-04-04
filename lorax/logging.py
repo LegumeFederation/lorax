@@ -81,13 +81,13 @@ def configure_logging(app):
     if app.config['LOGFILE']: # start a log file
         logfile_name = app.config['LOGGER_NAME'] + '.log'
         app.config['LOGFILE_NAME'] = logfile_name
-        logfile_path = Path(app.config['PATHS']['log'])/logfile_name
+        logfile_path = Path(app.config['LOG_PATH'])/logfile_name
         if app.config['DEBUG']:
             print('Logging to file "%s".' %str(logfile_path),
                   file=sys.stderr)
         if not logfile_path.parent.is_dir(): # create logs/ dir
             try:
-                logfile_path.parent.mkdir(mode=app.config['PATHS']['mode'], parents=True)
+                logfile_path.parent.mkdir(mode=app.config['DIR_MODE'], parents=True)
             except OSError:
                 app.logger.error('Unable to create logfile directory "%s"',
                              logfile_path.parent)
@@ -105,14 +105,5 @@ def configure_logging(app):
                      app.config['LOGGER_NAME'],
                      app.config['VERSION'])
     app.logger.debug('Run started at %s', datetime.now().strftime('%Y%m%d-%H%M%S'))
-    if app.config['DEBUG']:
-        for key in sorted(app.config):
-            if 'LORAX_'+key in os.environ:
-                from_environ = ' <- from environment'
-            else:
-                from_environ = ''
-            app.logger.debug('%s =  %s %s',
-                               key,
-                               app.config[key],
-                               from_environ)
+
 

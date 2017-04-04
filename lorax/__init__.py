@@ -97,7 +97,10 @@ def get_file(subpath, type='data', mode='U'):
     :param mode: 'U' for string, 'b' for binary.
     :return:
     '''
-    file_path = Path(app.config['PATHS'][type])/subpath
+    if type == 'data':
+        file_path = Path(app.config['DATA_PATH'])/subpath
+    elif type == 'log':
+        file_path = Path(app.config['LOG_PATH']) / subpath
     try:
         return file_path.open(mode='r'+mode).read()
     except IOError as exc:
@@ -113,11 +116,11 @@ def create_fasta(familyname, data_name, super=None):
     :return:
     '''
     if not super:
-        path = Path(app.config['PATHS']['data']) / familyname
+        path = Path(app.config['DATA_PATH']) / familyname
     else:
         if super in ALL_FILENAMES:
             abort(403)
-        path = Path(app.config['PATHS']['data']) / familyname / super
+        path = Path(app.config['DATA_PATH']) / familyname / super
     # post data
     if path.exists() and not path.is_dir():
         app.logger.warning('Removing existing file in directory path name')
@@ -146,7 +149,7 @@ def create_fasta(familyname, data_name, super=None):
     lengths = [len(rec.seq) for rec in record_dict.values()]
     infilename = data_name + infileext
     if super: # Do super processing
-        sub_path = Path(app.config['PATHS']['data']) / familyname / infilename
+        sub_path = Path(app.config['DATA_PATH']) / familyname / infilename
         sub_parsed_fasta = SeqIO.parse(str(sub_path), 'fasta')
         sub_record_dict = SeqIO.to_dict(sub_parsed_fasta)
         for rec in record_dict.values():
@@ -406,13 +409,13 @@ def queue_calculation(familyname,
     # Get paths to things we might need for either calculation.
     #
     if not super:
-        alignment_dir = Path(app.config['PATHS']['data']) / familyname
+        alignment_dir = Path(app.config['DATA_PATH']) / familyname
         hmm_path = Path(HMM_FILENAME)
     else:
         if super in ALL_FILENAMES:
             app.logger.error('Super name is a reserved name, "%s".', super)
             abort(403)
-        alignment_dir = Path(app.config['PATHS']['data']) / familyname / super
+        alignment_dir = Path(app.config['DATA_PATH']) / familyname / super
         hmm_path = Path('..') / HMM_FILENAME
     #
     # Check for prerequisites and determine sequence types.
@@ -556,7 +559,7 @@ def show_log():
 
 @app.route('/trees/'+FAMILIES_NAME)
 def return_families():
-    directory_list = os.listdir(path=app.config['PATHS']['data'])
+    directory_list = os.listdir(path=app.config['DATA_PATH'])
     directory_list.sort()
     return Response(json.dumps(directory_list), mimetype=JSON_MIMETYPE)
 
@@ -566,7 +569,7 @@ def get_or_set_alignment(family):
     if request.method == 'POST':
         return create_fasta(family, ALIGNMENT_NAME)
     elif request.method == 'GET':
-        alignment_path = Path(app.config['PATHS']['data']) / family / ALIGNMENT_NAME
+        alignment_path = Path(app.config['DATA_PATH']) / family / ALIGNMENT_NAME
         for ext in SEQUENCE_EXTENSIONS.keys():
             test_path = alignment_path.with_suffix(SEQUENCE_EXTENSIONS[ext])
             if test_path.exists():
@@ -582,7 +585,7 @@ def get_or_set_alignment_super(family, super):
     if request.method == 'POST':
         return create_fasta(family, ALIGNMENT_NAME, super=super)
     elif request.method == 'GET':
-        alignment_path = Path(app.config['PATHS']['data'])/family/super/ALIGNMENT_NAME
+        alignment_path = Path(app.config['DATA_PATH'])/family/super/ALIGNMENT_NAME
         for ext in SEQUENCE_EXTENSIONS.keys():
             test_path = alignment_path.with_suffix(SEQUENCE_EXTENSIONS[ext])
             if test_path.exists():
@@ -601,7 +604,7 @@ def create_sequences(family):
 def delete_superfamily(family, super):
     if super in ALL_FILENAMES:
         abort(403)
-    path = Path(app.config['PATHS']['data']) / family / super
+    path = Path(app.config['DATA_PATH']) / family / super
     if not path.exists():
         abort(403)
 
@@ -617,7 +620,7 @@ def create_superfamily_sequences(family, super):
 @app.route('/trees/<family>/HMM', methods=['PUT'])
 def create_HMM(family):
     try:
-        hmm_path = Path(app.config['PATHS']['data'])/family/HMM_FILENAME
+        hmm_path = Path(app.config['DATA_PATH'])/family/HMM_FILENAME
         hmm_fh = hmm_path.open('wb')
     except: # e.g., if family has not been created
         app.logger.error('Unable to create "%s".', str(hmm_path))
@@ -695,7 +698,7 @@ for builder in list(app.config['TREEBUILDERS'].keys()):
 def get_existing_tree(familyname, method):
     if method not in app.config['TREEBUILDERS']:
         abort(404)
-    inpath = Path(app.config['PATHS']['data'])/familyname/method/TREE_NAME
+    inpath = Path(app.config['DATA_PATH'])/familyname/method/TREE_NAME
     if not inpath.exists():
         abort(404)
     return Response(inpath.open().read(), mimetype=NEWICK_MIMETYPE)
@@ -710,7 +713,7 @@ def get_existing_tree_super(family, method, sup):
 def get_phyloxml_tree(familyname, method):
     if method not in app.config['TREEBUILDERS']:
         abort(404)
-    inpath = Path(app.config['PATHS']['data'])/familyname/method/PHYLOXML_NAME
+    inpath = Path(app.config['DATA_PATH'])/familyname/method/PHYLOXML_NAME
     if not inpath.exists():
         abort(404)
     return Response(inpath.open().read(), mimetype=NEWICK_MIMETYPE)
@@ -723,9 +726,9 @@ def get_phyloxml_tree_super(family, method, sup):
 @app.route('/trees/<familyname>/<method>/'+RUN_LOG_NAME)
 def get_log(familyname, method):
     if method in list(app.config['TREEBUILDERS'].keys()):
-        inpath = Path(app.config['PATHS']['data'])/familyname/method/RUN_LOG_NAME
+        inpath = Path(app.config['DATA_PATH'])/familyname/method/RUN_LOG_NAME
     elif method in list(app.config['ALIGNERS'].keys()):
-        inpath = Path(app.config['PATHS']['data'])/familyname/RUN_LOG_NAME
+        inpath = Path(app.config['DATA_PATH'])/familyname/RUN_LOG_NAME
     else:
         abort(428)
     if not inpath.exists():
@@ -741,9 +744,9 @@ def get_log_super(family, method, sup):
 @app.route('/trees/<familyname>/<method>/status')
 def get_status(familyname, method):
     if method in list(app.config['TREEBUILDERS'].keys()):
-        inpath = Path(app.config['PATHS']['data'])/familyname/method/STATUS_NAME
+        inpath = Path(app.config['DATA_PATH'])/familyname/method/STATUS_NAME
     elif method in list(app.config['ALIGNERS'].keys()):
-        inpath = Path(app.config['PATHS']['data']) /familyname /STATUS_NAME
+        inpath = Path(app.config['DATA_PATH']) /familyname /STATUS_NAME
     else:
         abort(428)
     if not inpath.exists():

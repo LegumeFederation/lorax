@@ -6,6 +6,7 @@ lorax is designed as a stand-alone cli rather than through Flask.
 # Standard library imports.
 #
 import sys
+import os
 import pkg_resources
 import pkgutil
 from datetime import datetime
@@ -45,10 +46,10 @@ def create_data_dir(app):
     :param app: 
     :return: 
     '''
-    data_dir = Path(app.config['PATHS']['data'])
+    data_dir = Path(app.config['DATA_PATH'])
     if not data_dir.is_dir(): # create logs/ dir
         try:
-            data_dir.mkdir(mode=app.config['PATHS']['mode'], parents=True)
+            data_dir.mkdir(mode=app.config['DIR_MODE'], parents=True)
         except OSError:
             app.logger.error('Unable to create data directory "%s"',
                              data_dir)
@@ -70,45 +71,58 @@ def run():
                     port=port,
                     debug=debug)
 
-@cli.command()
-@click.argument('var')
-def get_config(var):
-    '''Get the value of a configuration variable.'''
-    var = var.upper()
-    if var.startswith('LORAX_'):
-        var = var[6:]
-    if var in current_app.config:
-        print(current_app.config[var])
-    else:
-        print('ERROR--Variable %s not found in configuration variables.' %var,
-              file=sys.stderr)
-        sys.exit(1)
-
 
 @cli.command()
 @click.option('--type',help='Type of variable if not string.', default='str')
-@click.argument('var')
-@click.argument('value')
-def set_config(var, value, type):
-    '''Sets the value of a configuration variable in SETTINGS file.'''
-    var = var.upper()
-    if var.startswith('LORAX_'):
-        var = var[6:]
-    value_type = locate(type)
-    if value_type == bool:
-        value = bool(strtobool(value))
-    else:
-        value = value_type(value)
-    configure_logging(current_app)
-    config_file_path = Path(current_app.instance_path)/current_app.config['SETTINGS']
-    if not config_file_path.exists():
-        if not config_file_path.parent.exists():
-            config_file_path.parent.mkdir(mode=current_app.config['PATHS']['mode'],
-                                          parents=True)
-        with config_file_path.open(mode='w') as config_fh:
-            current_app.logger.warning('Creating instance config file at "%s".',
-                                      str(config_file_path))
-            print("""# -*- coding: utf-8 -*-
+@click.argument('var', required=False)
+@click.argument('value', required=False)
+def config_value(var, value, type):
+    '''Gets or sets the value of a configuration variable.'''
+    if value == None:  # No value specified, this is a get.
+        if var == None: # No variable specified, list them all.
+            print('Listing all %d defined configuration variables:'
+                  %(len(current_app.config)))
+            for key in sorted(current_app.config):
+                if 'LORAX_' + key in os.environ:
+                    from_environ = ' <- from environment'
+                else:
+                    from_environ = ''
+                print('  %s =  %s %s' %(key,
+                                      current_app.config[key],
+                                      from_environ))
+            return
+        else:
+            var = var.upper()
+            if var.startswith('LORAX_'):
+                var = var[6:]
+            if var in current_app.config:
+                print(current_app.config[var])
+                return
+            else:
+                print('"%s" not found in configuration variables.' % var,
+                      file=sys.stderr)
+                sys.exit(1)
+    else: # Must be setting.
+        var = var.upper()
+        if var.startswith('LORAX_'):
+            var = var[6:]
+        value_type = locate(type)
+        if value_type == bool:
+            value = bool(strtobool(value))
+        else:
+            value = value_type(value)
+        #
+        # Create a config file, if needed.
+        #
+        config_file_path = Path(current_app.instance_path)/current_app.config['SETTINGS']
+        if not config_file_path.exists():
+            if not config_file_path.parent.exists():
+                config_file_path.parent.mkdir(mode=current_app.config['DIR_MODE'],
+                                              parents=True)
+            with config_file_path.open(mode='w') as config_fh:
+                current_app.logger.warning('Creating instance config file at "%s".',
+                                          str(config_file_path))
+                print("""# -*- coding: utf-8 -*-
 '''Overrides of default lorax configurations.
 
 This file will be placed in an instance-specific folder and sourced
@@ -120,24 +134,24 @@ Note that configuration variables are all-caps.  Types are from python
 typing rules.
 '''""", file=config_fh)
 
-    with config_file_path.open( mode='a') as config_fh:
-        isodate = datetime.now().isoformat()[:-7]
-        if isinstance(value, str):
-            quote = '"'
-        else:
-            quote = ''
-        current_app.logger.warning('Setting %s to %s%s%s in config file "%s".',
-                                     var,
-                                     quote,
-                                     value,
-                                     quote,
-                                     str(config_file_path))
-        print('%s = %s%s%s # set at %s' %(var,
-                                            quote,
-                                            value,
-                                            quote,
-                                            isodate),
-              file=config_fh)
+        with config_file_path.open( mode='a') as config_fh:
+            isodate = datetime.now().isoformat()[:-7]
+            if isinstance(value, str):
+                quote = '"'
+            else:
+                quote = ''
+            current_app.logger.warning('Setting %s to %s%s%s in config file "%s".',
+                                         var,
+                                         quote,
+                                         value,
+                                         quote,
+                                         str(config_file_path))
+            print('%s = %s%s%s # set at %s' %(var,
+                                                quote,
+                                                value,
+                                                quote,
+                                                isodate),
+                  file=config_fh)
 
 
 @cli.command()
