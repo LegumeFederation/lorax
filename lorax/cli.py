@@ -77,7 +77,7 @@ def run():
 @click.argument('var', required=False)
 @click.argument('value', required=False)
 def config_value(var, value, type):
-    '''Gets or sets the value of a configuration variable.'''
+    '''Gets or sets config variables.'''
     if value == None:  # No value specified, this is a get.
         if var == None: # No variable specified, list them all.
             print('Listing all %d defined configuration variables:'
@@ -169,7 +169,7 @@ def test_logging():
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
 def copy_test_files(force):
-    '''Copy files from the test/ distribution directory to the current working directory.
+    '''Copy files test files to the current working directory.
     
     :return: 
     '''
