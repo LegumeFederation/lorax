@@ -6,12 +6,12 @@ biopython==1.68
 click==6.7                # via flask, rq
 croniter==0.3.16          # via rq-scheduler
 flask-rq2==17.0
-flask==0.12               # via flask-rq2, rq-dashboard
+flask==0.12.1             # via flask-rq2, rq-dashboard
 itsdangerous==0.24        # via flask
-jinja2==2.9.5             # via flask
+jinja2==2.9.6             # via flask
 markupsafe==0.23          # via jinja2 (edited for version)
 python-dateutil==2.6.0    # via arrow, croniter
-redis-py==2.10.5             # via rq, rq-dashboard (name is platform-dependent)
+redis-py==2.10.5          # via rq, rq-dashboard (name is platform-dependent)
 rq-dashboard==0.3.7
 rq-scheduler==0.7.0       # via flask-rq2
 rq==0.6.0                 # via flask-rq2, rq-dashboard, rq-scheduler

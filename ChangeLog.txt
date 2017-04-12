@@ -1,3 +1,29 @@
+
+
+LORAX_INSTANCE_DIR environmental variable allows overriding the location of the instance
+configuration file.  Useful for installations where the default instance path is not
+writable by the user.
+
+config_value with no arguments now indicates whether variables are set from instance
+config files or environmental variables.
+
+config_value --verbose VAR gives verbose information about the type of the variable
+and where it was set.
+
+The default type for config_value is now, in priority order:
+  * The type specified with the --vartype option, if it exists.
+  * The type of the extant variable.
+  * str if not previously defined and --vartype is not specified.
+
+config_value --type renamed to --vartype, and now accepts any valid python type
+for its argument.  Types other than str and bool are parsed via JSON and have JSON
+typing rules (including demanding use of double quotes in places).  Note that for
+complex types, you may have to enclose the argument in single quotes to keep the
+shell from mangling it.
+
+
+config_value VAR now prints the value.
+
 v0.92
 
 get_config and set_config commands are now condensed to config_value

@@ -163,6 +163,8 @@ def configure_app(app):
     #
     # Get instance-specific configuration, if it exists.
     #
+    if 'LORAX_INSTANCE_DIR' in os.environ:
+        app.instance_path = os.getenv('LORAX_INSTANCE_DIR')
     pyfile_name = os.getenv('LORAX_SETTINGS', app.config['SETTINGS'])
     app.config.from_pyfile(pyfile_name, silent=True)
     #
