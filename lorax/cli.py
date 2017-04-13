@@ -123,7 +123,7 @@ def config_value(var, value, vartype, verbose):
             config_file_status = 'does not exist'
             config_obj.__file__ = None
         if var == None: # No variable specified, list them all.
-            print('The instance-specific config file at %s %s.'%(str(config_file_path),
+            print('The instance-specific config file is at %s %s.'%(str(config_file_path),
                                                                  config_file_status))
             print('Listing all %d defined configuration variables:'
                   %(len(current_app.config)))
@@ -164,13 +164,15 @@ def config_value(var, value, vartype, verbose):
                 jsonobj = json.loads(value)
             except json.decoder.JSONDecodeError:
                 print('ERROR--Unparseable string "%s".  Did you use single quotes?'
-                      %(value))
+                      %(value), file=sys.stderr)
                 sys.exit(1)
             try:
                 value = value_type(jsonobj)
             except TypeError:
                 print('ERROR--"%s" evaluates to type %s, which cant be converted to type %s.'
-                      %(value, type(jsonobj).__name__, value_type.__name__))
+                      %(value, type(jsonobj).__name__, value_type.__name__),
+                      file=sys.stderr)
+                sys.exit(1)
         #
         # Create a config file, if needed.
         #

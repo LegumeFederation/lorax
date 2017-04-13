@@ -7,11 +7,11 @@ lorax -- I speak for the (phylogenetic) trees.
 #    pip install --editable .
 # and execute as a module.
 
-from setuptools import setup
-
-from distutils.util import convert_path
 import os
 import sys
+from setuptools import setup
+from distutils.util import convert_path
+
 
 name = 'lorax'
 

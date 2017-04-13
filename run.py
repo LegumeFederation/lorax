@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 from lorax import app
 from lorax.logging import configure_logging
 from lorax.cli import create_data_dir

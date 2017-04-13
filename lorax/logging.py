@@ -19,7 +19,6 @@ These definitions may be overridden via two ways:
 # Library imports.
 #
 import logging
-import os
 import sys
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
@@ -43,13 +42,9 @@ class ContextualFilter(logging.Filter):
         try:
             log_record.url = request.path
             log_record.method = request.method
-            #  Try to get the IP address of the user through reverse proxy
-            log_record.ip = request.environ.get('HTTP_X_REAL_IP',
-                                        request.remote_addr)
         except RuntimeError:
             log_record.url = ''
             log_record.method = ''
-            log_record.ip = 'command'
 
         return True
 
@@ -60,7 +55,6 @@ def configure_logging(app):
     :param app: 
     :return: 
     '''
-    #app.logger = logging.getLogger('werkzeug')  # this is the logger we want
     if app.config['DEBUG']:
         stderr_log_level = logging.DEBUG
     else:
@@ -74,7 +68,6 @@ def configure_logging(app):
     for handler in app.logger.handlers: # set levels on existing handlers
         handler.setLevel(stderr_log_level)
         handler.setFormatter(logging.Formatter(app.config['STDERR_LOG_FORMAT']))
-
     #
     # Start log file.
     #
@@ -95,7 +88,13 @@ def configure_logging(app):
         log_handler = RotatingFileHandler(str(logfile_path),
                                       maxBytes=app.config['LOGFILE_MAXBYTES'],
                                       backupCount=app.config['LOGFILE_BACKUPCOUNT'])
-        log_handler.setFormatter(logging.Formatter(app.config['FILE_LOG_FORMAT']))
+
+        log_handler.setLevel(file_log_level)
+        werkzeug_logger = logging.getLogger('werkzeug')
+        werkzeug_logger.addHandler(log_handler)
+        for handler in app.logger.handlers:  # set levels on existing handlers
+            handler.setLevel(file_log_level)
+            handler.setFormatter(logging.Formatter(app.config['STDERR_LOG_FORMAT']))
         app.logger.addHandler(log_handler)
     #
     # Do some logging on startup.

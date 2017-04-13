@@ -1,4 +1,6 @@
+v0.93
 
+Redirected stderr on HMM check call.
 
 LORAX_INSTANCE_DIR environmental variable allows overriding the location of the instance
 configuration file.  Useful for installations where the default instance path is not

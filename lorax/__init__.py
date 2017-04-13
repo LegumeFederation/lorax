@@ -123,10 +123,10 @@ def create_fasta(familyname, data_name, super=None):
         path = Path(app.config['DATA_PATH']) / familyname / super
     # post data
     if path.exists() and not path.is_dir():
-        app.logger.warning('Removing existing file in directory path name')
+        app.logger.warning('Removing existing file in data path name.')
         path.unlink()
     if not path.is_dir():
-        app.logger.debug("Creating directory %s", path)
+        app.logger.debug("Creating directory %s.", path)
         path.mkdir()
     for sequence_type in SEQUENCE_EXTENSIONS.keys():
         if sequence_type in request.files:
@@ -134,7 +134,7 @@ def create_fasta(familyname, data_name, super=None):
             infileext = SEQUENCE_EXTENSIONS[sequence_type]
             break
     else:
-        app.logger.error('unrecognized request for FASTA')
+        app.logger.error('Unrecognized request for FASTA.')
         abort(400)
     try:  # parse FASTA file
         fasta_str_fh = io.StringIO(fasta.read().decode('UTF-8'))
@@ -172,7 +172,7 @@ def create_fasta(familyname, data_name, super=None):
                       'overwrite': False}
     app.logger.debug('Saving FASTA file for family "%s".', familyname)
     if (path / infilename).exists():
-        app.logger.warning('Overwriting existing FASTA file for family %s', familyname)
+        app.logger.warning('Overwriting existing FASTA file for family %s.', familyname)
         fasta_dict['overwrite'] = True
     with open(str(path / infilename), 'w') as fasta_outfh:
         for seq in record_dict.values():
@@ -628,9 +628,11 @@ def create_HMM(family):
     hmm_fh.write(request.data)
     hmm_fh.close()
     try: # get HMM stats with hmmstat
-        hmmstats_output = subprocess.check_output(['hmmstat',HMM_FILENAME],
-                                                  universal_newlines=True,
-                                                  cwd=str(hmm_path.parent))
+        with open(os.devnull, 'w') as devnull:
+            hmmstats_output = subprocess.check_output(['hmmstat',HMM_FILENAME],
+                                                      universal_newlines=True,
+                                                      stderr=devnull,
+                                                      cwd=str(hmm_path.parent))
     except subprocess.CalledProcessError:
         app.logger.error('Not a valid HMM file for family %s, removing.', family)
         hmm_path.unlink()

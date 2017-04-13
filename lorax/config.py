@@ -18,7 +18,6 @@ These definitions may be overridden via two ways:
 #
 # Library imports.
 #
-import logging
 import os
 import sys
 #
@@ -118,8 +117,8 @@ class BaseConfig(object):
     #    method: HTTP method.
     #    ip: Real IP address of the requester.
     #
-    STDERR_LOG_FORMAT = '%(method)s from %(url)s %(ip)s %(levelname)s: %(message)s'
-    FILE_LOG_FORMAT = '[%(utcnow)s] %(method)s %(url)s %(ip)s %(levelname)s: %(message)s'
+    STDERR_LOG_FORMAT = '%(levelname)s: %(message)s'
+    FILE_LOG_FORMAT = '%(levelname)s: %(message)s'
 
 class DebugConfig(BaseConfig):
     DEBUG = True
