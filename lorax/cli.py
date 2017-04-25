@@ -1,7 +1,7 @@
-'''Command-line interpreter functions.
+"""Command-line interpreter functions.
 
 lorax is designed as a stand-alone cli rather than through Flask.
-'''
+"""
 #
 # Standard library imports.
 #
@@ -14,7 +14,7 @@ import types
 from datetime import datetime
 from distutils.util import strtobool
 from pydoc import locate
-from pathlib import Path # python 3.4 or later
+from pathlib import Path  # python 3.4 or later
 #
 # third-party imports.
 import click
@@ -25,31 +25,36 @@ from flask.cli import FlaskGroup
 #
 from .version import version
 from .logging import configure_logging
+
 #
 # Global variables.
 #
 AUTHOR = 'Joel Berendzen'
 EMAIL = 'joelb@ncgr.org'
-COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.  All rights reserved.
+COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.
+All rights reserved.
 """
 PROJECT_HOME = 'https://github.com/ncgr/lorax'
+
+
 #
 # CLI entry point.
 #
-@click.group(cls=FlaskGroup, epilog=AUTHOR + ' <'+EMAIL+'>. ' + COPYRIGHT + PROJECT_HOME)
+@click.group(cls=FlaskGroup,
+             epilog=AUTHOR + ' <' + EMAIL + '>. ' + COPYRIGHT + PROJECT_HOME)
 @click.version_option(version=version, prog_name=__name__)
-@click.pass_context
-def cli(ctx):
+def cli():
     pass
 
+
 def create_data_dir(app):
-    '''Creates a data directory, if one doesn't exist.
-    
-    :param app: 
-    :return: 
-    '''
+    """Creates a data directory, if one doesn't exist.
+
+    :param app:
+    :return:
+    """
     data_dir = Path(app.config['DATA_PATH'])
-    if not data_dir.is_dir(): # create logs/ dir
+    if not data_dir.is_dir():  # create logs/ dir
         try:
             data_dir.mkdir(mode=app.config['DIR_MODE'], parents=True)
         except OSError:
@@ -60,10 +65,11 @@ def create_data_dir(app):
 
 @cli.command()
 def run():
-    '''Run a lorax server directly.'''
+    """Run a lorax server directly."""
     from lorax.logging import configure_logging
-    print('Direct start of lorax, use of gunicorn is recommended for production.',
-          file=sys.stderr)
+    print(
+        'Direct start, use of gunicorn is recommended for production.',
+        file=sys.stderr)
     port = current_app.config['PORT']
     host = current_app.config['HOST']
     debug = current_app.config['DEBUG']
@@ -76,10 +82,10 @@ def run():
 
 def print_config_var(var, obj):
     """Print configuration variable with type and provenance.
-    
-    :param var: 
-    :param obj: 
-    :return: 
+
+    :param var:
+    :param obj:
+    :return:
     """
     if 'LORAX_' + var in os.environ:
         from_environ = ' <- from environment'
@@ -99,34 +105,40 @@ def print_config_var(var, obj):
                                           quote,
                                           from_environ))
 
+
 @cli.command()
-@click.option('--vartype',help='Type of variable, if not previously defined.', default=None)
-@click.option('--verbose/--no-verbose',  help='Verbose provenance.')
+@click.option('--vartype', help='Type of variable, if not previously defined.',
+              default=None)
+@click.option('--verbose/--no-verbose', help='Verbose provenance.')
 @click.argument('var', required=False)
 @click.argument('value', required=False)
 def config_value(var, value, vartype, verbose):
-    '''Gets or sets config variables.'''
-    config_file_path = Path(current_app.instance_path) / current_app.config['SETTINGS']
-    if value == None:  # No value specified, this is a get.
-        config_obj = types.ModuleType('config')
+    """Gets or sets config variables."""
+    config_file_path = Path(current_app.instance_path) / current_app.config[
+        'SETTINGS']
+    if value is None:  # No value specified, this is a get.
+        config_obj = types.ModuleType('config')  # noqa
         if config_file_path.exists():
             config_file_status = 'exists'
             config_obj.__file__ = str(config_file_path)
             try:
                 with config_file_path.open(mode='rb') as config_file:
-                    exec(compile(config_file.read(), str(config_file_path), 'exec'),
+                    exec(compile(config_file.read(), str(config_file_path),
+                                 'exec'),
                          config_obj.__dict__)
             except IOError as e:
-                e.strerror = 'Unable to load configuration file (%s)' % e.strerror
+                e.strerror = 'Unable to load configuration file (%s)' \
+                             % e.strerror
                 raise
         else:
             config_file_status = 'does not exist'
             config_obj.__file__ = None
-        if var == None: # No variable specified, list them all.
-            print('The instance-specific config file is at %s %s.'%(str(config_file_path),
-                                                                 config_file_status))
+        if var is None:  # No variable specified, list them all.
+            print('The instance-specific config file is at %s %s.' % (
+                str(config_file_path),
+                config_file_status))
             print('Listing all %d defined configuration variables:'
-                  %(len(current_app.config)))
+                  % (len(current_app.config)))
             for key in sorted(current_app.config):
                 print_config_var(key, config_obj)
             return
@@ -144,44 +156,49 @@ def config_value(var, value, vartype, verbose):
                 print('"%s" not found in configuration variables.' % var,
                       file=sys.stderr)
                 sys.exit(1)
-    else: # Must be setting.
+    else:  # Must be setting.
         var = var.upper()
         if var.startswith('LORAX_'):
             var = var[6:]
-        if var in current_app.config and vartype == None \
-                and not current_app.config[var] ==  None: # type defaults to current type
+        if var in current_app.config and vartype is None \
+                and not current_app.config[
+                    var] is None:  # type defaults to current type
             value_type = type(current_app.config[var])
-        else: # get type from command line, or str if not specified
-            if vartype == None:
+        else:  # get type from command line, or str if not specified
+            if vartype is None:
                 vartype = 'str'
             value_type = locate(vartype)
         if value_type == bool:
             value = bool(strtobool(value))
         elif value_type == str:
             pass
-        else: # load through JSON to handle dict and list types
+        else:  # load through JSON to handle dict and list types
             try:
                 jsonobj = json.loads(value)
             except json.decoder.JSONDecodeError:
-                print('ERROR--Unparseable string "%s".  Did you use single quotes?'
-                      %(value), file=sys.stderr)
+                print(
+                    'ERROR--Unparseable string "%s". Did you use quotes?'
+                    % value, file=sys.stderr)
                 sys.exit(1)
             try:
                 value = value_type(jsonobj)
             except TypeError:
-                print('ERROR--"%s" evaluates to type %s, which cant be converted to type %s.'
-                      %(value, type(jsonobj).__name__, value_type.__name__),
-                      file=sys.stderr)
+                print(
+                    'ERROR--Unable to convert "%s" of type %s to type %s.'
+                    % (value, type(jsonobj).__name__, value_type.__name__),
+                    file=sys.stderr)
                 sys.exit(1)
         #
         # Create a config file, if needed.
         #
         if not config_file_path.exists():
             if not config_file_path.parent.exists():
-                config_file_path.parent.mkdir(mode=current_app.config['DIR_MODE'],
-                                              parents=True)
+                config_file_path.parent.mkdir(
+                    mode=current_app.config['DIR_MODE'],
+                    parents=True)
             with config_file_path.open(mode='w') as config_fh:
-                print('Creating instance config file at "%s".' %str(config_file_path))
+                print('Creating instance config file at "%s".' % str(
+                    config_file_path))
                 print("""# -*- coding: utf-8 -*-
 '''Overrides of default lorax configurations.
 
@@ -192,27 +209,28 @@ hand-edited values.
 
 Note that configuration variables are all-caps.  Types are from python
 typing rules.
-'''""", file=config_fh)
+'''""", file=config_fh)  # noqa
         if isinstance(value, str):
             quote = '"'
         else:
             quote = ''
         print('Setting %s to %s%s%s (type %s) \n in config file "%s".'
-                % (var, quote, value, quote, type(value).__name__, str(config_file_path)))
-        with config_file_path.open( mode='a') as config_fh:
+              % (var, quote, value, quote, type(value).__name__,
+                 str(config_file_path)))
+        with config_file_path.open(mode='a') as config_fh:
             isodate = datetime.now().isoformat()[:-7]
-            print('%s = %s%s%s # set at %s' %(var,
-                                                quote,
-                                                value,
-                                                quote,
-                                                isodate),
-                  file=config_fh)
+            print('%s = %s%s%s # set at %s' % (var,
+                                               quote,
+                                               value,
+                                               quote,
+                                               isodate),
+                  file=config_fh)  # noqa
 
 
 @cli.command()
 def test_logging():
-    '''Test logging at the different levels.
-    '''
+    """Test logging at the different levels.
+    """
     configure_logging(current_app)
     current_app.logger.debug('Debug message.')
     current_app.logger.info('Info message.')
@@ -224,19 +242,21 @@ def test_logging():
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
 def copy_test_files(force):
-    '''Copy files test files to the current working directory.
-    
-    :return: 
-    '''
+    """Copy files test files to the current working directory.
+
+    :return:
+    """
     configure_logging(current_app)
     test_files = pkg_resources.resource_listdir(__name__, 'test')
     for filename in test_files:
         path_string = 'test/' + filename
         if not pkg_resources.resource_isdir(__name__, path_string):
             current_app.logger.info('Creating file %s":', filename)
-            data = pkgutil.get_data(__name__, 'test/'+filename)
+            data = pkgutil.get_data(__name__, 'test/' + filename)
             file_path = Path(filename)
             if file_path.exists() and not force:
-                current_app.logger.error('File %s already exists.  Use --force to overwrite.', filename)
+                current_app.logger.error(
+                    'File %s already exists.  Use --force to overwrite.',
+                    filename)
             with file_path.open(mode='wb') as fh:
                 fh.write(data)

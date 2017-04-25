@@ -7,5 +7,4 @@ configure_logging(app)
 create_data_dir(app)
 
 if __name__ == '__main__':
-   app.run()
-
+    app.run()

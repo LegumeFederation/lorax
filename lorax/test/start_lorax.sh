@@ -1,4 +1,5 @@
 #!/bin/bash
+#
 # starts the lorax server
 #
 if [ -z "$FLASK_APP" ] ; then
@@ -26,7 +27,6 @@ if [ "$?" -eq 1 ]; then
   echo "ERROR--redis does not seem to be running.  Start redis-server first."
   exit 1
 fi
-
 #
 # Function to check for queue workers.
 #
@@ -41,7 +41,7 @@ test_workers () {
    fi
 }
 async=`lorax config_value RQ_ASYNC`
-if [[ $async -eq "True" ]]; then
+if [[ ${async} -eq "True" ]]; then
    test_workers alignment 
    test_workers treebuilding
 fi

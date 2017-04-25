@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''Configuration variables for lorax.
+"""Configuration variables for lorax.
 
 Definitions in this file are selected by the LORAX_CONFIGURATION environmental
 variable.  This variable may take on the following values:
@@ -14,7 +14,7 @@ These definitions may be overridden via two ways:
   2) an environmental variable that starts with "LORAX_".  If its value is
      "True" or "False", then it will be interpreted as a logical value.
      If its value can be parsed as an integer, then it will be.
-'''
+"""
 #
 # Library imports.
 #
@@ -23,14 +23,15 @@ import sys
 #
 # Local imports
 #
-from .version import version as __version__ # noqa
+from .version import version as __version__  # noqa
+
 
 class BaseConfig(object):
-    '''Base class for configuration objects.
+    """Base class for configuration objects.
 
     Note that only values in uppercase will be stored in the app
     configuration object.
-    '''
+    """
     #
     # Usually these paths should be absolute, but for testing these
     # are relative to the PWD of the lorax process.
@@ -65,7 +66,7 @@ class BaseConfig(object):
     #
     # Settings file name.
     #
-    SETTINGS='config.cfg'
+    SETTINGS = 'config.cfg'
     #
     # Number of threads used in queued commands.  0 = use as many as available.
     #
@@ -80,13 +81,13 @@ class BaseConfig(object):
     RQ_REDIS_URL = "redis://localhost:6379/0"
     RQ_SCHEDULER_INTERVAL = 60
     RQ_SCHEDULER_QUEUE = ALIGNMENT_QUEUE
-    ALIGNMENT_QUEUE_TIMEOUT = 1000 # About 15 minutes, in seconds
-    TREE_QUEUE_TIMEOUT = 4 * 60 * 60 # 4 hours, in seconds
+    ALIGNMENT_QUEUE_TIMEOUT = 1000  # About 15 minutes, in seconds
+    TREE_QUEUE_TIMEOUT = 4 * 60 * 60  # 4 hours, in seconds
     #
     # Definitions for alignment algorithms.
     #
     ALIGNERS = {
-        'hmmalign': ["--trim", "--informat", "FASTA"] # command-line arguments
+        'hmmalign': ["--trim", "--informat", "FASTA"]  # command-line arguments
     }
     HMMALIGN_EXE = 'hmmalign'
     #
@@ -94,12 +95,13 @@ class BaseConfig(object):
     #
     TREEBUILDERS = {
         "FastTree": {
-          "peptide": ["-nopr", "-log", "peptide.log"],
-          "DNA": ["-nt", "-gtr", "-log", "nucleotide.log", "-nopr"]
+            "peptide": ["-nopr", "-log", "peptide.log"],
+            "DNA": ["-nt", "-gtr", "-log", "nucleotide.log", "-nopr"]
         },
         "RAxML": {
-          "peptide": ["-b", "12345", "-p", "12345", "-N", "10", "-m", "PROTGAMMABLOSUM62"],
-          "DNA": ["-d"]
+            "peptide": ["-b", "12345", "-p", "12345", "-N", "10", "-m",
+                        "PROTGAMMABLOSUM62"],
+            "DNA": ["-d"]
         }
     }
     FASTTREE_EXE = 'FastTree'
@@ -119,6 +121,7 @@ class BaseConfig(object):
     #
     STDERR_LOG_FORMAT = '%(levelname)s: %(message)s'
     FILE_LOG_FORMAT = '%(levelname)s: %(message)s'
+
 
 class DebugConfig(BaseConfig):
     DEBUG = True
@@ -147,11 +150,11 @@ config_dict = {
 
 
 def configure_app(app):
-    '''Configure the app, getting variables and setting up logging.
+    """Configure the app, getting variables and setting up logging.
 
     :param app:
     :return:
-    '''
+    """
     #
     config_name = os.getenv('LORAX_CONFIGURATION', 'default')
     if config_name not in config_dict:
@@ -187,4 +190,3 @@ def configure_app(app):
     # Set version in config.
     #
     app.config['VERSION'] = __version__
-

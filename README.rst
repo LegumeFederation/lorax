@@ -10,7 +10,7 @@ in either peptide or DNA
 space.
 
 How does lorax calculate phylogenetic trees?
----------------------------------------------
+--------------------------------------------
 
 Phylogenetic trees are built from either DNA or protein sequences by external processes in
 a computationally-intensive step that can take from minutes to days depending on the number of

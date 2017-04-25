@@ -18,7 +18,7 @@ Example:
 _V=0 
 while getopts "v" OPTION
 do
-   case $OPTION in
+   case ${OPTION} in
      v) _V=1
 	shift
         ;;
@@ -69,7 +69,7 @@ tmpfile=$(mktemp /tmp/put_HMM.XXX)
 status=$(curl -s -o ${tmpfile} -w '%{http_code}' -T "${1}" ${LORAX_HOST}:${LORAX_PORT}${full_target})
 if [ "${status}" -eq "${code}" ]; then
    echo "PUT of ${1} to ${full_target} returned HTTP code ${status} as expected."
-   if [[ $_V -eq 1 ]]; then
+   if [[ ${_V} -eq 1 ]]; then
       echo "Response is:"
       cat ${tmpfile}
       echo ""

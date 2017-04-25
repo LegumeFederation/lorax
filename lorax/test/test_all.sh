@@ -21,7 +21,7 @@ _V=0
 verbose_flag=""
 while getopts "v" OPTION
 do
-   case $OPTION in
+   case ${OPTION} in
      v) _V=1
 	verbose_flag="-v"
         ;;
@@ -110,7 +110,7 @@ poll_until_positive() {
    echo -n "Polling ${1} "
    while [ `curl -s ${LORAX_HOST}:${LORAX_PORT}${1}` -lt 0 ]; do
      echo -n "."
-     sleep $SLEEPTIME
+     sleep ${SLEEPTIME}
    done
    echo " done."
 }
