@@ -3,6 +3,13 @@ Changelog
 
 .. snip
 
+0.93.2
+~~~~~~
+
+-  Created the ``create_anaconda_venv.sh`` script for downstream to use.
+
+-  Changed the development platform to Anaconda python 3.6 in a virtualenv.
+
 -  Changed this file to ReStructuredText.
 
 0.93.1
