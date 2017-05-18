@@ -1,0 +1,5 @@
+From the home page at http://www.microbesonline.org/fasttree/:
+
+FastTree is open source software -- you are free to modify and redistribute it as you wish.
+If you do make any improvements to FastTree, please send them to us so we can incorporate your
+changes into the main version.
