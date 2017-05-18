@@ -3,6 +3,8 @@ Changelog
 
 .. snip
 
+-  ``config_value`` command is now simply ``config``.
+
 0.93.2
 ~~~~~~
 

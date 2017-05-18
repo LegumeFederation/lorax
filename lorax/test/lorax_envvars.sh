@@ -24,7 +24,7 @@ export LORAX_CONFIGURATION="testing"
 # other than the same directory as the lorax instance.  Note
 # also that running via gunicorn can overlay these values.
 #
-export LORAX_HOST=`lorax config_value HOST 2>/dev/null`
-export LORAX_PORT=`lorax config_value PORT 2>/dev/null`
+export LORAX_HOST=`lorax config HOST 2>/dev/null`
+export LORAX_PORT=`lorax config PORT 2>/dev/null`
 #
 env | grep "LORAX"

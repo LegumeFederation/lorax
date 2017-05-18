@@ -112,7 +112,7 @@ def print_config_var(var, obj):
 @click.option('--verbose/--no-verbose', help='Verbose provenance.')
 @click.argument('var', required=False)
 @click.argument('value', required=False)
-def config_value(var, value, vartype, verbose):
+def config(var, value, vartype, verbose):
     """Gets or sets config variables."""
     config_file_path = Path(current_app.instance_path) / current_app.config[
         'SETTINGS']
