@@ -1,16 +1,66 @@
 # -*- coding: utf-8 -*-
 """
-lorax -- I speak for the (phylogenetic) trees.
+lorax -- speaks for the (phylogenetic) trees.
 """
-
+#
 # Developers, install with
 #    pip install --editable .
-# and execute as a module.
-
+#
 import os
+import subprocess
 import sys
-from setuptools import setup
 from distutils.util import convert_path
+from pathlib import Path # python 3.4
+from setuptools import setup
+from setuptools.command.install import install
+
+
+def compile_fasttree_binary():
+    """Compile the FastTree software"""
+    if 'PREFIX' in os.environ:
+        exe_dir = os.environ['PREFIX'] # prefix for gentoo builds
+    elif hasattr(sys, 'real_prefix'):
+        exe_dir = sys.prefix
+    elif hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix:
+        exe_dir = sys.prefix
+    elif 'conda' in sys.prefix:
+        exe_dir = sys.prefix
+    else:
+        exe_dir = '.'
+    exe_path = str(Path(exe_dir).resolve()/'bin'/'FastTree-lorax')
+    print('compiling double-precision FastTree binary to %s:' %(exe_path))
+    command = ['gcc',
+               '-DUSE_DOUBLE',
+               '-finline-functions',
+               '-funroll-loops',
+               '-O3',
+               '-march=native',
+               '-DOPENMP',
+               '-fopenmp',
+               '-lm',
+               '-o',
+               str(exe_path),
+               'FastTree-2.1.10.c']
+    print('  %s' %(' '.join(command)))
+    pipe = subprocess.Popen(command,
+                            cwd='lorax/fasttree',
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    for line in pipe.stdout.readline():
+        print(line.decode('UTF-8'))
+    stderr = pipe.stderr.readline().decode('UTF-8')
+    if stderr != "":
+        print(stderr)
+        sys.exit(1)
+
+
+
+class InstallWithFastTree(install):
+    """Custom handler for the 'install' command"""
+    def run(self):
+        compile_fasttree_binary()
+        super().run()
+
 
 name = 'lorax'
 
@@ -34,6 +84,7 @@ setup(
     name=name,
     version=version,
     data_files=examplefiles,
+    cmdclass={'install': InstallWithFastTree},
     url='http://github.com/ncgr/lorax',
     keywords=['science', 'biology', 'bioinformatics', 'genomics',
               'sequence', 'curation'],
@@ -47,7 +98,8 @@ setup(
                             'templates/*',
                             'static/js/*',
                             'static/css/*,'
-                            'static/favicon.ico']},
+                            'static/favicon.ico',
+                            'fasttree/*']},
     include_package_data=True,
     zip_safe=False,
     install_requires=['Flask-RQ2',

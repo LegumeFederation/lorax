@@ -20,19 +20,17 @@ import subprocess
 from collections import OrderedDict  # python 3.1
 from datetime import datetime
 from pathlib import Path  # python 3.4
-
-import rq_dashboard
-from Bio import SeqIO, AlignIO, Phylo
 #
 # third-party imports
 #
 from flask import Flask, Response, request, abort
 from flask_rq2 import RQ
+import rq_dashboard
+from Bio import SeqIO, AlignIO, Phylo
 #
 # local imports
 #
 from lorax.config import configure_app
-
 #
 # Non-configurable global constants.
 #

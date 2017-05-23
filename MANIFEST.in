@@ -1,6 +1,7 @@
 include *.txt
 include INSTALL.*
 recursive-include lorax/instance *
-recursive-incude lorax/test *
+recursive-include lorax/test *
 recursive-include lorax/static *
 recursive-include lorax/templates *
+recursive-include lorax/fasttree *
