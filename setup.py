@@ -27,7 +27,11 @@ def compile_fasttree_binary():
         exe_dir = sys.prefix
     else:
         exe_dir = '.'
-    exe_path = str(Path(exe_dir).resolve()/'bin'/'FastTree-lorax')
+    bin_path = Path(exe_dir).resolve()/'bin'
+    if not bin_path.exists():
+        print('Creating binary directory %s:' %(str(bin_path)))
+        bin_path.mkdir(mode=0o755, parents=True)
+    exe_path = str(bin_path/'FastTree-lorax')
     print('compiling double-precision FastTree binary to %s:' %(exe_path))
     command = ['gcc',
                '-DUSE_DOUBLE',
@@ -48,9 +52,13 @@ def compile_fasttree_binary():
                             stderr=subprocess.PIPE)
     for line in pipe.stdout.readline():
         print(line.decode('UTF-8'))
-    stderr = pipe.stderr.readline().decode('UTF-8')
-    if stderr != "":
-        print(stderr)
+    cmd_err = False
+    for line in pipe.stderr.readline():
+        errline = line.decode('UTF-8')
+        if errline != "":
+            cmd_err = True
+            print(stderr)
+    if cmd_err:
         sys.exit(1)
 
 
