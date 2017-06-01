@@ -227,6 +227,17 @@ typing rules.
                   file=config_fh)  # noqa
 
 
+
+@cli.command()
+def delete_config():
+    """Deletes the config file."""
+    config_file_path = Path(current_app.instance_path) / current_app.config[
+        'SETTINGS']
+    if config_file_path.exists():
+        print('Deleting config file %s.' %(str(config_file_path)))
+        config_file_path.unlink()
+
+
 @cli.command()
 def test_logging():
     """Test logging at the different levels.

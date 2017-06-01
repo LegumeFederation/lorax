@@ -1,0 +1,27 @@
+lorax was tested under Anaconda Python 3.6.  
+
+lorax requires some packages that are in the bioconda channel, so before
+installing lorax, the following channels must be added:
+
+	conda config --add channels conda-forge
+	conda config --add channels defaults
+	conda config --add channels r
+	conda config --add channels bioconda
+
+After the channels are configured, the following dependencies should be
+added.  I prefer adding them to the root installation, but you may prefer
+to add them to the virtual environment to be constructed later:
+
+	conda install biopython redis redis-py hmmer gcc libgcc raxml
+
+Next, it is highly recommended that you create a virtual environment for
+lorax to run in.  lorax depends on a version of setuptools that is
+currently much higher than the version required by anaconda, so you may
+break other packages if you install lorax in a shared environment:
+
+	conda create --name loraxenv biopython click croniter flask \
+	  gcc libgcc raxml redis redis-py itsdangerous jinja2 markupsafe \
+	  python-dateutil rq six werkzeug
+
+After installing these packages then, "pip install lorax" should get the
+remaining packages directly from pypi.

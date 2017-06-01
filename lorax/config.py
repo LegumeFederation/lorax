@@ -104,7 +104,7 @@ class BaseConfig(object):
             "DNA": ["-d"]
         }
     }
-    FASTTREE_EXE = 'FastTree'
+    FASTTREE_EXE = 'FastTree-lorax'
     RAXML_EXE = 'raxmlHPC'
     #
     # Logging formatter.  Fields that are defined are:

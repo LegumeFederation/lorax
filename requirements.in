@@ -1,5 +1,6 @@
 # requirements.in
-Flask_RQ2
+packaging
+setuptools>30.3.0
+Flask_RQ2[cli]
 biopython
 rq-dashboard
-gunicorn

@@ -3,6 +3,15 @@ Changelog
 
 .. snip
 
+
+
+- Setuptools >30 is now required, due to moving many things into setup.cfg.
+
+- FastTree source now included in distribution; FastTree binary will be built
+  and put in virtual environment under name ``FastTree-lorax``.
+
+- License is now 3-clause BSD (was 4-clause BSD).
+
 -  ``config_value`` command is now simply ``config``.
 
 0.93.2

@@ -15,6 +15,7 @@ A web service process to calculate and serve up phylogenetic trees, including:
 import io
 import json
 import os
+import platform
 import shutil
 import subprocess
 from collections import OrderedDict  # python 3.1
@@ -219,19 +220,25 @@ def run_subprocess_with_status(out_path,
     :param status_path: Path to status log file
     :return: Return code of subprocess
     """
+    environ = os.environ.copy()
     #
     # Modify the environment to select the number of threads, if requested.
     #
-    environ = os.environ.copy()
     if app.config['THREADS'] > 0:
         environ['OMP_NUM_THREADS'] = str(app.config['THREADS'])
-    with out_path.open(mode='wb') as out_fh:
-        with err_path.open(mode='wt') as err_fh:
-            status = subprocess.run(cmdlist,
-                                    stdout=out_fh,
-                                    stderr=err_fh,
-                                    cwd=str(cwd),
-                                    env=environ)
+    #
+    # Export DYLD_LIBRARY_PATH so that FastTree-lorax will run
+    # on MacOSX.
+    #
+    #if platform.system == 'Darwin':
+    #    environ['DYLDLIBRARY_PATH']  = str(Path(sys.prefix).resolve() /'lib')
+    #with out_path.open(mode='wb') as out_fh:
+    #    with err_path.open(mode='wt') as err_fh:
+    #        status = subprocess.run(cmdlist,
+    #                                stdout=out_fh,
+    #                                stderr=err_fh,
+    #                                cwd=str(cwd),
+    #                                env=environ)
     write_status(status_path, status.returncode)
     if post_process is not None:
         post_process(out_path,

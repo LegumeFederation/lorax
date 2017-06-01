@@ -4,20 +4,22 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
+appdirs==1.4.3            # via setuptools
 arrow==0.10.0             # via rq-dashboard
-biopython==1.68
-click==6.7                # via flask, rq
-croniter==0.3.16          # via rq-scheduler
-flask-rq2==17.0
-flask==0.12.1             # via flask-rq2, rq-dashboard
-gunicorn==19.7.1
+biopython==1.69
+click==6.7                # via flask, flask-cli, rq
+croniter==0.3.17          # via rq-scheduler
+flask-cli==0.4.0          # via flask-rq2
+flask-rq2[cli]==17.0
+flask==0.12.2             # via flask-cli, flask-rq2, rq-dashboard
 itsdangerous==0.24        # via flask
 jinja2==2.9.6             # via flask
-markupsafe==0.23          # via jinja2 --edited for version
+markupsafe==1.0           # via jinja2
+packaging==16.8
 python-dateutil==2.6.0    # via arrow, croniter
-redis                     # via rq, rq-dashboard --edited to allow 3.2.0
+redis==2.10.5             # via rq, rq-dashboard
 rq-dashboard==0.3.7
 rq-scheduler==0.7.0       # via flask-rq2
 rq==0.6.0                 # via flask-rq2, rq-dashboard, rq-scheduler
-six==1.10.0               # via python-dateutil
-werkzeug==0.12.1          # via flask
+six==1.10.0               # via python-dateutil, setuptools
+werkzeug==0.12.2          # via flask
