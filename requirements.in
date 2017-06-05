@@ -1,6 +1,4 @@
 # requirements.in
-packaging
-setuptools>30.3.0
 Flask_RQ2[cli]
 biopython
 rq-dashboard

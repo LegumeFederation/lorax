@@ -3,8 +3,6 @@
 lorax -- speaks for the (phylogenetic) trees.
 """
 #
-#
-#
 # Developers, install with
 #    python setup.py develop
 #
@@ -14,13 +12,15 @@ import shutil
 import subprocess
 import sys
 from setuptools import setup
-from setuptools.command import build_py, develop
+from setuptools.command import build_py, develop, install
 from os import environ as environ
-
 # restrict to python 3.4 or later
 if sys.version_info < (3, 4, 0, 'final', 0):
     raise SystemExit("lorax requires python 3.4 or higher.")
+from pathlib import Path  # python 3.4
 
+FASTTREE_BINARY = 'FastTree-lorax'
+FASTTREE_PATH = Path('.')/'lorax'/'fasttree'
 
 class BuildFasttreeCommand(Command):
   """Compile FastTree with custom switches."""
@@ -41,26 +41,15 @@ class BuildFasttreeCommand(Command):
           'C compiler %s is not found on path.' % self.cc)
 
   def run(self):
-    """Run command."""
-    from pathlib import Path  # python 3.4
+    """Build FastTree with c compiler."""
     # Check if build is disabled by environmental variable.
     if 'NO_FASTTREE_BINARY' in environ:
-        logger.info('Skipping compile of FastTree binary.')
+        logger.info('skipping compile of FastTree binary')
         return
-    if hasattr(sys, 'real_prefix'):
-        exe_dir = sys.prefix
-    elif hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix:
-        exe_dir = sys.prefix
-    elif 'conda' in sys.prefix:
-        exe_dir = sys.prefix
-    else:
-        exe_dir = '.'
-    bin_path = Path(exe_dir).resolve() / 'bin'
-    if not bin_path.exists():
-        logger.debug('Creating binary directory %s:' % (str(bin_path)))
-        bin_path.mkdir(mode=0o755, parents=True)
-    exe_path = str(bin_path / 'FastTree-lorax')
-    logger.info('Compiling double-precision FastTree binary to %s:' % (exe_path))
+    if (FASTTREE_PATH/FASTTREE_BINARY).exists():
+        logger.info('FastTree binary already built')
+        return
+    logger.info('compiling FastTree binary')
     command = [shutil.which(self.cc),
                '-DUSE_DOUBLE',
                '-finline-functions',
@@ -69,24 +58,58 @@ class BuildFasttreeCommand(Command):
                '-march=native',
                '-DOPENMP',
                '-fopenmp',
+               '-lm',
                '-o',
-               str(exe_path),
+               FASTTREE_BINARY,
                'FastTree-2.1.10.c']
     logger.debug('  %s' % (' '.join(command)))
     pipe = subprocess.Popen(command,
                             cwd='lorax/fasttree',
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
-    for line in pipe.stdout.readline():
-        logger.debug(line.decode('UTF-8'))
-    cmd_err = False
-    for line in pipe.stderr.readline():
-        errline = line.decode('UTF-8')
-        if errline != "":
-            cmd_err = True
-            logger.error(stderr)
-    if cmd_err:
+    logger.debug(pipe.stdout.read().decode('UTF-8'))
+    stderr_messages = pipe.stderr.read().decode('UTF-8')
+    if stderr_messages != '':
+        logger.error(stderr_messages)
         raise SystemError("Unable to compile FastTree.")
+
+
+class InstallFasttreeCommand(Command):
+  """Install FastTree to proper location."""
+  description = 'Copy FastTree to install location'
+  user_options = [('bindir=', None, 'binaries directory')]
+
+
+  def initialize_options(self):
+    """Set default values for options."""
+    install_root = self.distribution.get_command_obj('install').root
+    if install_root is not None:
+        install_dir = install_root + '/usr'
+    elif hasattr(sys, 'real_prefix'):
+        install_dir = sys.prefix
+    elif hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix:
+        install_dir = sys.prefix
+    elif 'conda' in sys.prefix:
+        install_dir = sys.prefix
+    else:
+        install_dir = '.'
+    self.bin_path = Path(install_dir)/'bin'
+
+  def finalize_options(self):
+    """Post-process options."""
+    if not self.bin_path.exists():
+        logger.info('creating binary directory "%s"' % (str(self.bin_path)))
+        self.bin_path.mkdir(parents=True)
+
+  def run(self):
+    """Run command."""
+    # Check if build is disabled by environmental variable.
+    if 'NO_FASTTREE_BINARY' in environ:
+        logger.info('skipping install of FastTree binary')
+    else:
+        logger.info('copying FastTree binary to %s' % (str(self.bin_path)))
+        shutil.copy2(str(FASTTREE_PATH/FASTTREE_BINARY),
+                     str(self.bin_path))
 
 
 class BuildPyCommand(build_py.build_py):
@@ -102,14 +125,25 @@ class DevelopCommand(develop.develop):
 
     def run(self):
         self.run_command('build_fasttree')
+        self.run_command('install_fasttree')
         develop.develop.run(self)
+
+class InstallCommand(install.install):
+    """Install FastTree as part of install."""
+
+    def run(self):
+        self.run_command('install_fasttree')
+        install.install.run(self)
 #
-# most of the setup function has been moved to setup.cfg
+# Most of the setup function has been moved to setup.cfg,
+# which requires a recent setuptools to work.  Current
+# anaconda setuptools is too old, so it is strongly
+# urged that lorax be installed in a virtual environment.
 #
 setup(
     setup_requires=['packaging',
                     'setuptools>30.3.0',
-                    #'setuptools-scm>1.5'
+                    'setuptools-scm>1.5'
                     ],
     entry_points={
         'console_scripts': ['lorax = lorax.cli:cli']
@@ -117,11 +151,13 @@ setup(
     cmdclass={
         'build_fasttree': BuildFasttreeCommand,
         'build_py': BuildPyCommand,
-        'develop': DevelopCommand
+        'develop': DevelopCommand,
+        'install_fasttree': InstallFasttreeCommand,
+        'install': InstallCommand
     },
-    #use_scm_version={
-    #    'version_scheme': 'guess-next-dev',
-    #    'local_scheme': 'dirty-tag',
-    #    'write_to': 'lorax/version.py'
-    #}
+    use_scm_version={
+        'version_scheme': 'guess-next-dev',
+        'local_scheme': 'dirty-tag',
+        'write_to': 'lorax/version.py'
+    }
 )

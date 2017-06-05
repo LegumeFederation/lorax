@@ -61,11 +61,17 @@ docs/_build/
 ##################
 build/
 
-# lorax test data and logs#
-###########################
+# version #
+lorax/version.py
+
+# lorax test byproducts#
+########################
 lorax/test/data
 lorax/test/logs
-instance/
+
+# FastTree binary#
+##################
+FastTree-lorax
 
 # docutils #
 ############
