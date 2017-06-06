@@ -15,7 +15,6 @@ A web service process to calculate and serve up phylogenetic trees, including:
 import io
 import json
 import os
-import platform
 import shutil
 import subprocess
 from collections import OrderedDict  # python 3.1
@@ -25,6 +24,7 @@ from pathlib import Path  # python 3.4
 # third-party imports
 #
 from flask import Flask, Response, request, abort
+from flask_cli import FlaskCLI
 from flask_rq2 import RQ
 import rq_dashboard
 from Bio import SeqIO, AlignIO, Phylo
@@ -74,11 +74,16 @@ TEXT_MIMETYPE = 'text/plain'
 HMM_SWITCHES = {'peptide': 'amino',
                 'DNA': 'dna'}
 #
+# Library path for fixing external libraries.
+#
+LIBRARY_PATH_ENVVAR = {'Darwin': 'DYLD_LIBRARY_PATH'}
+#
 # Create an app object and configure it.
 #
 app = Flask(__name__,
             instance_relative_config=True,
             template_folder='templates')
+FlaskCLI(app)
 configure_app(app)
 #
 # Create a global RQ object, with dashboard at /rq.
@@ -226,19 +231,13 @@ def run_subprocess_with_status(out_path,
     #
     if app.config['THREADS'] > 0:
         environ['OMP_NUM_THREADS'] = str(app.config['THREADS'])
-    #
-    # Export DYLD_LIBRARY_PATH so that FastTree-lorax will run
-    # on MacOSX.
-    #
-    #if platform.system == 'Darwin':
-    #    environ['DYLDLIBRARY_PATH']  = str(Path(sys.prefix).resolve() /'lib')
-    #with out_path.open(mode='wb') as out_fh:
-    #    with err_path.open(mode='wt') as err_fh:
-    #        status = subprocess.run(cmdlist,
-    #                                stdout=out_fh,
-    #                                stderr=err_fh,
-    #                                cwd=str(cwd),
-    #                                env=environ)
+    with out_path.open(mode='wb') as out_fh:
+        with err_path.open(mode='wt') as err_fh:
+            status = subprocess.run(cmdlist,
+                                    stdout=out_fh,
+                                    stderr=err_fh,
+                                    cwd=str(cwd),
+                                    env=environ)
     write_status(status_path, status.returncode)
     if post_process is not None:
         post_process(out_path,

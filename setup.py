@@ -8,6 +8,7 @@ lorax -- speaks for the (phylogenetic) trees.
 #
 from distutils.cmd import Command
 import distutils.log as logger
+import platform
 import shutil
 import subprocess
 import sys
@@ -72,6 +73,15 @@ class BuildFasttreeCommand(Command):
     if stderr_messages != '':
         logger.error(stderr_messages)
         raise SystemError("Unable to compile FastTree.")
+    if platform.system() == 'Darwin':
+        logger.info('fixing library file paths in MacOS executable')
+        subprocess.check_call(['install_name_tool',
+                               '-change',
+                               '@rpath/libgomp.1.dylib',
+                               sys.prefix+'/lib/libgomp.1.dylib',
+                               FASTTREE_BINARY],
+                              cwd='lorax/fasttree'
+                              )
 
 
 class InstallFasttreeCommand(Command):
