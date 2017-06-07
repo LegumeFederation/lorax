@@ -37,7 +37,7 @@ class BaseConfig(object):
     # are relative to the PWD of the lorax process.
     #
     DATA_PATH = 'data/'
-    LOG_PATH = 'logs/'
+    LOG_PATH = 'var/log/'
     DIR_MODE = 0o755
     #
     # The DEBUG parameter has multiple implications:
@@ -78,7 +78,7 @@ class BaseConfig(object):
     ALIGNMENT_QUEUE = 'alignment'
     RQ_ASYNC = True
     RQ_QUEUES = [TREE_QUEUE, ALIGNMENT_QUEUE]
-    RQ_REDIS_URL = "redis://localhost:6379/0"
+    RQ_REDIS_URL = "redis://localhost:58929/0"
     RQ_SCHEDULER_INTERVAL = 60
     RQ_SCHEDULER_QUEUE = ALIGNMENT_QUEUE
     ALIGNMENT_QUEUE_TIMEOUT = 1000  # About 15 minutes, in seconds
@@ -104,8 +104,15 @@ class BaseConfig(object):
             "DNA": ["-d"]
         }
     }
+    #
+    # Deployment definitions.
+    #
+    VENV_PATH = ''
+    NO_BINARIES = False
+    CONDA_VENV = 'loraxenv'
     FASTTREE_EXE = 'FastTree-lorax'
     RAXML_EXE = 'raxmlHPC'
+    USER = 'loraxuser'
     #
     # Logging formatter.  Fields that are defined are:
     #    asctime: Time with too much precision

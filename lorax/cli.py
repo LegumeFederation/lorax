@@ -271,3 +271,27 @@ def copy_test_files(force):
                     filename)
             with file_path.open(mode='wb') as fh:
                 fh.write(data)
+
+
+@cli.command()
+@click.option('--force/--no-force', help='Force overwrites of existing files',
+              default=False)
+def create_instance(force):
+    """Creates templated versions of instance files in the working directory.
+
+    :return:
+    """
+    configure_logging(current_app)
+    test_files = pkg_resources.resource_listdir(__name__, 'instance')
+    for filename in test_files:
+        path_string = 'test/' + filename
+        if not pkg_resources.resource_isdir(__name__, path_string):
+            current_app.logger.info('Creating file %s":', filename)
+            data = pkgutil.get_data(__name__, 'test/' + filename)
+            file_path = Path(filename)
+            if file_path.exists() and not force:
+                current_app.logger.error(
+                    'File %s already exists.  Use --force to overwrite.',
+                    filename)
+            with file_path.open(mode='wb') as fh:
+                fh.write(data)

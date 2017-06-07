@@ -735,13 +735,11 @@ def put_hmm(family):
     hmm_fh.close()
     try:  # get HMM stats with hmmstat
         with open(os.devnull, 'w') as devnull:
-            print('stats')
             hmmstats_output = subprocess.check_output(
                 ['hmmstat', HMM_FILENAME],
                 universal_newlines=True,
                 stderr=devnull,
                 cwd=str(hmm_path.parent))
-            print('done')
     except subprocess.CalledProcessError:
         app.logger.error('Not a valid HMM file for family %s, removing.',
                          family)

@@ -1,0 +1,83 @@
+#!/bin/bash
+# Run a command in the lorax virtual environment.
+#
+# Usage:
+#        run_in_lorax_env [-v] COMMAND
+#
+# Environmental variables:
+#       LORAX_CONDA_VENV--If using an anaconda virtual environment,
+#                         this variable should be set to the name of it.
+#       LORAX_VENV_PATH--If set, must point at the root of a 
+#                        virtual environment.  If not set, this script
+#                        should be placed in the virtual environment
+#                        bin directory, and this script will set it.
+#                         
+# Useful in running supervisord.
+#
+#
+export FLASK_APP="lorax"
+_V=0
+if [ "$1" == "-v" ]; then
+	_V=1
+        shift 1
+fi
+if [ "$#" -eq 0 ]; then
+  echo "usage: run_in_lorax_env COMMAND"
+  exit 1
+fi
+#
+# Copy command out of argv, else it can mess up the sourcing.
+#
+command=( "$@" )
+shift $#
+#
+# If LORAX_VENV_PATH is not set, then:
+#    1. Check to see sys.real_prefix is defined.  If so, we are in
+#       a linux virtual environment already and sys.prefix is the virtual
+#       environment path.
+#    2. Else check to see if CONDA_PREFIX is defined.  If so, we are in
+#       a conda virtual environment and we should set LORAX_CONDA_VENV.
+#    3. Else if LORAX_CONDA_VENV is set activate that virtual environment.
+#    4. Else if an executable called "activate" exists in the same directory
+#       as this script, run it.
+#
+sys_prefix=`python -c 'import sys; print(sys.prefix)'`
+real_prefix=`python -c 'import sys; print(hasattr(sys, "real_prefix"))'`
+if [ "$real_prefix" == "True" ]; then # in a venv already
+    if [ -z "${LORAX_VENV_PATH+x}" ]; then
+        export LORAX_VENV_PATH="$sys_prefix"
+    fi
+elif [ ! -z "${CONDA_PREFIX+x}" ]; then # in a conda venv already
+    export LORAX_VENV_PATH="$CONDA_PREFIX"
+    export LORAX_CONDA_VENV="$CONDA_DEFAULT_ENV"
+elif [ ! -z "${LORAX_CONDA_VENV+x}" ]; then # activate conda venv
+      source activate ${LORAX_CONDA_VENV}
+      export LORAX_VENV_PATH="$CONDA_PREFIX"
+      export LORAX_CONDA_VENV="$CONDA_DEFAULT_ENV"
+elif [ ! -z "${LORAX_VENV_PATH+x}" ]; then # activate requested venv
+      source ${LORAX_VENV_PATH}/bin/activate
+      export LORAX_CONDA_VENV="$CONDA_DEFAULT_ENV"
+else
+       pushd `dirname "${BASH_SOURCE[0]}"` >/dev/null
+       if [ -x ./activate ]; then # activate venv in script directory
+          source ./activate
+       fi
+       export LORAX_VENV_PATH=`dirname $(pwd)`
+       export LORAX_CONDA_VENV="$CONDA_DEFAULT_ENV"
+       popd >/dev/null
+fi
+#
+# Echo the results if verbose.
+#
+if [ "$_V" -eq 1 ]; then
+  if [ -z "${LORAX_VENV_PATH+x}" ]; then
+    environ="this environment"
+  else
+    environ="${LORAX_VENV_PATH} virtual environment"
+  fi
+  echo "Executing \"${command[*]}\" in ${environ}."
+fi
+#
+# In virtual environment now, exec command.
+#
+${command[*]}

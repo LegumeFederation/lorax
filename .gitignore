@@ -67,7 +67,7 @@ lorax/version.py
 # lorax test byproducts#
 ########################
 lorax/test/data
-lorax/test/logs
+lorax/test/var
 
 # FastTree binary#
 ##################

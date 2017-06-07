@@ -22,6 +22,7 @@ from pathlib import Path  # python 3.4
 
 FASTTREE_BINARY = 'FastTree-lorax'
 FASTTREE_PATH = Path('.')/'lorax'/'fasttree'
+BINARY_PATH = Path('.')/'lorax'/'bin'
 
 class BuildFasttreeCommand(Command):
   """Compile FastTree with custom switches."""
@@ -44,10 +45,11 @@ class BuildFasttreeCommand(Command):
   def run(self):
     """Build FastTree with c compiler."""
     # Check if build is disabled by environmental variable.
-    if 'NO_FASTTREE_BINARY' in environ:
+    if 'LORAX_NO_BINARIES' in environ and\
+            environ['LORAX_NO_BINARIES'] == 'True':
         logger.info('skipping compile of FastTree binary')
         return
-    if (FASTTREE_PATH/FASTTREE_BINARY).exists():
+    if (BINARY_PATH/FASTTREE_BINARY).exists():
         logger.info('FastTree binary already built')
         return
     logger.info('compiling FastTree binary')
@@ -61,7 +63,7 @@ class BuildFasttreeCommand(Command):
                '-fopenmp',
                '-lm',
                '-o',
-               FASTTREE_BINARY,
+               '../bin/'+FASTTREE_BINARY,
                'FastTree-2.1.10.c']
     logger.debug('  %s' % (' '.join(command)))
     pipe = subprocess.Popen(command,
@@ -79,14 +81,13 @@ class BuildFasttreeCommand(Command):
                                '-change',
                                '@rpath/libgomp.1.dylib',
                                sys.prefix+'/lib/libgomp.1.dylib',
-                               FASTTREE_BINARY],
-                              cwd='lorax/fasttree'
+                               str(BINARY_PATH/FASTTREE_BINARY)],
                               )
 
 
-class InstallFasttreeCommand(Command):
-  """Install FastTree to proper location."""
-  description = 'Copy FastTree to install location'
+class InstallBinariesCommand(Command):
+  """Install binaries to virtual environment bin directory."""
+  description = 'Copy binaries to install location'
   user_options = [('bindir=', None, 'binaries directory')]
 
 
@@ -114,12 +115,13 @@ class InstallFasttreeCommand(Command):
   def run(self):
     """Run command."""
     # Check if build is disabled by environmental variable.
-    if 'NO_FASTTREE_BINARY' in environ:
-        logger.info('skipping install of FastTree binary')
+    if 'LORAX_NO_BINARIES' in environ and\
+            environ['LORAX_NO_BINARIES'] == 'True':
+        logger.info('skipping install of binary files')
     else:
-        logger.info('copying FastTree binary to %s' % (str(self.bin_path)))
-        shutil.copy2(str(FASTTREE_PATH/FASTTREE_BINARY),
-                     str(self.bin_path))
+        logger.info('copying binaries to %s' % (str(self.bin_path)))
+        for binary in BINARY_PATH.iterdir():
+            shutil.copy2(str(binary), str(self.bin_path))
 
 
 class BuildPyCommand(build_py.build_py):
@@ -135,14 +137,14 @@ class DevelopCommand(develop.develop):
 
     def run(self):
         self.run_command('build_fasttree')
-        self.run_command('install_fasttree')
+        self.run_command('install_binaries')
         develop.develop.run(self)
 
 class InstallCommand(install.install):
     """Install FastTree as part of install."""
 
     def run(self):
-        self.run_command('install_fasttree')
+        self.run_command('install_binaries')
         install.install.run(self)
 #
 # Most of the setup function has been moved to setup.cfg,
@@ -162,7 +164,7 @@ setup(
         'build_fasttree': BuildFasttreeCommand,
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
-        'install_fasttree': InstallFasttreeCommand,
+        'install_binaries': InstallBinariesCommand,
         'install': InstallCommand
     },
     use_scm_version={
