@@ -15,7 +15,7 @@ environment as the user you intend the web server to run as.
 
 	conda create --name loraxenv biopython click croniter flask \
 	  freetype gcc libgcc msgpack-python raxml redis redis-py \
-          itsdangerous jinja2 markupsafe python-dateutil rq six werkzeug
+          itsdangerous jinja2 markupsafe rq six werkzeug
 	source activate loraxenv
 
 Next one needs setuptools and gunicorn of later  version than that included
@@ -39,8 +39,13 @@ by issuing the command "supervisord".
 To start lorax from outside the virtual environment (e.g., from an rc
 script) issue the command "/path/to/loraxenv/bin/run_in_lorax_env supervisord".
 
+To test lorax, from inside the virtual environment issue the commands:
+	mkdir loraxtest # could be any name, will be deleted later
+        cd loraxtest
+	lorax copy_test_files
+	chmod 755 *.sh
+	source lorax_envvars.sh
+	./test_all.sh
 
 
-The latter command creates 
-After installing these packages then, "pip install lorax" should get the
-remaining packages directly from pypi.
+
