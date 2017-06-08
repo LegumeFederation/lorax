@@ -15,9 +15,13 @@ environment as the user you intend the web server to run as.
 
 	export LORAX_CONDA_VENV=loraxenv
 	conda create -y --name $LORAX_CONDA_VENV biopython click croniter \
-           flask freetype gcc gunicorn libgcc msgpack-python raxml redis \
+           flask freetype gunicorn  msgpack-python raxml redis \
            redis-py itsdangerous jinja2 markupsafe six werkzeug
 	source activate $LORAX_CONDA_VENV
+	
+If you are installing under MacOS (and only under MacOS), the following
+is also needed:
+	conda install gcc libgcc
 
 Next one needs setuptools and gunicorn of later  version than that included
 in anaconda and supervisord > 4.0 (which currently only exists in github:
@@ -52,15 +56,19 @@ Now it is time to run lorax and associate processes:
 	runinenv supervisorctl status
 
 The first command daemonizes lorax and 4 associated commands.  The last
-should return a list of 5 commands, all with status RUNNING.
+should return a list of 5 commands, all with status RUNNING.  The easiest
+way to kill the daemonized server processes is to kill the supervisord
+process (with "killall" on linux).
+
 Note that to start lorax from outside the virtual environment (e.g., from an rc
-script) one can issue the command:
+script) one can issue the commanda:
+        export LORAX_CONDA_VENV="loraxenv"
 	/path/to/loraxenv/bin/run_in_lorax_env supervisord
 
 To test lorax, from inside the virtual environment issue the commands:
 	mkdir loraxtest # could be any name, will be deleted later
         cd loraxtest
-	lorax create_test_files
+	runinenv lorax create_test_files
 	chmod 755 *.sh
 	source lorax_envvars.sh
 	./test_all.sh
