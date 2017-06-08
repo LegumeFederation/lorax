@@ -15,21 +15,23 @@ environment as the user you intend the web server to run as.
 
 	conda create --name loraxenv biopython click croniter flask \
 	  freetype gcc libgcc msgpack-python raxml redis redis-py \
-          itsdangerous jinja2 markupsafe rq six werkzeug
+          itsdangerous jinja2 markupsafe six werkzeug
 	source activate loraxenv
 
 Next one needs setuptools and gunicorn of later  version than that included
 in anaconda and supervisord > 4.0 (which currently only exists in github:
 
-	pip install -U setuptools gunicorn
+	pip install -U gunicorn
 	pip install https://github.com/Supervisor/supervisor/zipball/master
+	pip install -U setuptools # this may produce an error, don't worry
 
 Now we are ready to install and configure lorax itself:
 
-	pip install lorax
+	pip install --global-option=build_py lorax
 	export FLASK_APP=lorax
 	lorax config # inspect config variables (76 of them)
-	lorax config host MYHOSTIP # if other than localhost
+	# example config if IP other than localhost is desired
+	lorax config host MYHOSTIP
 	export LORAX_VENV_PATH=$CONDA_PREFIX
 	lorax create_instance
 
@@ -42,7 +44,7 @@ script) issue the command "/path/to/loraxenv/bin/run_in_lorax_env supervisord".
 To test lorax, from inside the virtual environment issue the commands:
 	mkdir loraxtest # could be any name, will be deleted later
         cd loraxtest
-	lorax copy_test_files
+	lorax create_test_files
 	chmod 755 *.sh
 	source lorax_envvars.sh
 	./test_all.sh

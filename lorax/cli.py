@@ -253,8 +253,8 @@ def test_logging():
 @cli.command()
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
-def copy_test_files(force):
-    """Copy test files to the current directory.
+def create_test_files(force):
+    """Create test files to the current directory.
 
     :return:
     """
@@ -332,3 +332,4 @@ def create_instance(force):
                                     operation,
                                     str(file_path))
             fh.write(out_string)
+
