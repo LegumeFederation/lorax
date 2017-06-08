@@ -144,6 +144,7 @@ class InstallCommand(install.install):
     """Install FastTree as part of install."""
 
     def run(self):
+        self.run_command('build_fasttree')
         self.run_command('install_binaries')
         install.install.run(self)
 #
