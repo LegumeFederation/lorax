@@ -14,15 +14,16 @@ confusion between package and environment names.  You should create this
 environment as the user you intend the web server to run as.
 
 	export LORAX_CONDA_VENV=loraxenv
-	conda create --name $LORAX_CONDA_VENV biopython click croniter flask \
-	  freetype gcc gunicorn libgcc msgpack-python raxml redis redis-py \
-          itsdangerous jinja2 markupsafe six werkzeug
+	conda create -y --name $LORAX_CONDA_VENV biopython click croniter \
+           flask freetype gcc gunicorn libgcc msgpack-python raxml redis \
+           redis-py itsdangerous jinja2 markupsafe six werkzeug
 	source activate $LORAX_CONDA_VENV
 
 Next one needs setuptools and gunicorn of later  version than that included
 in anaconda and supervisord > 4.0 (which currently only exists in github:
 
 	pip install https://github.com/Supervisor/supervisor/zipball/master
+	pip install superlance
 	pip install -U gunicorn
 	pip install -U setuptools
 
@@ -30,8 +31,8 @@ The last command produces an error; don't be worried by it.  Now we are ready
  to install lorax itself:
 
 	pip install --global-option=build_py lorax
-	alias runinenv=${CONDA_PREFIX)/bin/run_in_lorax_env
-`	source deactivate
+	alias runinenv=${CONDA_PREFIX}/bin/run_in_lorax_env
+	source deactivate
 
 At this point, you are outside the virtual environment with an alias
 to run_in_lorax_env inside the virtual environment.  That script, in
@@ -46,10 +47,12 @@ function properly. We now configure lorax:
 
 Now it is time to run lorax and associate processes:
 
-	runinenv supervisord # will return immediately
+	runinenv supervisord
+	sleep 9
 	runinenv supervisorctl status
 
-This should return a list of 5 commands, all with status RUNNING.
+The first command daemonizes lorax and 4 associated commands.  The last
+should return a list of 5 commands, all with status RUNNING.
 Note that to start lorax from outside the virtual environment (e.g., from an rc
 script) one can issue the command:
 	/path/to/loraxenv/bin/run_in_lorax_env supervisord
@@ -64,5 +67,4 @@ To test lorax, from inside the virtual environment issue the commands:
 
 If the installation went properly, the last command should finish with
 "lorax test completed successfully."
-
 
