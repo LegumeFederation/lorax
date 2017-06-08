@@ -3,3 +3,4 @@ Flask_RQ2[cli]
 biopython
 rq-dashboard
 gunicorn
+superlance
