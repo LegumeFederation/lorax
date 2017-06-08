@@ -29,6 +29,8 @@ Now we are ready to install and configure lorax itself:
 	pip install lorax
 	export FLASK_APP=lorax
 	lorax config # inspect config variables (76 of them)
+	lorax config host MYHOSTIP # if other than localhost
+	export LORAX_VENV_PATH=$CONDA_PREFIX
 	lorax create_instance
 
 You may now start all lorax-related processes from inside the virtualenv
