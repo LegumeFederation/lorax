@@ -13,10 +13,11 @@ to use.  I prefer to use the name "loraxenv" for this environment to prevent
 confusion between package and environment names.  You should create this
 environment as the user you intend the web server to run as.
 
-	conda create --name loraxenv biopython click croniter flask \
+	export LORAX_CONDA_VENV=loraxenv
+	conda create --name $LORAX_CONDA_VENV biopython click croniter flask \
 	  freetype gcc gunicorn libgcc msgpack-python raxml redis redis-py \
           itsdangerous jinja2 markupsafe six werkzeug
-	source activate loraxenv
+	source activate $LORAX_CONDA_VENV
 
 Next one needs setuptools and gunicorn of later  version than that included
 in anaconda and supervisord > 4.0 (which currently only exists in github:
@@ -25,22 +26,28 @@ in anaconda and supervisord > 4.0 (which currently only exists in github:
 	pip install -U gunicorn
 	pip install -U setuptools
 
-The last command produces an error; don't be worried by it.
-Now we are ready to install and configure lorax itself:
+The last command produces an error; don't be worried by it.  Now we are ready
+ to install lorax itself:
 
 	pip install --global-option=build_py lorax
-	export FLASK_APP=lorax
-	export LORAX_VENV_PATH="$CONDA_PREFIX"
+	alias runinenv=${CONDA_PREFIX)/bin/run_in_lorax_env
+`	source deactivate
+
+At this point, you are outside the virtual environment with an alias
+to run_in_lorax_env inside the virtual environment.  That script, in
+turn depends on a single environmental variable (LORAX_CONDA_VENV) to
+function properly. We now configure lorax:
+
 	# inspect config variables, all 76 of them
-	lorax config 
+	runinenv lorax config 
 	# example config if IP other than localhost is desired
-	# lorax config host MYHOSTIP
-	lorax create_instance
+	# runinenv lorax config host MYHOSTIP
+	runinenv lorax create_instance
 
-You may now start all lorax-related processes from inside the virtualenv:
+Now it is time to run lorax and associate processes:
 
-	supervisord # will return immediately
-	supervisorctl status
+	runinenv supervisord # will return immediately
+	runinenv supervisorctl status
 
 This should return a list of 5 commands, all with status RUNNING.
 Note that to start lorax from outside the virtual environment (e.g., from an rc
