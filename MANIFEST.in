@@ -4,6 +4,7 @@ include lorax/fasttree/ChangeLog.txt
 include lorax/fasttree/FastTree-2.1.10.c
 include lorax/fasttree/LICENSE.txt
 include lorax/fasttree/README.txt
+recursive-include lorax/instance *
 recursive-include lorax/test *
 recursive-include lorax/static *
 recursive-include lorax/templates *
