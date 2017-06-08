@@ -8,20 +8,37 @@ installing lorax, the following channels must be added:
 	conda config --add channels r
 	conda config --add channels bioconda
 
-After the channels are configured, the following dependencies should be
-added.  I prefer adding them to the root installation, but you may prefer
-to add them to the virtual environment to be constructed later:
-
-	conda install biopython redis redis-py hmmer gcc libgcc raxml
-
-Next, it is highly recommended that you create a virtual environment for
-lorax to run in.  lorax depends on a version of setuptools that is
-currently much higher than the version required by anaconda, so you may
-break other packages if you install lorax in a shared environment:
+After the channels are configured, create a virtual environment for lorax
+to use.  I prefer to use the name "loraxenv" for this environment to prevent
+confusion between package and environment names.  You should create this
+environment as the user you intend the web server to run as.
 
 	conda create --name loraxenv biopython click croniter flask \
-	  gcc libgcc raxml redis redis-py itsdangerous jinja2 markupsafe \
-	  python-dateutil rq six werkzeug
+	  freetype gcc libgcc msgpack-python raxml redis redis-py \
+          itsdangerous jinja2 markupsafe python-dateutil rq six werkzeug
+	source activate loraxenv
 
+Next one needs setuptools and gunicorn of later  version than that included
+in anaconda and supervisord > 4.0 (which currently only exists in github:
+
+	pip install -U setuptools gunicorn
+	pip install https://github.com/Supervisor/supervisor/zipball/master
+
+Now we are ready to install and configure lorax itself:
+
+	pip install lorax
+	export FLASK_APP=lorax
+	lorax config # inspect config variables (76 of them)
+	lorax create_instance
+
+You may now start all lorax-related processes from inside the virtualenv
+by issuing the command "supervisord".
+
+To start lorax from outside the virtual environment (e.g., from an rc
+script) issue the command "/path/to/loraxenv/bin/run_in_lorax_env supervisord".
+
+
+
+The latter command creates 
 After installing these packages then, "pip install lorax" should get the
 remaining packages directly from pypi.

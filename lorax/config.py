@@ -20,6 +20,12 @@ These definitions may be overridden via two ways:
 #
 import os
 import sys
+from getpass import getuser
+from socket import getfqdn
+#
+# Third-party imports.
+#
+import arrow
 #
 # Local imports
 #
@@ -33,12 +39,14 @@ class BaseConfig(object):
     configuration object.
     """
     #
-    # Usually these paths should be absolute, but for testing these
-    # are relative to the PWD of the lorax process.
+    # These paths may be made absolute.  If relative, they are relative
+    # to start directory.  For use with the provided supervisord configuration,
+    # they are relative to the virtual environment head at sys.prefix.
     #
     DATA_PATH = 'data/'
     LOG_PATH = 'var/log/'
-    DIR_MODE = 0o755
+    PROCESS_UMASK = '022'
+    DIR_MODE = 0o755 # Note interaction with process umask
     #
     # The DEBUG parameter has multiple implications:
     #           * access to python debugging via flask
@@ -105,14 +113,39 @@ class BaseConfig(object):
         }
     }
     #
-    # Deployment definitions.
+    # Binaries.
     #
-    VENV_PATH = ''
-    NO_BINARIES = False
-    CONDA_VENV = 'loraxenv'
+    NO_BINARIES = False # If True, FastTree will not be built
     FASTTREE_EXE = 'FastTree-lorax'
     RAXML_EXE = 'raxmlHPC'
-    USER = 'loraxuser'
+    #
+    # Deployment definitions.  These should be set in environmental
+    # variables and are included here to document them.
+    #
+    VENV_PATH = ''
+    CONDA_VENV = ''
+    #
+    # Current run.
+    #
+    USER = getuser()
+    HOSTNAME = getfqdn()
+    DATETIME = arrow.now().format('YYYY-MM-DD HH:mm:ss')
+    #
+    # supervisord defs.
+    #
+    SUPERVISORD_PORT = 58928
+    SUPERVISORD_HOST = '127.0.0.1'
+    SUPERVISORD_USER = 'lorax'
+    SUPERVISORD_PASSWORD = 'monitor_password'  # set if not localhost
+    #
+    # redis defs.
+    #
+    REDIS_PORT = 58929
+    #
+    # crashmail defs.
+    #
+    CRASHMAIL_EMAIL = 'joelb@ncgr.org'
+    CRASHMAIL_EVENTS = 'PROCESS_STATE_EXITED'
     #
     # Logging formatter.  Fields that are defined are:
     #    asctime: Time with too much precision

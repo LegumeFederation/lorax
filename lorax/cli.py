@@ -15,6 +15,7 @@ from datetime import datetime
 from distutils.util import strtobool
 from pydoc import locate
 from pathlib import Path  # python 3.4 or later
+from string import Template
 #
 # third-party imports.
 import click
@@ -253,7 +254,7 @@ def test_logging():
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
 def copy_test_files(force):
-    """Copy files test files to the current working directory.
+    """Copy test files to the current directory.
 
     :return:
     """
@@ -269,6 +270,7 @@ def copy_test_files(force):
                 current_app.logger.error(
                     'File %s already exists.  Use --force to overwrite.',
                     filename)
+                sys.exit(1)
             with file_path.open(mode='wb') as fh:
                 fh.write(data)
 
@@ -277,21 +279,56 @@ def copy_test_files(force):
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
 def create_instance(force):
-    """Creates templated versions of instance files in the working directory.
+    """Creates instance files in sys.prefix.
 
     :return:
     """
     configure_logging(current_app)
-    test_files = pkg_resources.resource_listdir(__name__, 'instance')
-    for filename in test_files:
-        path_string = 'test/' + filename
-        if not pkg_resources.resource_isdir(__name__, path_string):
-            current_app.logger.info('Creating file %s":', filename)
-            data = pkgutil.get_data(__name__, 'test/' + filename)
-            file_path = Path(filename)
-            if file_path.exists() and not force:
-                current_app.logger.error(
-                    'File %s already exists.  Use --force to overwrite.',
-                    filename)
-            with file_path.open(mode='wb') as fh:
-                fh.write(data)
+    out_path = Path(sys.prefix)
+    current_app.logger.info('Configuring instance at "%s".', str(out_path))
+    # Start by creating directories
+    dirs = ['data', 'etc', 'var/log', 'var/redis', 'var/run']
+    for dir in dirs:
+        out_dir = out_path/dir
+        if not out_dir.exists():
+            current_app.logger.info('Creating "%s" directory', out_dir)
+            out_dir.mkdir(parents=True)
+    files = ['run_lorax.py']
+    for filename in files:
+        data = pkgutil.get_data(__name__, 'instance/' + filename)
+        file_path = out_path / filename
+        if file_path.exists() and not force:
+            current_app.logger.error(
+                'File %s already exists.  Use --force to overwrite.',
+                filename)
+            sys.exit(1)
+        elif file_path.exists() and force:
+            operation = 'Overwriting'
+        else:
+            operation = 'Creating'
+        with file_path.open(mode='wb') as fh:
+            current_app.logger.info('%s file "%s".',
+                                    operation,
+                                    str(file_path))
+            fh.write(data)
+    templates = ['etc/supervisord.conf']
+    for filename in templates:
+        data = pkgutil.get_data(__name__, 'instance/'+ filename)
+        data_string = data.decode('UTF-8')
+        template = Template(data_string)
+        out_string = template.substitute(current_app.config)
+        file_path = out_path / filename
+        if file_path.exists() and not force:
+            current_app.logger.error(
+                'File %s already exists.  Use --force to overwrite.',
+                filename)
+            sys.exit(1)
+        elif file_path.exists() and force:
+            operation = 'Overwriting'
+        else:
+            operation = 'Creating'
+        with file_path.open(mode='wt') as fh:
+            current_app.logger.info('%s file "%s" from template.',
+                                    operation,
+                                    str(file_path))
+            fh.write(out_string)

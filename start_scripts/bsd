@@ -1,0 +1,29 @@
+#!/bin/sh
+
+. /etc/rc.subr
+
+name="lorax"
+rcvar="lorax_enable"
+
+command="/usr/local/www/lorax/bin/run_in_lorax_env"
+command_args="supervisord"
+
+pidfile="/usr/local/www/lorax/var/run/lorax.pid"
+
+required_files="/usr/local/www/lorax/etc/supervisord.conf /usr/local/www/lorax/run_lorax.py"
+
+required_dirs="/usr/local/www/lorax/var/log /usr/local/www/lorax/var/redis /usr/local/www/lorax/var/run"
+
+sig_reload="USR1"
+
+extra_commands="reload supervisorctl"
+
+supervisorctl_cmd="lorax_supervisorctl"
+
+lorax_supervisorctl()
+{
+	/usr/local/www/lorax/bin/run_in_lorax_env supervisorctl
+}
+
+load_rc_config $name
+run_rc_command "$1"
