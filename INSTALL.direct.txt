@@ -1,0 +1,33 @@
+lorax will run in python 3.4 and up.  Testing took place under python3.6.
+We recommend that you start the installation by making sure your root
+python installation is up-to-date before creating a virtual environment
+(which may get updated by pip in a non-maintainable way).  Although it is
+ possible to run lorax directly from the root installation,
+it is not advisable to do so because lorax's dependencies could break other
+python packages you may wish to install.
+
+You will need a working "virtualenv" package for the python version you
+wish to use.  I prefer to use the name "loraxenv" for the virtual
+environment to prevent confusion between package and environment names.
+You should create this environment as the user under which you intend the
+web server to run, using the python version you wish to use selected
+as default, with the following commands:
+
+	virtualenv loraxenv
+	cd loraxenv
+	source bin/activate
+	pip install -U setuptools # may produce an error, proceed anyway
+	pip install numpy
+	pip install biopython
+	pip install --global-option=build_py lorax
+	pip install git+git://github.com/Supervisor/supervisor.git@2c601db
+	pip install superlance setuptools-scm
+
+Next, we define a command of convenience for running a script that
+defines two environmental variables and activates the correct virtual
+environment from _outside_ the virtual environment:
+
+    alias runinenv="${CONDA_PREFIX}/bin/run_in_lorax_env"
+    deactivate
+
+Next, follow the instructions in INSTALL.configure+run.txt.

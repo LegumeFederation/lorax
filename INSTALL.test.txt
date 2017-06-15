@@ -1,0 +1,15 @@
+To test lorax, issue the commands:
+
+	mkdir test_lorax # could be any name, will be deleted later
+    cd test_lorax
+	runinenv lorax create_test_files
+	./test_all.sh
+
+If the installation went properly, the last command should finish with
+"lorax test completed successfully."
+
+You may also wish to load a full-sized data model to work with.  The
+script "get_big_model.sh" will do that for you.  The model of 12
+legume genomes (against the phytozome 10.2 HMM's) is rather big
+at 900 MB of downloads and some 7 GB of data when loaded, so expect
+this to take a while (about 30 minutes on a core i7 with SSD).

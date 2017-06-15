@@ -48,6 +48,7 @@ hmmpath=$2
 # Loop over FASTA files, POST FASTA and PUT HMM.
 #
 nfiles=`ls ${fastapath} | wc -l`
+echo "" > families.txt
 let count=0
 for seqfile in ${fastapath}/* ; do
         let count=${count}+1
@@ -68,4 +69,10 @@ for seqfile in ${fastapath}/* ; do
 		echo "PUT of HMM failed on ${fam}"
 		exit 1
 	fi
+	echo "$fam">>families.txt
 done
+if [ "$_Q" -ne 0 ]; then
+  echo "" # newline after progress bar
+done
+echo "list of families can be found in families.txt"
+

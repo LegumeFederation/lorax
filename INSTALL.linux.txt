@@ -1,0 +1,26 @@
+Installation of lorax under linux can be done either directly via the 
+virtualenv package or indirectly via Anaconda Python and packages in the
+bioconda channel.  Which path you choose depends on your preferences.
+
+Using a direct install (via virtualenv) gives you the most control over
+what happens.  You may specify the directory you would like the virtual
+environment to use, and you may control the building of the binaries.
+Note that the FastTree binary is built by lorax at setup time; this
+design choice was dictated by distrust of FastTree being built correctly
+(with OpenMP and double-precision calculations enabled) on most platforms,
+a problem made worse by the lack of configuration files for FastTree).
+If you choose the direct option, you will have to make sure that the binaries
+for HMMer3.1_beta2 and RAxML are installed correctly for your distribution,
+as well as biopython and its dependencies. The advantage that comes with this
+hassle is that quite a bit of computational time may be spent running those
+binaries (particularly RAxML), so you may wish to build them from source to take
+advantage of the processor features (e.g., AVX) specific to your machine.
+If you choose the direct install route and if you use the Gentoo source
+distribution, you may wish to take advantage
+ of the ebuilds in the ebuilds/ directory are used for installation of lorax
+under Gentoo.  They are intended to go in a local overlay under dev-python/.
+If you will do a direct install, follow the directions in INSTALL.direct.txt.
+
+If you are a casual user of lorax, installation from Anaconda Python will
+get you up and running more quickly.  Follow the directions in 
+INSTALL.anaconda.txt.

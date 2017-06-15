@@ -4,7 +4,8 @@ is done via "source activate ENV" where ENV is the name of the
 environment you created.  Then issue the following commands:
 
 	run_in_lorax_env supervisorctl shutdown
-	pip install -U lorax
+        pip uninstall lorax
+	pip install --no-cache-dir lorax
 	run_in_lorax_env configure_instance --force
         run_in_lorax_env supervisord; sleep 10
 	run_in_lorax_env supervisorctl status

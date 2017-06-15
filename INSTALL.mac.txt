@@ -24,4 +24,9 @@ ensure that the Anaconda Python bin/ directory is prepended to your path in
 ~/.bash_profile or else you will have to prepend it manually before continuing
 the installation and every time you wish to use lorax.
 
-Next, proceed with the instructions for installing via Anaconda Python.
+To continue the installation, follow the instructions in INSTALL.anaconda.txt.
+We recommend installing lorax on the Mac via Anaconda Python because of the
+complexities of building required binaries (biopython, FastTree, HMMer).
+With Anaconda Biopython, most of the work is handled by the bioconda channel.
+Building the requirements yourself is possible but unsupported.
+

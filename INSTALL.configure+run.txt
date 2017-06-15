@@ -1,0 +1,27 @@
+We now configure lorax.  The first command will print a large number of
+configuration variables.  If you wish to change any of them, do it before
+issuing the "configure_instance" command, which will write the startup
+configurations which include such things as port numbers and which processes
+to start.  Configuration may be done either via the "lorax config" command
+or via environmental variables.  In particular the "LORAX_MODE" environmental
+variable controls the setting of multiple variables in defining which processes
+will get started.
+
+	runinenv lorax config
+	runinenv lorax configure_instance
+
+Now it is time to run lorax and associate processes:
+
+	runinenv supervisord; sleep 10
+	runinenv supervisorctl status
+
+The first command daemonizes lorax and 4 associated commands.  The last
+should return a list of 5 commands, all with status RUNNING.  When
+you wish to shut down the lorax-related processes, you may issue the
+command:
+
+    runinenv supervisorctl shutdown
+
+or simply issue "killall supervisord".
+
+Next, follow the instructions for testing in INSTALL.test.txt.

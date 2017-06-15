@@ -61,44 +61,4 @@ environment from _outside_ the virtual environment:
     alias runinenv="${CONDA_PREFIX}/bin/run_in_lorax_env"
     source deactivate
 
-We now configure lorax.  The first command will print a large number of
-configuration variables.  If you wish to change any of them, do it before
-issuing the "configure_instance" command, which will write the startup
-configurations which include such things as port numbers and which processes
-to start.  Configuration may be done either via the "lorax config" command
-or via environmental variables.  In particular the "LORAX_MODE" environmental
-variable controls the setting of multiple variables in defining which processes
-will get started.
-
-	runinenv lorax config
-	runinenv lorax configure_instance
-
-Now it is time to run lorax and associate processes:
-
-	runinenv supervisord; sleep 10
-	runinenv supervisorctl status
-
-The first command daemonizes lorax and 4 associated commands.  The last
-should return a list of 5 commands, all with status RUNNING.  When
-you wish to shut down the lorax-related processes, you may issue the
-command:
-
-    runinenv supervisorctl shutdown
-
-or simply issue "killall supervisord".
-
-To test lorax, issue the commands:
-
-	mkdir test_lorax # could be any name, will be deleted later
-    cd test_lorax
-	runinenv lorax create_test_files
-	./test_all.sh
-
-If the installation went properly, the last command should finish with
-"lorax test completed successfully."
-
-You may also wish to load a full-sized data model to work with.  The
-script "get_big_model.sh" will do that for you.  The model of 12
-legume genomes (against the phytozome 10.2 HMM's) is rather big
-at 900 MB of downloads and some 7 GB of data when loaded, so expect
-this to take a few hours.
+Next, follow the instructions in INSTALL.configure+run.txt.
