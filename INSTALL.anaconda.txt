@@ -8,71 +8,97 @@ may be obtained by the following:
 	conda config --add channels defaults
 	conda config --add channels bioconda
 
-After the channels are configured, create a virtual environment for lorax
-to use.  I prefer to use the name "loraxenv" for this environment to prevent
-confusion between package and environment names.  You should create this
-environment as the user you intend the web server to run as.
+After the channels are configured, update the installation by issuing the command:
 
-	export LORAX_CONDA_VENV=loraxenv
-	conda create -y --name $LORAX_CONDA_VENV biopython click croniter \
-           flask freetype gunicorn  msgpack-python raxml redis \
+	conda update --all
+
+This command usually results in several packages being superseded and updated.
+
+Although it is possible to run lorax directly from the main Anaconda installation,
+it is not advisable to do so because lorax's dependencies could break other python
+packages you may wish to install.  For this reason, it is preferable to create a
+python virtual environment where lorax and its dependencies live.
+I prefer to use the name "loraxenv" for this environment to prevent
+confusion between package and environment names.  You should create this
+environment as the user under which you intend the web server to run, using the
+following commands:
+
+	conda create -y --name loraxenv biopython click croniter \
+           flask freetype gunicorn hmmer msgpack-python raxml redis \
            redis-py itsdangerous jinja2 markupsafe six werkzeug
-	source activate $LORAX_CONDA_VENV
+	source activate loraxenv
 	
-If you are installing under MacOS (and only under MacOS), the following
-is also needed:
+If you are installing under MacOS (and only under MacOS), gcc and libgcc
+MUST be installed in the current virtual environment:
+
 	conda install gcc libgcc
 
-Next one needs setuptools and gunicorn of later  version than that included
-in anaconda and supervisord > 4.0 (which currently only exists in github:
+With the current conda version (4.3.21), there are three packages in the default
+channels that are too old for use with lorax: setuptools (27.2.0, should be >30.3.0)
+markupsafe (0.23, should be 1.0.0),  
+and gunicorn (19.1.0, should be 19.7.1).  Updating setuptools in the root installation
+has the possible side effect of breaking any further Anaconda installations, which
+is why lorax needs to be installed in a virtual environment.  To update these
 
-	pip install https://github.com/Supervisor/supervisor/zipball/master
-	pip install superlance
-	pip install -U gunicorn
+	pip install -U gunicorn markupsafe
 	pip install -U setuptools
 
 The last command produces an error; don't be worried by it.  Now we are ready
  to install lorax itself:
 
 	pip install --global-option=build_py lorax
-	alias runinenv=${CONDA_PREFIX}/bin/run_in_lorax_env
-	source deactivate
 
-At this point, you are outside the virtual environment with an alias
-to run_in_lorax_env inside the virtual environment.  That script, in
-turn depends on a single environmental variable (LORAX_CONDA_VENV) to
-function properly. We now configure lorax:
+Now pick up some dependencies that pip may not have installed
+properly from requirements.txt:
 
-	# inspect config variables, all 76 of them
-	runinenv lorax config 
-	# example config if IP other than localhost is desired
-	# runinenv lorax config host MYHOSTIP
-	runinenv lorax create_instance
+	pip install git+git://github.com/Supervisor/supervisor.git@2c601db
+	pip install superlance setuptools-scm
+
+Next, we define a command of convenience for running a script that
+defines two environmental variables and activates the correct virtual
+environment from _outside_ the virtual environment:
+
+    alias runinenv="${CONDA_PREFIX}/bin/run_in_lorax_env"
+    source deactivate
+
+We now configure lorax.  The first command will print a large number of
+configuration variables.  If you wish to change any of them, do it before
+issuing the "configure_instance" command, which will write the startup
+configurations which include such things as port numbers and which processes
+to start.  Configuration may be done either via the "lorax config" command
+or via environmental variables.  In particular the "LORAX_MODE" environmental
+variable controls the setting of multiple variables in defining which processes
+will get started.
+
+	runinenv lorax config
+	runinenv lorax configure_instance
 
 Now it is time to run lorax and associate processes:
 
-	runinenv supervisord
-	sleep 9
+	runinenv supervisord; sleep 10
 	runinenv supervisorctl status
 
 The first command daemonizes lorax and 4 associated commands.  The last
-should return a list of 5 commands, all with status RUNNING.  The easiest
-way to kill the daemonized server processes is to kill the supervisord
-process (with "killall" on linux).
+should return a list of 5 commands, all with status RUNNING.  When
+you wish to shut down the lorax-related processes, you may issue the
+command:
 
-Note that to start lorax from outside the virtual environment (e.g., from an rc
-script) one can issue the commanda:
-        export LORAX_CONDA_VENV="loraxenv"
-	/path/to/loraxenv/bin/run_in_lorax_env supervisord
+    runinenv supervisorctl shutdown
 
-To test lorax, from inside the virtual environment issue the commands:
-	mkdir loraxtest # could be any name, will be deleted later
-        cd loraxtest
+or simply issue "killall supervisord".
+
+To test lorax, issue the commands:
+
+	mkdir test_lorax # could be any name, will be deleted later
+    cd test_lorax
 	runinenv lorax create_test_files
-	chmod 755 *.sh
-	source lorax_envvars.sh
 	./test_all.sh
 
 If the installation went properly, the last command should finish with
 "lorax test completed successfully."
 
+You may also wish to load a full-sized data model to work with.  The
+script "get_big_model.sh" will do that for you.  The model of 12
+legume genomes (against the phytozome 10.2 HMM's) is rather big
+at 900 MB of downloads and some 7 GB of data when loaded, so expect
+this to take a few hours.

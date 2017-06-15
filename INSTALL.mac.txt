@@ -1,0 +1,27 @@
+lorax has been tested under macOS Sierra (10.12.5).  The minimum version for
+proper function of Anaconda Python is MacOS 10.12.3.  
+
+Installation of lorax currently requires use of git. To test if you have git 
+installed, open a terminal window (under Applications -> Utilities) and issue
+the command:
+	
+	git --version 
+
+If this produces an error, the easiest way to install git is by installing the
+XCode command-line tools, part of the XCode utilities, which are available for
+free (but large) download from the App Store.
+
+Once you have git installed, install Anaconda Python by visiting the URL
+https://www.continuum.io/downloads.  You will want Python 3.6, for which the
+current version is 4.4.0.  You must use a 64-bit version.  The command-line 
+installer is fine, and 25% smaller.  When you have downloaded the installer,
+issue the following command from a terminal window in the Downloads directory:
+
+	bash Anaconda3-<version>-MacOSX-x86_64.sh
+
+where <version> is the current version number.  As part of installation, please
+ensure that the Anaconda Python bin/ directory is prepended to your path in 
+~/.bash_profile or else you will have to prepend it manually before continuing
+the installation and every time you wish to use lorax.
+
+Next, proceed with the instructions for installing via Anaconda Python.

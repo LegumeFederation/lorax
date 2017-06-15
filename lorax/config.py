@@ -122,8 +122,7 @@ class BaseConfig(object):
     # Deployment definitions.  These should be set in environmental
     # variables and are included here to document them.
     #
-    VENV_PATH = ''
-    CONDA_VENV = ''
+    ROOT = ''
     #
     # Current run.
     #
@@ -147,6 +146,20 @@ class BaseConfig(object):
     CRASHMAIL_EMAIL = 'joelb@ncgr.org'
     CRASHMAIL_EVENTS = 'PROCESS_STATE_EXITED'
     #
+    # Controls of which processes get started by supervisord.
+    # Setting these to empty strings will cause the process to
+    # not be started.
+    #
+    ALIGNMENT_CONF = 'alignment.conf'
+    LORAX_CONF = 'lorax.conf'
+    REDIS_CONF = 'redis.conf'
+    TREEBUILDER_CONF = 'treebuilder.conf'
+    #
+    # Command to run the lorax server
+    #
+
+    #
+    #
     # Logging formatter.  Fields that are defined are:
     #    asctime: Time with too much precision
     #    levelname: Severity level.
@@ -163,18 +176,37 @@ class BaseConfig(object):
     FILE_LOG_FORMAT = '%(levelname)s: %(message)s'
 
 
-class DebugConfig(BaseConfig):
+class DevelopmentConfig(BaseConfig):
+    """Start lorax with internal server, no queues."""
     DEBUG = True
     TESTING = True
     RQ_ASYNC = False
+    # running synchronous means don't start queues
+    REDIS_CONF = ''
+    ALIGNMENT_CONF = ''
+    TREEBUILDER_CONF = ''
+    # start development server
+    LORAX_CONF = 'lorax-debug.conf'
 
 
-class TestConfig(BaseConfig):
-    TESTING = True
+class ServerOnlyConfig(BaseConfig):
+    """Start lorax and redis, no queues."""
+    ALIGNMENT_CONF = ''
+    TREEBUILDER_CONF = ''
 
 
-class ProductionConfig(BaseConfig):
-    QUIET = True
+class TreebuilderConfig(BaseConfig):
+    """Start treebuilder queue only."""
+    REDIS_CONF = ''
+    LORAX_CONF = ''
+    ALIGNMENT_CONF = ''
+
+
+class AlignerConfig(BaseConfig):
+    """Start alignment queue only"""
+    REDIS_CONF = ''
+    LORAX_CONF = ''
+    TREEBUILDER_CONF = ''
 
 
 #
@@ -183,9 +215,10 @@ class ProductionConfig(BaseConfig):
 #
 config_dict = {
     'default': 'lorax.config.BaseConfig',
-    'development': 'lorax.config.DebugConfig',
-    'testing': 'lorax.config.TestConfig',
-    'production': 'lorax.config.ProductionConfig'
+    'development': 'lorax.config.DevelopmentConfig',
+    'serverOnly': 'lorax.config.ServerOnlyConfig',
+    'treebuilder': 'lorax.config.TreebuilderConfig',
+    'aligner': 'lorax.config.AlignerConfig'
 }
 
 
@@ -196,12 +229,13 @@ def configure_app(app):
     :return:
     """
     #
-    config_name = os.getenv('LORAX_CONFIGURATION', 'default')
+    config_name = os.getenv('LORAX_MODE', 'default')
     if config_name not in config_dict:
-        print('ERROR -- configuration variable "%s" not known.' % config_name,
+        print('ERROR -- mode "%s" not known.' % config_name,
               file=sys.stderr)
         sys.exit(1)
     app.config.from_object(config_dict[config_name])
+    app.config['MODE'] = config_name
     #
     # Get instance-specific configuration, if it exists.
     #
@@ -227,6 +261,12 @@ def configure_app(app):
                 pass
         app.config[envvar] = value
     #
-    # Set version in config.
+    # Set version.
     #
     app.config['VERSION'] = __version__
+    #
+    # If root path has not been set,
+    # assume that it is sys.prefix.
+    #
+    if app.config['ROOT'] == '':
+        app.config['ROOT'] = sys.prefix

@@ -18,8 +18,9 @@ Example:
 Options:
       -v   verbose mode, shows all returns.
 
- Before running this script, lorax should be started in a
- separate window and the environmental variables LORAX_HOST
+ Before running this script, lorax should be started.
+ If the lorax server is running at an address other than the
+ default, the environmental variables LORAX_HOST
  and LORAX_PORT must be defined.
 "
 #
@@ -38,12 +39,10 @@ done
 # Get environmental variables.
 #
 if [ -z "$LORAX_HOST" ] ; then
-	echo "Must set LORAX_HOST before running this script."
-	exit 1
+	LORAX_HOST=localhost
 fi
 if [ -z "$LORAX_PORT" ] ; then
-	echo "Must set LORAX_PORT before running this script."
-	exit 1
+	LORAX_PORT=58927
 fi
 #
 # Parse arguments
@@ -52,9 +51,9 @@ if [ "$#" -lt 4 ]; then
 	echo "$DOC"
 	exit 1
 fi
-if [[ $1 == "peptide" ]] ; then
+if [ "$1" == "peptide" ] ; then
 	type="peptide"
-elif [[ $1 == "DNA" ]]; then
+elif [ "$1" == "DNA" ]; then
 	type="DNA"
 else
 	echo "TYPE must be either \"peptide\" or \"DNA\"."
@@ -71,9 +70,9 @@ if [ -z "$3" ] ; then
 	echo "$DOC"
 	exit 1
 fi
-if [[ $4 == "sequences" ]]; then
+if [ "$4" == "sequences" ]; then
 	target="sequences"
-elif [[ $4 == "alignment" ]]; then
+elif [ "$4" == "alignment" ]; then
 	target="alignment"
 else
 	echo "TARGET must be either \"sequences\" or \"alignment\"."
@@ -92,8 +91,8 @@ full_target="/trees/${3}/${target}"
 tmpfile=$(mktemp /tmp/post_FASTA.XXX)
 status=$(curl -s -o ${tmpfile} -w '%{http_code}' -F "${type}=@${2}" ${LORAX_HOST}:${LORAX_PORT}${full_target})
 if [ "${status}" -eq "${code}" ]; then
-   echo "POST of ${2} to ${full_target} returned HTTP code ${status} as expected."
    if [ "$_V" -eq 1 ]; then
+      echo "POST of ${2} to ${full_target} returned HTTP code ${status} as expected."
       echo "Response is:"
       cat ${tmpfile}
       echo ""

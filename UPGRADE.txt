@@ -1,0 +1,19 @@
+To upgrade from a previous version of lorax, start by activating
+the virtual environment that you used.  For Anaconda Python, this
+is done via "source activate ENV" where ENV is the name of the 
+environment you created.  Then issue the following commands:
+
+	run_in_lorax_env supervisorctl shutdown
+	pip install -U lorax
+	run_in_lorax_env configure_instance --force
+        run_in_lorax_env supervisord; sleep 10
+	run_in_lorax_env supervisorctl status
+
+Then create a new test directory or go to the old one and issue the
+following commands:
+
+	run_in_lorax_env create_test_files --force
+	source deactivate
+	./test_all.sh
+
+This command should finish with "lorax test completed successfully".

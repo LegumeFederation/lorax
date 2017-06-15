@@ -28,15 +28,13 @@ do
    esac
 done
 #
-# Check environmental variables
+# If environmental variables not set, use defaults.
 #
 if [ -z "$LORAX_HOST" ] ; then
-	echo "Must set LORAX_HOST before running this script"
-	exit 1
+	export LORAX_HOST=localhost
 fi
 if [ -z "$LORAX_PORT" ] ; then
-	echo "Must set LORAX_PORT before running this script"
-	exit 1
+	export LORAX_PORT=58927
 fi
 #
 # Functions

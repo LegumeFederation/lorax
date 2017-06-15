@@ -28,12 +28,10 @@ done
 # Get environmental variables.
 #
 if [ -z "$LORAX_HOST" ] ; then
-	echo "Must set LORAX_HOST before running this script"
-	exit 1
+	LORAX_HOST=localhost
 fi
 if [  -z "$LORAX_PORT" ] ; then
-	echo "Must set LORAX_PORT before running this script"
-	exit 1
+	LORAX_PORT=58927
 fi
 if [ ! -f "$1" ] ; then
 	echo "Must specify a readable HMM file."
@@ -68,8 +66,8 @@ full_target="/trees/${2}/HMM"
 tmpfile=$(mktemp /tmp/put_HMM.XXX)
 status=$(curl -s -o ${tmpfile} -w '%{http_code}' -T "${1}" ${LORAX_HOST}:${LORAX_PORT}${full_target})
 if [ "${status}" -eq "${code}" ]; then
-   echo "PUT of ${1} to ${full_target} returned HTTP code ${status} as expected."
-   if [[ ${_V} -eq 1 ]]; then
+   if [ $_V -eq 1 ]; then
+     echo "PUT of ${1} to ${full_target} returned HTTP code ${status} as expected."
       echo "Response is:"
       cat ${tmpfile}
       echo ""

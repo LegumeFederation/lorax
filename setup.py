@@ -1,20 +1,26 @@
 # -*- coding: utf-8 -*-
-"""
-lorax -- speaks for the (phylogenetic) trees.
-"""
+#
+# This file is part of lorax
+# Copyright (C) 2017, NCGR.
+#
+# lorax is free software; you can redistribute it and/or modify
+# it under the terms of the 3-Clause BSD License; see LICENSE.txt
+# file for more details.
+#
+"""lorax -- speaks for the (phylogenetic) trees."""
 #
 # Developers, install with
 #    python setup.py develop
 #
 from distutils.cmd import Command
 import distutils.log as logger
+from os import environ as environ
 import platform
 import shutil
 import subprocess
 import sys
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command import build_py, develop, install
-from os import environ as environ
 # restrict to python 3.4 or later
 if sys.version_info < (3, 4, 0, 'final', 0):
     raise SystemExit("lorax requires python 3.4 or higher.")
@@ -77,10 +83,15 @@ class BuildFasttreeCommand(Command):
         raise SystemError("Unable to compile FastTree.")
     if platform.system() == 'Darwin':
         logger.info('fixing library file paths in MacOS executable')
+        gomp_name = 'libgomp.1.dylib'
+        gomp_path  = Path(sys.prefix)/'lib'/gomp_name
+        if not gomp_path.exists():
+            logger.error('libgcc must be in the virtual environment')
+            raise SystemError("Unable to resolve paths in MacOS executable")
         subprocess.check_call(['install_name_tool',
                                '-change',
-                               '@rpath/libgomp.1.dylib',
-                               sys.prefix+'/lib/libgomp.1.dylib',
+                               '@rpath/'+gomp_name,
+                               str(gomp_path),
                                str(BINARY_PATH/FASTTREE_BINARY)],
                               )
 
@@ -153,7 +164,33 @@ class InstallCommand(install.install):
 # anaconda setuptools is too old, so it is strongly
 # urged that lorax be installed in a virtual environment.
 #
+tests_require = [
+    'check-manifest>=0.25',
+    'coverage>=4.0',
+    'isort>=4.2.2.2',
+    'pydocstyle>=1.0.0',
+    'pytest-cache>=1.0',
+    'pytest-cov>=1.8.0',
+    'pytest-pep8>=1.0.6',
+    'pytest>=2.8.0'
+]
+
+extras_require = {
+    'docs': ['Sphinx>=1.4.2'
+             ],
+    'tests': tests_require,
+
+}
+
+extras_require['all'] = []
+for reqs in extras_require.values():
+    extras_require['all'].extend(reqs)
+
+packages = find_packages()
+
 setup(
+    description=__doc__,
+    packages=packages,
     setup_requires=['packaging',
                     'setuptools>30.3.0',
                     'setuptools-scm>1.5'
@@ -172,5 +209,7 @@ setup(
         'version_scheme': 'guess-next-dev',
         'local_scheme': 'dirty-tag',
         'write_to': 'lorax/version.py'
-    }
+    },
+    extras_require=extras_require,
+    tests_require=tests_require,
 )

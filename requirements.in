@@ -3,4 +3,4 @@ Flask_RQ2[cli]
 biopython
 rq-dashboard
 gunicorn
-superlance
+setuptools-scm>1.5

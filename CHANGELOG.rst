@@ -3,7 +3,19 @@ Changelog
 
 .. snip
 
+0.94
+~~~~
 
+- ``run_in_lorax_env`` script created to define the two required
+  environmental variables and activate the virtual environment
+  from either Anaconda or normal versions.
+
+- ``configure_instance`` command defined to configure the supervisord
+  scripts.
+
+- Supervisord is now used to start lorax and associated version.  
+  supervisord>4.0 (currently only from git) is required due to python3
+  requirement.
 
 - Setuptools >30 is now required, due to moving many things into setup.cfg.
 

@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# PROVIDE: lorax
+
+. /etc/rc.subr
+
+name="lorax"
+rcvar="set_rcvar"
+start_cmd="lorax_start"
+stop_cmd="lorax_stop"
+
+load_rc_config $name
+
+command="${venv_dir}/run_in_lorax_env"
+command_args="supervisord"
+
+pidfile="${venv_dir)/var/run/lorax.pid"
+required_files="${venv_dir}/etc/supervisord.conf ${venv_dir}/run_lorax.py"
+required_dirs="${venv_dir}/var/log ${venv_dir}/var/redis ${venv_dir}/var/run"
+sig_reload="USR1"
+extra_commands="reload status"
+
+status="lorax_status"
+
+lorax_start()
+{
+ ${venv_dir}/bin/run_in_lorax_env supervisord
+}
+
+lorax_stop()
+{
+ ${venv_dir}/bin/run_in_lorax_env supervisorctl shutdown
+}
+
+lorax_status()
+{
+ ${venv_dir}/bin/run_in_lorax_env supervisorctl status
+}
+
+run_rc_command "$1"

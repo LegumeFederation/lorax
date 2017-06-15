@@ -1,21 +1,28 @@
 #!/bin/bash
-# Run a command in the lorax virtual environment.
+#
+# Run a command in the virtual environment in which lorax was installed,
+# whether that virtual environment was created by conda or by the
+# virtualenv package.
+#
+# If the virtual environment is already activated, the only side-effect of
+# this script is to set some environmental variables.  If the virtual
+# environment is not activated, it will be activated before running the
+# command (and deactivated at the end of this script).
 #
 # Usage:
 #        run_in_lorax_env [-v] COMMAND
 #
 # Environmental variables:
-#       LORAX_CONDA_VENV--If using an anaconda virtual environment,
-#                         this variable should be set to the name of it.
-#       LORAX_VENV_PATH--If set, must point at the root of a 
-#                        virtual environment.  If not set, this script
-#                        should be placed in the virtual environment
-#                        bin directory, and this script will set it.
+#       FLASK_APP   Will be set to "lorax"
+#       LORAX_ROOT  Will be set to the parent of this directory this file
+#                   resides in.
 #                         
-# Useful in running supervisord.
+# Useful in running supervisord, supervisorctl, and other lorax commands.
 #
 #
-export FLASK_APP="lorax"
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
 _V=0
 if [ "$1" == "-v" ]; then
 	_V=1
@@ -31,53 +38,82 @@ fi
 command=( "$@" )
 shift $#
 #
-# If LORAX_VENV_PATH is not set, then:
-#    1. Check to see sys.real_prefix is defined.  If so, we are in
-#       a linux virtual environment already and sys.prefix is the virtual
-#       environment path.
-#    2. Else check to see if CONDA_PREFIX is defined.  If so, we are in
-#       a conda virtual environment and we should set LORAX_CONDA_VENV.
-#    3. Else if LORAX_CONDA_VENV is set activate that virtual environment.
-#    4. Else if an executable called "activate" exists in the same directory
-#       as this script, run it.
+# Set environmental variables.
 #
-sys_prefix=`python -c 'import sys; print(sys.prefix)'`
-real_prefix=`python -c 'import sys; print(hasattr(sys, "real_prefix"))'`
-if [ "$real_prefix" == "True" ]; then # in a venv already
-    if [ -z "${LORAX_VENV_PATH+x}" ]; then
-        export LORAX_VENV_PATH="$sys_prefix"
-    fi
-elif [ ! -z "${CONDA_PREFIX+x}" ]; then # in a conda venv already
-    export LORAX_VENV_PATH="$CONDA_PREFIX"
-    export LORAX_CONDA_VENV="$CONDA_DEFAULT_ENV"
-elif [ ! -z "${LORAX_CONDA_VENV+x}" ]; then # activate conda venv
-      source activate ${LORAX_CONDA_VENV}
-      export LORAX_VENV_PATH="$CONDA_PREFIX"
-      export LORAX_CONDA_VENV="$CONDA_DEFAULT_ENV"
-elif [ ! -z "${LORAX_VENV_PATH+x}" ]; then # activate requested venv
-      source ${LORAX_VENV_PATH}/bin/activate
-      export LORAX_CONDA_VENV="$CONDA_DEFAULT_ENV"
+script_path=`realpath "$BASH_SOURCE"`
+bin_dir=`dirname "$script_path"`
+venv_path=`dirname "${bin_dir}"`
+export LORAX_ROOT="$venv_path"
+export FLASK_APP="lorax"
+#
+# Check to see if environment is Anaconda python.  If so, check to see
+# if the environment is already active.  If not, find the
+# name of the virtual environment corresponding to the installation
+# directory and "source activate" it before running COMMAND.
+#
+# If the environment is not Anaconda python, check to see if the
+# environment is a virtual one.  If so, go ahead and run COMMAND.
+# If not a virtual environment and if an "activate" script is found
+# in the directory with this script, source the activate script
+# before running this command.
+#
+if [ -x "${bin_dir}/conda" ]; then # This is Anaconda python
+   venv_type="conda"
+   active_env=`${bin_dir}/conda env list | grep \* | awk '{print $3}'`
+   active_env_name=`${bin_dir}/conda env list | grep \* | awk '{print $1}'`
+   if [ "$active_env" == "$venv_path" ]; then # already in environment
+        in_venv=1
+        if [ -z "$CONDA_DEFAULT_ENV" ] ; then
+           my_env_name=active_env_name
+        else
+           my_env_name="$CONDA_DEFAULT_ENV"
+        fi
+   else
+      # conda environment needs activation, discover its name
+      environments=`${bin_dir}/conda env list | grep -v \# | grep -v \*`
+      while read -r envline; do
+         env_path=`echo ${envline} | awk '{print $2}'`
+         env_name=`echo ${envline} | awk '{print $1}'`
+         if [ "$env_path" == "$venv_path" ]; then
+            my_env_name="$env_name"
+            break
+         fi
+      done <<< "$environments"
+      if [ -z "$my_env_name" ] ; then
+        echo "ERROR -- conda virtual environment not properly configured"
+        exit 1
+      fi
+      source activate ${my_env_name}
+   fi
 else
-       pushd `dirname "${BASH_SOURCE[0]}"` >/dev/null
+    # environment was not created by anaconda, inheritance works differently
+    venv_type="normal"
+    sys_prefix=`python -c 'import sys; print(sys.prefix)'`
+    real_prefix=`python -c 'import sys; print(hasattr(sys, "real_prefix"))'`
+    if [ "$real_prefix" == "True" ]; then # in a venv already
+        in_venv=1
+    else
+       pushd "$bin_dir" >/dev/null
        if [ -x ./activate ]; then # activate venv in script directory
+          in_venv=1
+          my_venv_name="$venv_path"
           source ./activate
        fi
-       export LORAX_VENV_PATH=`dirname $(pwd)`
-       export LORAX_CONDA_VENV="$CONDA_DEFAULT_ENV"
        popd >/dev/null
+    fi
 fi
 #
 # Echo the results if verbose.
 #
 if [ "$_V" -eq 1 ]; then
-  if [ -z "${LORAX_VENV_PATH+x}" ]; then
-    environ="this environment"
+  if [ "$in_venv" -eq 1 ]; then
+    environ="${venv_type} ${my_venv_name} virtual environment"
   else
-    environ="${LORAX_VENV_PATH} virtual environment"
+    environ="real environment"
   fi
   echo "Executing \"${command[*]}\" in ${environ}."
 fi
 #
-# In virtual environment now, exec command.
+# In proper environment now, exec command.
 #
 ${command[*]}
