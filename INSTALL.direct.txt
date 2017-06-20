@@ -38,6 +38,7 @@ Next use pip to install dependencies:
 	pip install -U setuptools # may produce an error, proceed anyway
 	pip install numpy
 	pip install biopython
+	pip install gunicorn
 	pip install --global-option=build_py lorax
 	pip install git+git://github.com/Supervisor/supervisor.git@2c601db
 	pip install superlance setuptools-scm

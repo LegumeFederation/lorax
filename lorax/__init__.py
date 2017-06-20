@@ -89,7 +89,7 @@ configure_app(app)
 # Create a global RQ object, with dashboard at /rq.
 #
 rq = RQ(app)
-if not app.config['RQ_ASYNC']:
+if app.config['RQ_ASYNC']:
     app.config.from_object(rq_dashboard.default_settings)
     app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 
