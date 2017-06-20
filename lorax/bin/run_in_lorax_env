@@ -100,6 +100,7 @@ else
           source ./activate
        fi
        popd >/dev/null
+       export PATH=${bin_dir}:${PATH}  # prepend binary directory to path
     fi
 fi
 #

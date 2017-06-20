@@ -143,7 +143,7 @@ class BaseConfig(object):
     #
     # crashmail defs.
     #
-    CRASHMAIL_EMAIL = 'joelb@ncgr.org'
+    CRASHMAIL_EMAIL = getuser()
     CRASHMAIL_EVENTS = 'PROCESS_STATE_EXITED'
     #
     # Controls of which processes get started by supervisord.

@@ -1,6 +1,12 @@
-lorax was tested under Anaconda Python 3.6. Begin by downloading it and
-making sure that it is in your PATH.   
+Use Python 3.6
+--------------
+lorax was tested under Anaconda Python 3.6. As of this writing, there is
+no compelling reason to use earlier or later versions. Begin by downloading
+Anaconda Python 3.6 (the command-line installer is fine) and
+making sure that it is in your PATH.
 
+Configure Channels
+-------------------
 lorax requires some packages that are in non-default channels, which
 may be obtained by the following:
 
@@ -8,52 +14,64 @@ may be obtained by the following:
 	conda config --add channels defaults
 	conda config --add channels bioconda
 
-After the channels are configured, update the installation by issuing the command:
+After the channels are configured, update the installation by issuing:
 
 	conda update --all
 
-This command usually results in several packages being superseded and updated.
+This command usually results in several packages being updated.
 
-Although it is possible to run lorax directly from the main Anaconda installation,
-it is not advisable to do so because lorax's dependencies could break other python
-packages you may wish to install.  For this reason, it is preferable to create a
-python virtual environment where lorax and its dependencies live.
-I prefer to use the name "loraxenv" for this environment to prevent
-confusion between package and environment names.  You should create this
-environment as the user under which you intend the web server to run, using the
-following commands:
+Create a Virtualenv
+-------------------
+Although it is possible to run lorax directly from the root installation,
+it is not advisable to do so because lorax's dependencies could break other
+packages.  As of the current conda version (4.3.21), there are four packages
+in the channels that are too old for use with lorax:
+
+Package     Anaconda Version Required Version
+----------- ---------------- ----------------
+setuptools  27.2.0           >30.3.0)
+markupsafe  0.23             1.0.0
+gunicorn    19.1.0           19.7.1
+supervisor  3.3.2            4.0 (from git)
+
+Replacing setuptools, in particular, could cause breakage of your root
+Anaconda Python distribution. For this reason, it is required to create a
+python virtual environment for lorax and its dependencies. I prefer to name
+this environment "loraxenv" to prevent confusion between package and
+environment names.  You should create this environment as the user under which
+you intend the web server to run (using "sudo -u USER -i " if necessary),
+using the following commands:
 
 	conda create -y --name loraxenv biopython click croniter \
            flask freetype gunicorn hmmer msgpack-python raxml redis \
            redis-py itsdangerous jinja2 markupsafe six werkzeug
 	source activate loraxenv
-	
+
+
+Install gcc if using MacOSX
+---------------------------
 If you are installing under MacOS (and only under MacOS), gcc and libgcc
 MUST be installed in the current virtual environment:
 
 	conda install gcc libgcc
 
-With the current conda version (4.3.21), there are three packages in the default
-channels that are too old for use with lorax: setuptools (27.2.0, should be >30.3.0)
-markupsafe (0.23, should be 1.0.0),  
-and gunicorn (19.1.0, should be 19.7.1).  Updating setuptools in the root installation
-has the possible side effect of breaking any further Anaconda installations, which
-is why lorax needs to be installed in a virtual environment.  To update these
+Do pip installs
+---------------
+Next continue the installation by installing/updating dependencies:
 
 	pip install -U gunicorn markupsafe
 	pip install -U setuptools
+	pip install git+git://github.com/Supervisor/supervisor.git@2c601db
+	pip install superlance setuptools-scm
 
 The last command produces an error; don't be worried by it.  Now we are ready
  to install lorax itself:
 
 	pip install --global-option=build_py lorax
 
-Now pick up some dependencies that pip may not have installed
-properly from requirements.txt:
 
-	pip install git+git://github.com/Supervisor/supervisor.git@2c601db
-	pip install superlance setuptools-scm
-
+Create a temporary command alias
+---------------------------------
 Next, we define a command of convenience for running a script that
 defines two environmental variables and activates the correct virtual
 environment from _outside_ the virtual environment:
