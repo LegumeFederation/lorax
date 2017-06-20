@@ -48,14 +48,17 @@ hmmpath=$2
 # Loop over FASTA files, POST FASTA and PUT HMM.
 #
 nfiles=`ls ${fastapath} | wc -l`
-echo "" > families.txt
 let count=0
-for seqfile in ${fastapath}/* ; do
+echo -e "#family\tseqs\tavg_len" >families.tsv
+for seqfile in `ls -S ${fastapath}/*` ; do
         let count=${count}+1
         seqname=${seqfile##*/}
 	fam=${seqname%%.*}
+	nseqs=`grep \> ${seqfile} | wc -l`
+	nchars=`grep -v \> ${seqfile} | wc -c`
+	avg_len=`python -c "print(round(${nchargs}/${nseqs}))"`
 	if [ "$_V" -ne 0 ]; then
-		echo "creating family $fam"
+		echo "creating family ${fam} with ${nseqs} sequences of length ${avg_len}"
 	elif [ "$_Q" -eq 0 ]; then
 		ProgressBar ${count} ${nfiles}
 	fi
@@ -69,10 +72,10 @@ for seqfile in ${fastapath}/* ; do
 		echo "PUT of HMM failed on ${fam}"
 		exit 1
 	fi
-	echo "$fam">>families.txt
+	echo -e "${fam}\t${nseqs}\t${avg_len}">>families.tsv
 done
 if [ "$_Q" -ne 0 ]; then
   echo "" # newline after progress bar
-done
-echo "list of families can be found in families.txt"
+fi
+echo "Size-ordered (large to small) list of families can be found in families.txt"
 
