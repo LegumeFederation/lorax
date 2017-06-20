@@ -49,14 +49,14 @@ hmmpath=$2
 #
 nfiles=`ls ${fastapath} | wc -l`
 let count=0
-echo -e "#family\tseqs\tavg_len" >families.tsv
+echo -e "#family_name\tseqs\tavg_len" >families.tsv
 for seqfile in `ls -S ${fastapath}/*` ; do
         let count=${count}+1
         seqname=${seqfile##*/}
 	fam=${seqname%%.*}
 	nseqs=`grep \> ${seqfile} | wc -l`
 	nchars=`grep -v \> ${seqfile} | wc -c`
-	avg_len=`python -c "print(round(${nchargs}/${nseqs}))"`
+	avg_len=`python -c "print(int(round(${nchars}/${nseqs})))"`
 	if [ "$_V" -ne 0 ]; then
 		echo "creating family ${fam} with ${nseqs} sequences of length ${avg_len}"
 	elif [ "$_Q" -eq 0 ]; then
