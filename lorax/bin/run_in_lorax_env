@@ -46,6 +46,10 @@ venv_path=`dirname "${bin_dir}"`
 export LORAX_ROOT="$venv_path"
 export FLASK_APP="lorax"
 #
+# Execute this script in the installation working directory.
+#
+pushd "$venv_path" >/dev/null
+#
 # Check to see if environment is Anaconda python.  If so, check to see
 # if the environment is already active.  If not, find the
 # name of the virtual environment corresponding to the installation
@@ -93,14 +97,12 @@ else
     if [ "$real_prefix" == "True" ]; then # in a venv already
         in_venv=1
     else
-       pushd "$bin_dir" >/dev/null
-       if [ -x ./activate ]; then # activate venv in script directory
+       export PATH=${bin_dir}:${PATH}  # prepend binary directory to path
+       if [ -x ${bin_dir}/activate ]; then # activate venv in script directory
           in_venv=1
           my_venv_name="$venv_path"
-          source ./activate
+          source ${bin_dir}/activate
        fi
-       popd >/dev/null
-       export PATH=${bin_dir}:${PATH}  # prepend binary directory to path
     fi
 fi
 #
@@ -118,3 +120,7 @@ fi
 # In proper environment now, exec command.
 #
 ${command[*]}
+#
+# Restore working directory.
+#
+popd >/dev/null

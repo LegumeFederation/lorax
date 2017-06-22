@@ -24,7 +24,7 @@ from flask.cli import FlaskGroup
 #
 # Local imports.
 #
-from .version import version
+from .version import version as LORAX_VERSION
 from .logging import configure_logging
 
 #
@@ -36,14 +36,11 @@ COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.
 All rights reserved.
 """
 PROJECT_HOME = 'https://github.com/ncgr/lorax'
-
-
 #
 # CLI entry point.
 #
 @click.group(cls=FlaskGroup,
              epilog=AUTHOR + ' <' + EMAIL + '>. ' + COPYRIGHT + PROJECT_HOME)
-@click.version_option(version=version, prog_name=__name__)
 def cli():
     pass
 
@@ -108,15 +105,27 @@ def print_config_var(var, obj):
 
 
 @cli.command()
-@click.option('--vartype', help='Type of variable, if not previously defined.',
+@click.option('--vartype',
+              help='Type of variable, if not previously defined.',
               default=None)
 @click.option('--verbose/--no-verbose', help='Verbose provenance.')
+@click.option('--delete/--no-delete',
+              help='Deletes config file, arguments ignored.')
 @click.argument('var', required=False)
 @click.argument('value', required=False)
-def config(var, value, vartype, verbose):
-    """Gets or sets config variables."""
+def config(var, value, vartype, verbose, delete):
+    """Gets, sets, or deletes config variables."""
     config_file_path = Path(current_app.instance_path) / current_app.config[
         'SETTINGS']
+    if delete:
+        if config_file_path.exists():
+            print('Deleting config file %s.' %(str(config_file_path)))
+            config_file_path.unlink()
+            sys.exit(0)
+        else:
+            print('ERROR--config file %s does not exist.'
+                  %(str(config_file_path)))
+            sys.exit(1)
     if value is None:  # No value specified, this is a get.
         config_obj = types.ModuleType('config')  # noqa
         if config_file_path.exists():
@@ -164,7 +173,8 @@ def config(var, value, vartype, verbose):
         if var in current_app.config and vartype is None \
                 and not current_app.config[
                     var] is None:  # type defaults to current type
-            value_type = type(current_app.config[var])
+            old_value = current_app.config[var]
+            value_type = type(old_value)
         else:  # get type from command line, or str if not specified
             if vartype is None:
                 vartype = 'str'
@@ -215,8 +225,11 @@ typing rules.
             quote = '"'
         else:
             quote = ''
-        print('Setting %s to %s%s%s (type %s) \n in config file "%s".'
-              % (var, quote, value, quote, type(value).__name__,
+        print('%s was %s%s%s, now set to %s%s%s (type %s) \n in config file "%s".'
+              % (var,
+                 quote, old_value, quote,
+                 quote, value, quote,
+                 type(value).__name__,
                  str(config_file_path)))
         with config_file_path.open(mode='a') as config_fh:
             isodate = datetime.now().isoformat()[:-7]
@@ -226,17 +239,6 @@ typing rules.
                                                quote,
                                                isodate),
                   file=config_fh)  # noqa
-
-
-
-@cli.command()
-def delete_config():
-    """Deletes the config file."""
-    config_file_path = Path(current_app.instance_path) / current_app.config[
-        'SETTINGS']
-    if config_file_path.exists():
-        print('Deleting config file %s.' %(str(config_file_path)))
-        config_file_path.unlink()
 
 
 @cli.command()
@@ -278,12 +280,15 @@ def create_test_files(force):
 @cli.command()
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
-def configure_instance(force):
-    """Configuresinstance files in sys.prefix.
+def create_instance(force):
+    """Configures instance files in $LORAX_ROOT.
 
     :return:
     """
-    out_path = Path(sys.prefix)
+    if 'LORAX_ROOT' not in os.environ:
+        print('Environmental variable LORAX_ROOT must be defined.')
+        sys.exit(1)
+    out_path = Path(os.environ['LORAX_ROOT'])
     print('Configuring instance at "%s".' %str(out_path))
     # Start by creating directories
     dirs = ['data', 'etc', 'var/log', 'var/redis', 'var/run']
@@ -310,10 +315,11 @@ def configure_instance(force):
                   str(file_path)))
             fh.write(data)
     templates = ['etc/supervisord.conf',
-                 'etc/lorax.conf',
-                 'etc/alignment.conf',
-                 'etc/redis.conf',
-                 'etc/treebuilder.conf']
+                 'etc/lorax-supervisord.conf',
+                 'etc/alignment-supervisord.conf',
+                 'etc/redis-supervisord.conf',
+                 'etc/treebuilder-supervisord.conf',
+                 'var/redis/redis.conf']
     for filename in templates:
         data = pkgutil.get_data(__name__, 'instance/'+ filename)
         data_string = data.decode('UTF-8')

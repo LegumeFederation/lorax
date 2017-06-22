@@ -42,9 +42,7 @@ environment names.  You should create this environment as the user under which
 you intend the web server to run (using "sudo -u USER -i " if necessary),
 using the following commands:
 
-	conda create -y --name loraxenv biopython click croniter \
-           flask freetype gunicorn hmmer msgpack-python raxml redis \
-           redis-py itsdangerous jinja2 markupsafe six werkzeug
+	conda create -y --name loraxenv biopython click hmmer raxml redis
 	source activate loraxenv
 
 
@@ -53,20 +51,18 @@ Install gcc if using MacOSX
 If you are installing under MacOS (and only under MacOS), gcc and libgcc
 MUST be installed in the current virtual environment:
 
-	conda install gcc libgcc
+	conda install -y gcc libgcc
+
+Failure to do this step will result in a message to the effect "Unable to
+resolve paths in MacOS executable" in the lorax installation step 
+later.
 
 Do pip installs
 ---------------
-Next continue the installation by installing/updating dependencies:
+Next continue the installation by updating setuptools and installing lorax.
+The first will end with an error; this is expected, so don't be worried by it:
 
-	pip install -U gunicorn markupsafe
 	pip install -U setuptools
-	pip install git+git://github.com/Supervisor/supervisor.git@2c601db
-	pip install superlance setuptools-scm
-
-The last command produces an error; don't be worried by it.  Now we are ready
- to install lorax itself:
-
 	pip install --global-option=build_py lorax
 
 

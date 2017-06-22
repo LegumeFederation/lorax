@@ -10,6 +10,7 @@
 """lorax -- speaks for the (phylogenetic) trees."""
 #
 # Developers, install with
+#    pip install -r requirements.txt
 #    python setup.py develop
 #
 from distutils.cmd import Command

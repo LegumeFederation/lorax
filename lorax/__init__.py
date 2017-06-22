@@ -78,10 +78,14 @@ HMM_SWITCHES = {'peptide': 'amino',
 #
 LIBRARY_PATH_ENVVAR = {'Darwin': 'DYLD_LIBRARY_PATH'}
 #
-# Create an app object and configure it.
+# Create an app object and configure it in the directory
+# specified by LORAX_ROOT (or "." if not specified).
 #
+root_path = '.'
+if 'LORAX_ROOT' in os.environ:
+    root_path = os.environ['LORAX_ROOT']
 app = Flask(__name__,
-            instance_relative_config=True,
+            instance_path=root_path,
             template_folder='templates')
 FlaskCLI(app)
 configure_app(app)
@@ -92,8 +96,6 @@ rq = RQ(app)
 if app.config['RQ_ASYNC']:
     app.config.from_object(rq_dashboard.default_settings)
     app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
-
-
 #
 # Helper function defs start here.
 #
@@ -881,3 +883,8 @@ def get_status(familyname, method):
 @app.route('/trees/<family>.<sup>/<method>/status')
 def get_status_super(family, method, sup):
     return get_status(family + '/' + sup, method)
+
+
+@app.route('/test_exception')
+def test_exception():
+    raise RuntimeError('Intentional error from /test_exception')

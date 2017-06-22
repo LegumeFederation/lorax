@@ -118,6 +118,8 @@ echo "testing server on http://${LORAX_HOST}:${LORAX_PORT}"
 
 test_GET /badtarget 404
 
+test_GET /test_exception 500
+
 test_GET /log.txt
 
 test_GET /trees/families.json

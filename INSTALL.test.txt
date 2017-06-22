@@ -1,3 +1,10 @@
+If you defined the lorax host to be something other than localhost, you will
+have to define the environmental variable LORAX_HOST to match:
+
+    export LORAX_HOST=MY_HOST_IP
+
+Ditto for the port address.
+
 To test lorax, issue the commands:
 
 	mkdir test_lorax # could be any name, will be deleted later

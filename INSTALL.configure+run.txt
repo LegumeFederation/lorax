@@ -5,10 +5,14 @@ configurations which include such things as port numbers and which processes
 to start.  Configuration may be done either via the "lorax config" command
 or via environmental variables.  In particular the "LORAX_MODE" environmental
 variable controls the setting of multiple variables in defining which processes
-will get started.
+will get started.  Usually you will want to configure the following variables
+in order to expose the lorax server to the internet (substituting the
+desired values in the places beginning with MY_):
 
-	runinenv lorax config
-	runinenv lorax configure_instance
+	runinenv lorax config host MY_IP_ADDRESS
+	runinenv lorax config crashmail_email MY_EMAIL_ADDRESS
+	runinenv lorax create_instance
+
 
 Now it is time to run lorax and associate processes:
 

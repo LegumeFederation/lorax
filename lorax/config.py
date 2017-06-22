@@ -22,6 +22,7 @@ import os
 import sys
 from getpass import getuser
 from socket import getfqdn
+from pathlib import Path # python 3.4
 #
 # Third-party imports.
 #
@@ -74,7 +75,7 @@ class BaseConfig(object):
     #
     # Settings file name.
     #
-    SETTINGS = 'config.cfg'
+    SETTINGS = 'etc/lorax.conf'
     #
     # Number of threads used in queued commands.  0 = use as many as available.
     #
@@ -137,10 +138,6 @@ class BaseConfig(object):
     SUPERVISORD_USER = 'lorax'
     SUPERVISORD_PASSWORD = 'monitor_password'  # set if not localhost
     #
-    # redis defs.
-    #
-    REDIS_PORT = 58929
-    #
     # crashmail defs.
     #
     CRASHMAIL_EMAIL = getuser()
@@ -150,14 +147,14 @@ class BaseConfig(object):
     # Setting these to empty strings will cause the process to
     # not be started.
     #
-    ALIGNMENT_CONF = 'alignment.conf'
-    LORAX_CONF = 'lorax.conf'
-    REDIS_CONF = 'redis.conf'
-    TREEBUILDER_CONF = 'treebuilder.conf'
+    ALIGNMENT_CONF = 'alignment-supervisord.conf'
+    LORAX_CONF = 'lorax-supervisord.conf'
+    REDIS_CONF = 'redis-supervisord.conf'
+    TREEBUILDER_CONF = 'treebuilder-supervisord.conf'
     #
-    # Command to run the lorax server
+    # Sentry monitoring
     #
-
+    SENTRY_DSN = ''
     #
     #
     # Logging formatter.  Fields that are defined are:
@@ -186,7 +183,9 @@ class DevelopmentConfig(BaseConfig):
     ALIGNMENT_CONF = ''
     TREEBUILDER_CONF = ''
     # start development server
-    LORAX_CONF = 'lorax-debug.conf'
+    LORAX_CONF = 'lorax-supervisord-debug.conf'
+    # Use debug config settings
+    SETTINGS = 'lorax-debug.conf'
 
 
 class ServerOnlyConfig(BaseConfig):
@@ -221,6 +220,8 @@ config_dict = {
     'aligner': 'lorax.config.AlignerConfig'
 }
 
+def goofy():
+    print('hello from version')
 
 def configure_app(app):
     """Configure the app, getting variables and setting up logging.
@@ -228,7 +229,6 @@ def configure_app(app):
     :param app:
     :return:
     """
-    #
     config_name = os.getenv('LORAX_MODE', 'default')
     if config_name not in config_dict:
         print('ERROR -- mode "%s" not known.' % config_name,
@@ -239,10 +239,11 @@ def configure_app(app):
     #
     # Get instance-specific configuration, if it exists.
     #
-    if 'LORAX_INSTANCE_DIR' in os.environ:
-        app.instance_path = os.getenv('LORAX_INSTANCE_DIR')
+    if 'LORAX_ROOT' in os.environ:
+        app.instance_path = os.getenv('LORAX_ROOT')
     pyfile_name = os.getenv('LORAX_SETTINGS', app.config['SETTINGS'])
-    app.config.from_pyfile(pyfile_name, silent=True)
+    pyfile_path = str(Path(app.instance_path)/pyfile_name)
+    app.config.from_pyfile(pyfile_path, silent=True)
     #
     # Do overrides from environmental variables.
     #
@@ -264,6 +265,12 @@ def configure_app(app):
     # Set version.
     #
     app.config['VERSION'] = __version__
+    #
+    # set REDIS_PORT from RQ_REDIS_URL
+    #
+    redis_url = app.config['RQ_REDIS_URL']
+    app.config['RQ_REDIS_HOST'] = redis_url.split(':')[1].strip('/')
+    app.config['RQ_REDIS_PORT'] = int(redis_url.split(':')[2].split('/')[0])
     #
     # If root path has not been set,
     # assume that it is sys.prefix.
