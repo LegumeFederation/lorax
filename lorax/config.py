@@ -40,12 +40,19 @@ class BaseConfig(object):
     configuration object.
     """
     #
-    # These paths may be made absolute.  If relative, they are relative
-    # to start directory.  For use with the provided supervisord configuration,
-    # they are relative to the virtual environment head at sys.prefix.
+    # Deployment definitions.  These should be set in environmental
+    # variables and are included here to document them.
     #
-    DATA_PATH = 'data/'
-    LOG_PATH = 'var/log/'
+    ROOT = os.getenv('LORAX_ROOT', sys.prefix) # normally gets overwritten
+    VAR = os.getenv('LORAX_VAR', sys.prefix+'/var')
+    LOG = os.getenv('LORAX_TMP', VAR+'/log')
+    PLATFORM = 'unknown'
+    #
+    # These paths may be made absolute.  If relative, they are relative
+    # to $LORAX_ROOT, which is normally the same as the virtual environment
+    # head at sys.prefix.  They should be created before runtime,
+    #
+    DATA_PATH = VAR + '/data/'
     PROCESS_UMASK = '022'
     DIR_MODE = 0o755 # Note interaction with process umask
     #
@@ -75,7 +82,7 @@ class BaseConfig(object):
     #
     # Settings file name.
     #
-    SETTINGS = 'etc/lorax.conf'
+    SETTINGS = 'lorax.conf'
     #
     # Number of threads used in queued commands.  0 = use as many as available.
     #
@@ -120,11 +127,6 @@ class BaseConfig(object):
     FASTTREE_EXE = 'FastTree-lorax'
     RAXML_EXE = 'raxmlHPC'
     #
-    # Deployment definitions.  These should be set in environmental
-    # variables and are included here to document them.
-    #
-    ROOT = ''
-    #
     # Current run.
     #
     USER = getuser()
@@ -137,6 +139,7 @@ class BaseConfig(object):
     SUPERVISORD_HOST = '127.0.0.1'
     SUPERVISORD_USER = 'lorax'
     SUPERVISORD_PASSWORD = 'monitor_password'  # set if not localhost
+    SUPERVISORD_UNIX_SOCKET = False
     #
     # crashmail defs.
     #
@@ -242,7 +245,7 @@ def configure_app(app):
     if 'LORAX_ROOT' in os.environ:
         app.instance_path = os.getenv('LORAX_ROOT')
     pyfile_name = os.getenv('LORAX_SETTINGS', app.config['SETTINGS'])
-    pyfile_path = str(Path(app.instance_path)/pyfile_name)
+    pyfile_path = str(Path(app.instance_path)/'etc'/pyfile_name)
     app.config.from_pyfile(pyfile_path, silent=True)
     #
     # Do overrides from environmental variables.

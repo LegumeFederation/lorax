@@ -115,7 +115,8 @@ def print_config_var(var, obj):
 @click.argument('value', required=False)
 def config(var, value, vartype, verbose, delete):
     """Gets, sets, or deletes config variables."""
-    config_file_path = Path(current_app.instance_path) / current_app.config[
+    config_file_path = Path(current_app.instance_path) \
+                       / 'etc'/ current_app.config[
         'SETTINGS']
     if delete:
         if config_file_path.exists():
@@ -291,7 +292,7 @@ def create_instance(force):
     out_path = Path(os.environ['LORAX_ROOT'])
     print('Configuring instance at "%s".' %str(out_path))
     # Start by creating directories
-    dirs = ['data', 'etc', 'var/log', 'var/redis', 'var/run']
+    dirs = ['etc']
     for dir in dirs:
         out_dir = out_path/dir
         if not out_dir.exists():
@@ -319,7 +320,7 @@ def create_instance(force):
                  'etc/alignment-supervisord.conf',
                  'etc/redis-supervisord.conf',
                  'etc/treebuilder-supervisord.conf',
-                 'var/redis/redis.conf']
+                 'etc/redis.conf']
     for filename in templates:
         data = pkgutil.get_data(__name__, 'instance/'+ filename)
         data_string = data.decode('UTF-8')

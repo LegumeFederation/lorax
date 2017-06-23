@@ -89,7 +89,7 @@ def configure_logging(app):
     if app.config['LOGFILE']:  # start a log file
         logfile_name = app.config['LOGGER_NAME'] + '.log'
         app.config['LOGFILE_NAME'] = logfile_name
-        logfile_path = Path(app.config['LOG_PATH']) / logfile_name
+        logfile_path = Path(app.config['LOG']) / logfile_name
         if app.config['DEBUG']:
             print('Logging to file "%s".' % str(logfile_path),
                   file=sys.stderr)

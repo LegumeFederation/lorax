@@ -43,8 +43,65 @@ shift $#
 script_path=`realpath "$BASH_SOURCE"`
 bin_dir=`dirname "$script_path"`
 venv_path=`dirname "${bin_dir}"`
-export LORAX_ROOT="$venv_path"
+if [ -z "$LORAX_ROOT" ]; then
+    export LORAX_ROOT="$venv_path"
+fi
+if [ -z "$LORAX_VAR" ]; then
+    export LORAX_VAR="${LORAX_ROOT}/var"
+fi
+if [ -z "$LORAX_TMP" ]; then
+    export LORAX_TMP="/tmp/lorax"
+fi
+if [[ "$LORAX_TMP" != *"lorax"* ]]; then
+   echo "ERROR--LORAX_TMP must contain \"lorax\" in its definition"
+   exit 1
+fi
+if [ -z "$LORAX_LOG" ]; then
+    export LORAX_LOG="${LORAX_VAR}/log"
+fi
 export FLASK_APP="lorax"
+#
+# If $bin_dir is not in the path, prepend it.
+#
+if [[ ":$PATH:" != *"${bin_dir}:"* ]]; then
+    export PATH=${bin_dir}:${PATH}
+fi
+#
+# Do platform-specific things.
+#
+platform=`uname`
+if [[ "$platform" == 'Linux' ]]; then
+    :
+elif [[ "$platform" == 'FreeBSD' ]]; then
+   if [ -z "$LC_ALL" ]; then
+      export LC_ALL="en_US.UTF-8"
+   fi
+   if [ -z "$LANG" ]; then
+      export LANG="en_US.UTF-8"
+   fi
+elif [[ "$platform" == 'Darwin' ]]; then
+   :
+else
+   platform="untested $platform"
+fi
+export LORAX_PLATFORM="$platform"
+#
+# Create required directories.
+#
+declare -a vardirs=("redis" "run")
+for vardir in "${vardirs[@]}"; do
+  varpath="${LORAX_VAR}/${vardir}"
+  if [ ! -d "$varpath" ]; then
+     mkdir -p $varpath
+  fi
+done
+if [ ! -d "$LORAX_LOG" ]; then
+  mkdir -p $LORAX_LOG
+fi
+if [ ! -d "$LORAX_TMP" ]; then
+  mkdir -p $LORAX_TMP
+fi
+#
 #
 # Execute this script in the installation working directory.
 #
@@ -97,8 +154,8 @@ else
     if [ "$real_prefix" == "True" ]; then # in a venv already
         in_venv=1
     else
-       export PATH=${bin_dir}:${PATH}  # prepend binary directory to path
-       if [ -x ${bin_dir}/activate ]; then # activate venv in script directory
+       # Check if we need to activate the virtual environment.
+       if [ -x ${bin_dir}/activate ]; then
           in_venv=1
           my_venv_name="$venv_path"
           source ${bin_dir}/activate

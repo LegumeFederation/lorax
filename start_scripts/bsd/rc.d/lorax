@@ -11,12 +11,12 @@ stop_cmd="lorax_stop"
 
 load_rc_config $name
 
-command="${venv_dir}/run_in_lorax_env"
+command="${LORAX_ROOT}/bin/run_in_lorax_env"
 command_args="supervisord"
 
-pidfile="${venv_dir)/var/run/lorax.pid"
-required_files="${venv_dir}/etc/supervisord.conf ${venv_dir}/run_lorax.py"
-required_dirs="${venv_dir}/var/log ${venv_dir}/var/redis ${venv_dir}/var/run"
+pidfile="${LORAX_VAR)/run/lorax.pid"
+required_files="${LORAX_ROOT}/etc/supervisord.conf ${LORAX_ROOT}/run_lorax.py"
+required_dirs="${LORAX_VAR}/var/log"
 sig_reload="USR1"
 extra_commands="reload status"
 

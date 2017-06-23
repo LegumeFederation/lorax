@@ -37,41 +37,51 @@ class BuildFasttreeCommand(Command):
   user_options = [
       # The format is (long option, short option, description).
       ('cc=', None, 'path to c compiler'),
+      ('cflags=', None, 'CFLAGS for compiler in use')
   ]
 
   def initialize_options(self):
     """Set default values for options."""
     # Each user option must be listed here with their default value.
-    self.cc = 'gcc'
+    system = platform.system()
+    if system == 'Linux':
+        self.cc = 'gcc'
+        self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' +\
+                  ' -O3 -march=native -DOPENMP -fopenmp'
+    elif system == 'Darwin':
+        self.cc = 'gcc'
+        self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' +\
+                  ' -O3 -march=native -DOPENMP -fopenmp -lm'
+    elif system == 'FreeBSD':
+        self.cc = 'clang'
+        self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' +\
+                  ' -O3 -march=native -lm'
+    else:
+        logger.warning('Unrecognized system, using conservative default CFLAGS')
+        self.cc = 'gcc'
+        self.cflags = '-DUSE_DOUBLE -lm'
 
   def finalize_options(self):
     """Post-process options."""
     assert shutil.which(self.cc) is not None, (
           'C compiler %s is not found on path.' % self.cc)
+    self.cflag_list = self.cflags.split()
 
   def run(self):
     """Build FastTree with c compiler."""
     # Check if build is disabled by environmental variable.
-    if 'LORAX_NO_BINARIES' in environ and\
-            environ['LORAX_NO_BINARIES'] == 'True':
+    if 'LORAX_NO_COMPILE' in environ and\
+            environ['LORAX_NO_COMPILE'] == 'True':
         logger.info('skipping compile of FastTree binary')
         return
     if (BINARY_PATH/FASTTREE_BINARY).exists():
         logger.info('FastTree binary already built')
         return
     logger.info('compiling FastTree binary')
-    command = [shutil.which(self.cc),
-               '-DUSE_DOUBLE',
-               '-finline-functions',
-               '-funroll-loops',
-               '-O3',
-               '-march=native',
-               '-DOPENMP',
-               '-fopenmp',
-               '-lm',
-               '-o',
-               '../bin/'+FASTTREE_BINARY,
-               'FastTree-2.1.10.c']
+    command = [shutil.which(self.cc)] +\
+              self.cflag_list + ['-o',
+              '../bin/'+FASTTREE_BINARY,
+              'FastTree-2.1.10.c']
     logger.debug('  %s' % (' '.join(command)))
     pipe = subprocess.Popen(command,
                             cwd='lorax/fasttree',

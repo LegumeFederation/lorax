@@ -20,8 +20,12 @@ python packages you may wish to install.
 
 Create a Virtual Environment
 ----------------------------
-You will need a working "virtualenv" package for the python version you
-wish to use.  I prefer to use the name "loraxenv" for the virtual
+lorax requires a more recent version of setuptools than that distributed
+with python 3.6 as well as the use of pip.  Both of these may break distro
+package manager assumptions, so you will need to either create a working
+virtual environment or a root environment in user space.
+
+I prefer to use the name "loraxenv" for the virtual
 environment to prevent confusion between package and environment names.
 You should create this environment as the user under which you intend the
 web server to run, using the python version you wish to use selected
@@ -35,13 +39,9 @@ Install/Update with pip
 -----------------------
 Next use pip to install dependencies:
 
-	pip install -U setuptools # may produce an error, proceed anyway
-	pip install numpy
-	pip install biopython
-	pip install gunicorn
+	pip install -U setuptools # may produce an error, don't worry
+	pip install -U numpy biopython
 	pip install --global-option=build_py lorax
-	pip install git+git://github.com/Supervisor/supervisor.git@2c601db
-	pip install superlance setuptools-scm
 
 
 Define alias command
