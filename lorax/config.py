@@ -140,6 +140,7 @@ class BaseConfig(object):
     SUPERVISORD_USER = 'lorax'
     SUPERVISORD_PASSWORD = 'monitor_password'  # set if not localhost
     SUPERVISORD_UNIX_SOCKET = False
+    SOCKET_CONF = 'supervisord-inet.conf'
     #
     # crashmail defs.
     #
@@ -274,6 +275,11 @@ def configure_app(app):
     redis_url = app.config['RQ_REDIS_URL']
     app.config['RQ_REDIS_HOST'] = redis_url.split(':')[1].strip('/')
     app.config['RQ_REDIS_PORT'] = int(redis_url.split(':')[2].split('/')[0])
+    #
+    # Supervisord socket type.
+    #
+    if app.config['SUPERVISORD_UNIX_SOCKET']:
+        app.config['SOCKET_CONF'] = 'supervisord-unix.conf'
     #
     # If root path has not been set,
     # assume that it is sys.prefix.

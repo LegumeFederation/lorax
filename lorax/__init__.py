@@ -110,7 +110,7 @@ def get_file(subpath, file_type='data', mode='U'):
     if file_type == 'data':
         file_path = Path(app.config['DATA_PATH']) / subpath
     elif file_type == 'log':
-        file_path = Path(app.config['LOG_PATH']) / subpath
+        file_path = Path(app.config['LOG']) / subpath
     else:
         app.logger.error('Unrecognized file type %s.', file_type)
         return

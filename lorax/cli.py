@@ -320,7 +320,9 @@ def create_instance(force):
                  'etc/alignment-supervisord.conf',
                  'etc/redis-supervisord.conf',
                  'etc/treebuilder-supervisord.conf',
-                 'etc/redis.conf']
+                 'etc/redis.conf',
+                 'etc/supervisord-unix.conf',
+                 'etc/supervisord-inet.conf']
     for filename in templates:
         data = pkgutil.get_data(__name__, 'instance/'+ filename)
         data_string = data.decode('UTF-8')
