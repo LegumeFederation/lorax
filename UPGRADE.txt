@@ -3,18 +3,17 @@ the virtual environment that you used.  For Anaconda Python, this
 is done via "source activate ENV" where ENV is the name of the 
 environment you created.  Then issue the following commands:
 
-	run_in_lorax_env supervisorctl shutdown
+	lorax_env supervisorctl shutdown
     pip uninstall lorax
 	pip install --no-cache-dir --global-option=build_py lorax
-	run_in_lorax_env lorax configure_instance --force
-    run_in_lorax_env supervisord; sleep 10
-	run_in_lorax_env supervisorctl status
+	lorax_env lorax configure_instance --force
+    lorax_env supervisord; sleep 10
+	lorax_env supervisorctl status
 
 Then create a new test directory or go to the old one and issue the
 following commands:
 
-	run_in_lorax_env lorax create_test_files --force
-	source deactivate
+	lorax_env lorax create_test_files --force
 	./test_all.sh
 
 This command should finish with "lorax test completed successfully".

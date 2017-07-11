@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-lorax --
-
-A web service process to calculate and serve up phylogenetic trees, including:
-    * Setting of tree calculation parameters and metadata
-    * Storing input sequences
-    * Multiple sequence alignment
-    * Phylogenetic tree calculation
-    * Serving up results
+"""Configure and run a queued web service.
 """
 #
 # standard library imports
@@ -19,6 +11,7 @@ import shutil
 import subprocess
 from collections import OrderedDict  # python 3.1
 from datetime import datetime
+from sys import prefix
 from pathlib import Path  # python 3.4
 #
 # third-party imports
@@ -31,7 +24,7 @@ from Bio import SeqIO, AlignIO, Phylo
 #
 # local imports
 #
-from lorax.config import configure_app
+from .config import configure_app
 #
 # Non-configurable global constants.
 #
@@ -79,13 +72,11 @@ HMM_SWITCHES = {'peptide': 'amino',
 LIBRARY_PATH_ENVVAR = {'Darwin': 'DYLD_LIBRARY_PATH'}
 #
 # Create an app object and configure it in the directory
-# specified by LORAX_ROOT (or "." if not specified).
+# specified by MYAPP_ROOT (or sys.prefix if not specified).
 #
-root_path = '.'
-if 'LORAX_ROOT' in os.environ:
-    root_path = os.environ['LORAX_ROOT']
 app = Flask(__name__,
-            instance_path=root_path,
+            instance_path=os.getenv(__name__.split('.')[0].upper() +
+                                    '_ROOT', prefix),
             template_folder='templates')
 FlaskCLI(app)
 configure_app(app)
@@ -108,7 +99,7 @@ def get_file(subpath, file_type='data', mode='U'):
     :return:
     """
     if file_type == 'data':
-        file_path = Path(app.config['DATA_PATH']) / subpath
+        file_path = Path(app.config['DATA']) / subpath
     elif file_type == 'log':
         file_path = Path(app.config['LOG']) / subpath
     else:
@@ -131,11 +122,11 @@ def create_fasta(familyname, data_name, superfamily=None):
     record_dict = None
     infileext = None
     if not superfamily:
-        path = Path(app.config['DATA_PATH']) / familyname
+        path = Path(app.config['DATA']) / familyname
     else:
         if superfamily in ALL_FILENAMES:
             abort(403)
-        path = Path(app.config['DATA_PATH']) / familyname / superfamily
+        path = Path(app.config['DATA']) / familyname / superfamily
     # post data
     if path.exists() and not path.is_dir():
         app.logger.warning('Removing existing file in data path name.')
@@ -164,7 +155,7 @@ def create_fasta(familyname, data_name, superfamily=None):
     lengths = [len(rec.seq) for rec in record_dict.values()]
     infilename = data_name + infileext
     if superfamily:  # Do superfamily processing
-        sub_path = Path(app.config['DATA_PATH']) / familyname / infilename
+        sub_path = Path(app.config['DATA']) / familyname / infilename
         sub_parsed_fasta = SeqIO.parse(str(sub_path), 'fasta')
         sub_record_dict = SeqIO.to_dict(sub_parsed_fasta)
         for rec in record_dict.values():
@@ -454,7 +445,7 @@ def queue_calculation(familyname,
     # Get paths to things we might need for either calculation.
     #
     if not superfamily:
-        alignment_dir = Path(app.config['DATA_PATH']) / familyname
+        alignment_dir = Path(app.config['DATA']) / familyname
         hmm_path = Path(HMM_FILENAME)
     else:
         if superfamily in ALL_FILENAMES:
@@ -462,7 +453,7 @@ def queue_calculation(familyname,
                              superfamily)
             abort(403)
         alignment_dir = Path(
-            app.config['DATA_PATH']) / familyname / superfamily
+            app.config['DATA']) / familyname / superfamily
         hmm_path = Path('..') / HMM_FILENAME
     #
     # Check for prerequisites and determine sequence types.
@@ -630,7 +621,7 @@ def return_families():
 
     :return: JSON list
     """
-    directory_list = sorted(os.listdir(path=app.config['DATA_PATH']))
+    directory_list = sorted(os.listdir(path=app.config['DATA']))
     return Response(json.dumps(directory_list), mimetype=JSON_MIMETYPE)
 
 
@@ -646,7 +637,7 @@ def post_or_get_alignment(family):
         return create_fasta(family, ALIGNMENT_NAME)
     elif request.method == 'GET':
         alignment_path = Path(
-            app.config['DATA_PATH']) / family / ALIGNMENT_NAME
+            app.config['DATA']) / family / ALIGNMENT_NAME
         for ext in SEQUENCE_EXTENSIONS.keys():
             test_path = alignment_path.with_suffix(SEQUENCE_EXTENSIONS[ext])
             if test_path.exists():
@@ -669,7 +660,7 @@ def post_or_get_alignment_superfamily(family, superfamily):
         return create_fasta(family, ALIGNMENT_NAME, superfamily=superfamily)
     elif request.method == 'GET':
         alignment_path = Path(
-            app.config['DATA_PATH']) / family / superfamily / ALIGNMENT_NAME
+            app.config['DATA']) / family / superfamily / ALIGNMENT_NAME
         for ext in SEQUENCE_EXTENSIONS.keys():
             test_path = alignment_path.with_suffix(SEQUENCE_EXTENSIONS[ext])
             if test_path.exists():
@@ -699,7 +690,7 @@ def delete_superfamily(family, superfamily):
     """
     if superfamily in ALL_FILENAMES:
         abort(403)
-    path = Path(app.config['DATA_PATH']) / family / superfamily
+    path = Path(app.config['DATA']) / family / superfamily
     if not path.exists():
         abort(403)
 
@@ -727,7 +718,7 @@ def put_hmm(family):
     """
     hmm_fh = None
     hmmstats_output = None
-    hmm_path = Path(app.config['DATA_PATH']) / family / HMM_FILENAME
+    hmm_path = Path(app.config['DATA']) / family / HMM_FILENAME
     try:
         hmm_fh = hmm_path.open('wb')
     except IOError:  # e.g., if family has not been created
@@ -817,7 +808,7 @@ for builder in list(app.config['TREEBUILDERS'].keys()):
 def get_existing_tree(familyname, method):
     if method not in app.config['TREEBUILDERS']:
         abort(404)
-    inpath = Path(app.config['DATA_PATH']) / familyname / method / TREE_NAME
+    inpath = Path(app.config['DATA']) / familyname / method / TREE_NAME
     if not inpath.exists():
         abort(404)
     return Response(inpath.open().read(), mimetype=NEWICK_MIMETYPE)
@@ -833,7 +824,7 @@ def get_phyloxml_tree(familyname, method):
     if method not in app.config['TREEBUILDERS']:
         abort(404)
     inpath = Path(
-        app.config['DATA_PATH']) / familyname / method / PHYLOXML_NAME
+        app.config['DATA']) / familyname / method / PHYLOXML_NAME
     if not inpath.exists():
         abort(404)
     return Response(inpath.open().read(), mimetype=NEWICK_MIMETYPE)
@@ -849,9 +840,9 @@ def get_log(familyname, method):
     inpath = None
     if method in list(app.config['TREEBUILDERS'].keys()):
         inpath = Path(
-            app.config['DATA_PATH']) / familyname / method / RUN_LOG_NAME
+            app.config['DATA']) / familyname / method / RUN_LOG_NAME
     elif method in list(app.config['ALIGNERS'].keys()):
-        inpath = Path(app.config['DATA_PATH']) / familyname / RUN_LOG_NAME
+        inpath = Path(app.config['DATA']) / familyname / RUN_LOG_NAME
     else:
         abort(428)
     if not inpath.exists():
@@ -869,9 +860,9 @@ def get_status(familyname, method):
     inpath = None
     if method in list(app.config['TREEBUILDERS'].keys()):
         inpath = Path(
-            app.config['DATA_PATH']) / familyname / method / STATUS_NAME
+            app.config['DATA']) / familyname / method / STATUS_NAME
     elif method in list(app.config['ALIGNERS'].keys()):
-        inpath = Path(app.config['DATA_PATH']) / familyname / STATUS_NAME
+        inpath = Path(app.config['DATA']) / familyname / STATUS_NAME
     else:
         abort(428)
     if not inpath.exists():

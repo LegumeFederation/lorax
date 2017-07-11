@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Configuration variables for lorax.
+"""Define and handle configuration variables.
 
-Definitions in this file are selected by the LORAX_CONFIGURATION environmental
+Definitions in this file are selected by the MYAPP_CONFIGURATION environmental
 variable.  This variable may take on the following values:
-    * default
-    * development
-    * testing
-    * production
+    * default: starts everything in production environment
+    * development: starts in debug environment (not secure)
+    * serverOnly: same as default, but without queues
+    * treebuilder: starts treebuilder queue only
+    * aligner: start aligner queue only
 
 
 These definitions may be overridden via two ways:
-  1) a python file pointed to by the environmental variable LORAX_SETTINGS.
-  2) an environmental variable that starts with "LORAX_".  If its value is
+  1) a python file pointed to by the environmental variable MYAPP_SETTINGS.
+  2) an environmental variable that starts with "MYAPP_".  If its value is
      "True" or "False", then it will be interpreted as a logical value.
      If its value can be parsed as an integer, then it will be.
 """
@@ -31,6 +32,30 @@ import arrow
 # Local imports
 #
 from .version import version as __version__  # noqa
+MODULE = __name__.split('.')[0]
+#
+# Definitions that *must* be set in environmental variables.  Trying to
+# set these from the config file would be too late, so they are
+# not settable by that mechanism.
+#
+IMMUTABLES = ('ROOT', 'VAR', 'LOG', 'TMP')
+PATHVARS = ('ROOT', 'VAR', 'LOG', 'TMP', 'DATA', 'USERDATA')
+
+
+def get_path(name, default):
+    """Get path from environ, checking absoluteness."""
+    varname = MODULE.upper() + '_' + name.upper()
+    if varname in os.environ:
+        path_str = os.environ[varname]
+        try:
+            Path(path_str).relative_to('/')
+        except ValueError:  # relative path, not acceptable
+            print('ERROR--path variable %s="%s" not absolute, ignoring'
+                  % (var, path_str))
+            path_str = default
+    else:
+        path_str = default
+    return path_str
 
 
 class BaseConfig(object):
@@ -40,21 +65,22 @@ class BaseConfig(object):
     configuration object.
     """
     #
-    # Deployment definitions.  These should be set in environmental
-    # variables and are included here to document them.
+    # File path locations.  All of these are immutable except DATA.
+    # Since different components run from different locations, these
+    # must be absolute.  The immutable ones should be created before
+    # runtime.
     #
-    ROOT = os.getenv('LORAX_ROOT', sys.prefix) # normally gets overwritten
-    VAR = os.getenv('LORAX_VAR', sys.prefix+'/var')
-    LOG = os.getenv('LORAX_TMP', VAR+'/log')
-    PLATFORM = 'unknown'
+    ROOT = get_path('ROOT', sys.prefix)
+    VAR = get_path('VAR', ROOT + '/var')
+    LOG = get_path('LOG', VAR + '/log')
+    TMP = get_path('TMP', VAR + '/tmp')
+    DATA = get_path('DATA', VAR + '/data/')
+    USERDATA = get_path('DATA', VAR + '/userdata/')
     #
-    # These paths may be made absolute.  If relative, they are relative
-    # to $LORAX_ROOT, which is normally the same as the virtual environment
-    # head at sys.prefix.  They should be created before runtime,
     #
-    DATA_PATH = VAR + '/data/'
-    PROCESS_UMASK = '022'
-    DIR_MODE = 0o755 # Note interaction with process umask
+    #
+    PROCESS_UMASK = '007'
+    DIR_MODE = 0o770 # Note interaction with process umask
     #
     # The DEBUG parameter has multiple implications:
     #           * access to python debugging via flask
@@ -82,7 +108,7 @@ class BaseConfig(object):
     #
     # Settings file name.
     #
-    SETTINGS = 'lorax.conf'
+    SETTINGS = MODULE +'.conf'
     #
     # Number of threads used in queued commands.  0 = use as many as available.
     #
@@ -90,15 +116,17 @@ class BaseConfig(object):
     #
     # RQ settings.  If "RQ_ASYNC" is False, then no queueing will be done.
     #
+    RQ_ASYNC = True
     TREE_QUEUE = 'treebuilding'
     ALIGNMENT_QUEUE = 'alignment'
-    RQ_ASYNC = True
     RQ_QUEUES = [TREE_QUEUE, ALIGNMENT_QUEUE]
-    RQ_REDIS_URL = "redis://localhost:58929/0"
+    REDIS_UNIX_SOCKET = False
+    RQ_REDIS_PORT = 58929
+    RQ_REDIS_HOST = 'localhost'
     RQ_SCHEDULER_INTERVAL = 60
     RQ_SCHEDULER_QUEUE = ALIGNMENT_QUEUE
-    ALIGNMENT_QUEUE_TIMEOUT = 1000  # About 15 minutes, in seconds
-    TREE_QUEUE_TIMEOUT = 4 * 60 * 60  # 4 hours, in seconds
+    ALIGNMENT_QUEUE_TIMEOUT = 24 * 60 * 60  # 24 hours, in seconds
+    TREE_QUEUE_TIMEOUT = 30 * 24 * 60 * 60  # 30 days, in seconds
     #
     # Definitions for alignment algorithms.
     #
@@ -123,8 +151,7 @@ class BaseConfig(object):
     #
     # Binaries.
     #
-    NO_BINARIES = False # If True, FastTree will not be built
-    FASTTREE_EXE = 'FastTree-lorax'
+    FASTTREE_EXE = 'FastTree-'+MODULE
     RAXML_EXE = 'raxmlHPC'
     #
     # Current run.
@@ -135,12 +162,17 @@ class BaseConfig(object):
     #
     # supervisord defs.
     #
+    SUPERVISORD_UNIX_SOCKET = False
     SUPERVISORD_PORT = 58928
     SUPERVISORD_HOST = '127.0.0.1'
-    SUPERVISORD_USER = 'lorax'
-    SUPERVISORD_PASSWORD = 'monitor_password'  # set if not localhost
-    SUPERVISORD_UNIX_SOCKET = False
-    SOCKET_CONF = 'supervisord-inet.conf'
+    SUPERVISORD_USER = MODULE
+    SUPERVISORD_PASSWORD = MODULE + '_default_password'
+    SUPERVISORD_START_REDIS = True
+    SUPERVISORD_START_SERVER = True
+    SUPERVISORD_START_REDIS = True
+    SUPERVISORD_START_ALIGNMENT = True
+    SUPERVISORD_START_TREEBUILDER = True
+    SUPERVISORD_START_CRASHMAIL = True
     #
     # crashmail defs.
     #
@@ -151,12 +183,7 @@ class BaseConfig(object):
     # Setting these to empty strings will cause the process to
     # not be started.
     #
-    ALIGNMENT_CONF = 'alignment-supervisord.conf'
-    LORAX_CONF = 'lorax-supervisord.conf'
-    REDIS_CONF = 'redis-supervisord.conf'
-    TREEBUILDER_CONF = 'treebuilder-supervisord.conf'
-    #
-    # Sentry monitoring
+    # Monitoring at sentry.io.
     #
     SENTRY_DSN = ''
     #
@@ -177,55 +204,53 @@ class BaseConfig(object):
     FILE_LOG_FORMAT = '%(levelname)s: %(message)s'
 
 
+
+
+
 class DevelopmentConfig(BaseConfig):
-    """Start lorax with internal server, no queues."""
+    """Start internal server, no queues."""
     DEBUG = True
     TESTING = True
     RQ_ASYNC = False
-    # running synchronous means don't start queues
-    REDIS_CONF = ''
-    ALIGNMENT_CONF = ''
-    TREEBUILDER_CONF = ''
-    # start development server
-    LORAX_CONF = 'lorax-supervisord-debug.conf'
+    # Running synchronous--no need to start queues.
+    SUPERVISORD_START_REDIS  = False
+    SUPERVISORD_START_ALIGNMENT = False
+    SUPERVISORD_START_TREEBUILDER = False
     # Use debug config settings
-    SETTINGS = 'lorax-debug.conf'
+    SETTINGS = MODULE + '-debug.conf'
 
 
 class ServerOnlyConfig(BaseConfig):
-    """Start lorax and redis, no queues."""
-    ALIGNMENT_CONF = ''
-    TREEBUILDER_CONF = ''
+    """Start server and redis, no queues."""
+    SUPERVISORD_START_ALIGNMENT = False
+    SUPERVISORD_START_TREEBUILDER = False
 
 
 class TreebuilderConfig(BaseConfig):
     """Start treebuilder queue only."""
-    REDIS_CONF = ''
-    LORAX_CONF = ''
-    ALIGNMENT_CONF = ''
+    SUPERVISORD_START_REDIS = False
+    SUPERVISORD_START_SERVER = False
+    SUPERVISORD_START_ALIGNMENT = False
 
 
 class AlignerConfig(BaseConfig):
     """Start alignment queue only"""
-    REDIS_CONF = ''
-    LORAX_CONF = ''
-    TREEBUILDER_CONF = ''
+    SUPERVISORD_START_REDIS = False
+    SUPERVISORD_START_SERVER = False
+    SUPERVISORD_START_TREEBUILDER = False
 
 
 #
 # Dictionary of configuration levels to be used with
-#  the LORAX_CONFIGURATION environmental variable.
+#  the _CONFIGURATION environmental variable.
 #
 config_dict = {
-    'default': 'lorax.config.BaseConfig',
-    'development': 'lorax.config.DevelopmentConfig',
-    'serverOnly': 'lorax.config.ServerOnlyConfig',
-    'treebuilder': 'lorax.config.TreebuilderConfig',
-    'aligner': 'lorax.config.AlignerConfig'
+    'default': MODULE +'.config.BaseConfig',
+    'development': MODULE +'.config.DevelopmentConfig',
+    'serverOnly': MODULE +'.config.ServerOnlyConfig',
+    'treebuilder': MODULE +'.config.TreebuilderConfig',
+    'aligner': MODULE +'.config.AlignerConfig'
 }
-
-def goofy():
-    print('hello from version')
 
 def configure_app(app):
     """Configure the app, getting variables and setting up logging.
@@ -233,7 +258,7 @@ def configure_app(app):
     :param app:
     :return:
     """
-    config_name = os.getenv('LORAX_MODE', 'default')
+    config_name = os.getenv(MODULE.upper()+'_MODE', 'default')
     if config_name not in config_dict:
         print('ERROR -- mode "%s" not known.' % config_name,
               file=sys.stderr)
@@ -243,18 +268,18 @@ def configure_app(app):
     #
     # Get instance-specific configuration, if it exists.
     #
-    if 'LORAX_ROOT' in os.environ:
-        app.instance_path = os.getenv('LORAX_ROOT')
-    pyfile_name = os.getenv('LORAX_SETTINGS', app.config['SETTINGS'])
+    if MODULE.upper()+'_ROOT' in os.environ:
+        app.instance_path = os.getenv(MODULE.upper()+'_ROOT')
+    pyfile_name = os.getenv(MODULE.upper()+'_SETTINGS', app.config['SETTINGS'])
     pyfile_path = str(Path(app.instance_path)/'etc'/pyfile_name)
     app.config.from_pyfile(pyfile_path, silent=True)
     #
     # Do overrides from environmental variables.
     #
-    for lorax_envvar, envvar in [(i, i[6:])
+    for my_envvar, envvar in [(i, i[6:])
                                  for i in sorted(os.environ)
-                                 if i.startswith('LORAX_')]:
-        value = os.environ[lorax_envvar]
+                                 if i.startswith(MODULE.upper() + '_')]:
+        value = os.environ[my_envvar]
         if value == 'True':
             value = True
         elif value == 'False':
@@ -264,25 +289,67 @@ def configure_app(app):
                 value = int(value)
             except ValueError:
                 pass
-        app.config[envvar] = value
+        if envvar not in PATHVARS: # paths already configured from envvars
+            app.config[envvar] = value
     #
     # Set version.
     #
     app.config['VERSION'] = __version__
     #
-    # set REDIS_PORT from RQ_REDIS_URL
+    # Set redis socket type.
     #
-    redis_url = app.config['RQ_REDIS_URL']
-    app.config['RQ_REDIS_HOST'] = redis_url.split(':')[1].strip('/')
-    app.config['RQ_REDIS_PORT'] = int(redis_url.split(':')[2].split('/')[0])
+    if app.config['REDIS_UNIX_SOCKET']:
+        app.config['RQ_REDIS_PORT'] = 0
+        app.config['RQ_REDIS_HOST'] = '127.0.0.1'
+        app.config['RQ_REDIS_URL'] = "unix://@'" + \
+            app.config['TMP'] + '/redis.sock?db=0'
+        app.config['RQ_UNIXSOCKET'] = 'unixsocket %s/redis.sock' %(app.config['TMP'])
+    else:
+        app.config['RQ_REDIS_URL'] = 'redis://'+\
+                                     app.config['RQ_REDIS_HOST'] +\
+                                     ':' +\
+                                     str(app.config['RQ_REDIS_PORT']) +\
+                                     '/0'
+        app.config['RQ_UNIXSOCKET'] = ''
     #
     # Supervisord socket type.
     #
     if app.config['SUPERVISORD_UNIX_SOCKET']:
-        app.config['SOCKET_CONF'] = 'supervisord-unix.conf'
-    #
-    # If root path has not been set,
-    # assume that it is sys.prefix.
-    #
-    if app.config['ROOT'] == '':
-        app.config['ROOT'] = sys.prefix
+        app.config['SOCKET_CONF'] = '%(ENV_' +\
+                                    MODULE.upper() +\
+                                    '_ROOT)s/etc/' +\
+                                    MODULE +\
+                                    '/supervisord-unix.conf'
+        app.config['SUPERVISORD_SERVERURL'] = 'unix://%{ENV_' +\
+                                              MODULE.upper() +\
+                                              '_TMP}s/supervisord.sock'
+    else:
+        app.config['SOCKET_CONF'] = '%(ENV_'+\
+                                    MODULE.upper() +\
+                                    '_ROOT)s/etc/supervisord-inet.conf'
+        app.config['SUPERVISORD_SERVERURL'] = 'http://' + \
+                app.config['SUPERVISORD_HOST'] + ':'+ \
+                str(app.config['SUPERVISORD_PORT'])
+    supervisord_services = ['SERVER',
+                            'REDIS',
+                            'ALIGNMENT',
+                            'TREEBUILDER',
+                            'CRASHMAIL']
+    has_debug = [MODULE.upper()]
+    for service in supervisord_services:
+        if app.config['SUPERVISORD_START_'+service]:
+            if service in has_debug:
+                app.config[service+'_CONF'] = '%(ENV_' +\
+                                              MODULE.upper() +\
+                                              '_ROOT)s/etc/' +\
+                                              service.lower() +\
+                                              '-supervisord-debug.conf'
+            else:
+                app.config[service+'_CONF'] = '%(ENV_' +\
+                                              MODULE.upper() +\
+                                              '_ROOT)s/etc/' +\
+                                              service.lower() +\
+                                              '-supervisord.conf'
+        else:
+            app.config[service+'_CONF'] = ''
+

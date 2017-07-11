@@ -1,11 +1,12 @@
 include *.txt
-include INSTALL.*
+include *.rst
 include lorax/fasttree/ChangeLog.txt
 include lorax/fasttree/FastTree-2.1.10.c
 include lorax/fasttree/LICENSE.txt
 include lorax/fasttree/README.txt
-include lorax/bin/run_in_lorax.env
+include lorax/bin/server_env
 recursive-include lorax/instance *
+recursive-include lorax/etc *
 recursive-include lorax/test *
 recursive-include lorax/static *
 recursive-include lorax/templates *

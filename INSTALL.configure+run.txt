@@ -1,4 +1,11 @@
-We now configure lorax.  The first command will print a large number of
+We now configure lorax.  To begin, we need to enter the proper
+environment, using the lorax_env script.  The path to this script is
+the value of LORAX_ROOT you chose at install time:
+
+	/path/to/lorax_env -i
+
+You will now get a "lorax_env> " prompt and you are ready to configure.
+
 configuration variables.  If you wish to change any of them, do it before
 issuing the "configure_instance" command, which will write the startup
 configurations which include such things as port numbers and which processes
@@ -9,23 +16,18 @@ will get started.  Usually you will want to configure the following variables
 in order to expose the lorax server to the internet (substituting the
 desired values in the places beginning with MY_):
 
-	runinenv lorax config host MY_IP_ADDRESS
-	runinenv lorax config crashmail_email MY_EMAIL_ADDRESS
-	runinenv lorax create_instance
+	lorax config host MY_IP_ADDRESS
+	lorax config crashmail_email MY_EMAIL_ADDRESS
+	lorax create_instance
 
 
 Now it is time to run lorax and associate processes:
 
-	runinenv supervisord; sleep 10
-	runinenv supervisorctl status
+	supervisord; sleep 10
+	supervisorctl status
 
-The first command daemonizes lorax and 4 associated commands.  The last
-should return a list of 5 commands, all with status RUNNING.  When
-you wish to shut down the lorax-related processes, you may issue the
-command:
-
-    runinenv supervisorctl shutdown
-
-or simply issue "killall supervisord".
+The first command daemonizes lorax and associated processes.  The last
+should return a list of commands, all with status RUNNING. You may then
+enter "control-D" to exit the lorax_env environment.
 
 Next, follow the instructions for testing in INSTALL.test.txt.

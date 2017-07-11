@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 """Command-line interpreter functions.
 
-lorax is designed as a stand-alone cli rather than through Flask.
+These functions extend the Flask CLI.
+
 """
 #
 # Standard library imports.
@@ -24,18 +26,17 @@ from flask.cli import FlaskGroup
 #
 # Local imports.
 #
-from .version import version as LORAX_VERSION
 from .logging import configure_logging
-
 #
 # Global variables.
 #
+MODULE = __name__.split('.')[0]
 AUTHOR = 'Joel Berendzen'
 EMAIL = 'joelb@ncgr.org'
 COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.
 All rights reserved.
 """
-PROJECT_HOME = 'https://github.com/ncgr/lorax'
+PROJECT_HOME = 'https://github.com/LegumeFederation/'+__name__
 #
 # CLI entry point.
 #
@@ -45,26 +46,29 @@ def cli():
     pass
 
 
-def create_data_dir(app):
-    """Creates a data directory, if one doesn't exist.
+def create_dir(config_path, subdir, app=current_app):
+    """Creates runtime directories, if they don't exist.
 
     :param app:
     :return:
     """
-    data_dir = Path(app.config['DATA_PATH'])
-    if not data_dir.is_dir():  # create logs/ dir
+    dir_path = Path(app.config[config_path])/subdir
+    if not dir_path.is_dir():  # create logs/ dir
+        app.logger.info('Creating directory %s/%s at %s.',
+                        config_path, subdir, str(dir_path))
         try:
-            data_dir.mkdir(mode=app.config['DIR_MODE'], parents=True)
+            dir_path.mkdir(mode=app.config['DIR_MODE'],
+                           parents=True)
         except OSError:
-            app.logger.error('Unable to create data directory "%s"',
-                             data_dir)
+            app.logger.error('Unable to create directory "%s"',
+                             str(dir_path))
             raise OSError
 
 
 @cli.command()
 def run():
-    """Run a lorax server directly."""
-    from lorax.logging import configure_logging
+    """Run a server directly."""
+    from  .logging import configure_logging
     print(
         'Direct start, use of gunicorn is recommended for production.',
         file=sys.stderr)
@@ -72,7 +76,8 @@ def run():
     host = current_app.config['HOST']
     debug = current_app.config['DEBUG']
     configure_logging(current_app)
-    create_data_dir(current_app)
+    create_dir('DATA', '')
+    create_dir('USERDATA', '')
     current_app.run(host=host,
                     port=port,
                     debug=debug)
@@ -85,7 +90,7 @@ def print_config_var(var, obj):
     :param obj:
     :return:
     """
-    if 'LORAX_' + var in os.environ:
+    if __name__.upper()+'_' + var in os.environ:
         from_environ = ' <- from environment'
     elif var in obj.__dict__:
         from_environ = ' <- from config file'
@@ -115,9 +120,8 @@ def print_config_var(var, obj):
 @click.argument('value', required=False)
 def config(var, value, vartype, verbose, delete):
     """Gets, sets, or deletes config variables."""
-    config_file_path = Path(current_app.instance_path) \
-                       / 'etc'/ current_app.config[
-        'SETTINGS']
+    config_file_path = Path(current_app.config['ROOT']) \
+                       / 'etc'/ current_app.config['SETTINGS']
     if delete:
         if config_file_path.exists():
             print('Deleting config file %s.' %(str(config_file_path)))
@@ -155,7 +159,7 @@ def config(var, value, vartype, verbose, delete):
             return
         else:
             var = var.upper()
-            if var.startswith('LORAX_'):
+            if var.startswith(__name__.upper()+'_'):
                 var = var[6:]
             if var in current_app.config:
                 if verbose:
@@ -169,7 +173,7 @@ def config(var, value, vartype, verbose, delete):
                 sys.exit(1)
     else:  # Must be setting.
         var = var.upper()
-        if var.startswith('LORAX_'):
+        if var.startswith(__name__.upper()+'_'):
             var = var[6:]
         if var in current_app.config and vartype is None \
                 and not current_app.config[
@@ -203,21 +207,19 @@ def config(var, value, vartype, verbose, delete):
         #
         # Create a config file, if needed.
         #
+        create_dir('ROOT', 'etc/')
         if not config_file_path.exists():
-            if not config_file_path.parent.exists():
-                config_file_path.parent.mkdir(
-                    mode=current_app.config['DIR_MODE'],
-                    parents=True)
             with config_file_path.open(mode='w') as config_fh:
                 print('Creating instance config file at "%s".' % str(
                     config_file_path))
                 print("""# -*- coding: utf-8 -*-
-'''Overrides of default lorax configurations.
+'''Overrides of default configurations.
 
 This file will be placed in an instance-specific folder and sourced
-after lorax.config but before environmental variables.  You may edit
-this file, but lorax set_config will append and possible supercede
-hand-edited values.
+after default configs but before environmental variables.  You may
+hand-edit this file, but further sets will append and possibly supercede
+hand-edited values.  You may also delete these file and start again
+with the config --delete switch.
 
 Note that configuration variables are all-caps.  Types are from python
 typing rules.
@@ -261,83 +263,96 @@ def create_test_files(force):
 
     :return:
     """
+    pwd_path = Path('.')
     test_files = pkg_resources.resource_listdir(__name__, 'test')
     for filename in test_files:
         path_string = 'test/' + filename
         if not pkg_resources.resource_isdir(__name__, path_string):
-            print('Creating file %s":' %filename)
+            print('Creating file ./%s":' %filename)
             data = pkgutil.get_data(__name__, 'test/' + filename)
-            file_path = Path(filename)
+            file_path = pwd_path/filename
             if file_path.exists() and not force:
                 print('ERROR-- File %s already exists.'%filename +
                       '  Use --force to overwrite.')
                 sys.exit(1)
             with file_path.open(mode='wb') as fh:
                 fh.write(data)
-            if filename.endswith('.sh'):
-                file_path.chmod(0o755)
 
+def walk_package(root):
+    """walk through a package_resource
+    :type module_name: basestring
+    :param module_name: module to search in
+    :type dirname: basestring
+    :param dirname: base directory
+    """
+    dirs = []
+    files = []
+    for name in pkg_resources.resource_listdir(__name__, root):
+        fullname = root + '/' + name
+        if pkg_resources.resource_isdir(__name__, fullname):
+            dirs.append(fullname)
+        else:
+            files.append(name)
+    for new_path in dirs:
+        yield from walk_package(new_path)
+    yield root, dirs, files
+
+
+def copy_files(pkg_subdir, out_head, force):
+    for root, dirs, files in walk_package(pkg_subdir):
+        split_dir = os.path.split(root)
+        if split_dir[0] == '':
+            out_subdir = ''
+        else:
+            out_subdir = '/'.join(list(split_dir)[1:])
+        out_path = out_head / out_subdir
+        if not out_path.exists() and len(files)>0:
+            print('Creating "%s" directory' %str(out_path))
+            out_path.mkdir(mode=current_app.config['DIR_MODE'],
+            parents=True)
+        for filename in files:
+            executable = False
+            if filename.endswith('.sh'):
+                executable = True
+            data = pkgutil.get_data(__name__,
+                                    root +
+                                    '/' +
+                                    filename)
+            data_string = data.decode('UTF-8')
+            if not executable: # template first
+                template_string = Template(data_string)
+                data_string = template_string.substitute(current_app.config)
+            file_path = out_path / filename
+            if file_path.exists() and not force:
+                print('ERROR -- File %s already exists.' %filename+
+                      'Use --force to overwrite.')
+                sys.exit(1)
+            elif file_path.exists() and force:
+                operation = 'Overwriting'
+            else:
+                operation = 'Creating'
+            with file_path.open(mode='wt') as fh:
+                print('%s file "%s" from template.'
+                      %(operation, str(file_path)))
+                fh.write(data_string)
+            if executable:
+                file_path.chmod(0o755)
 
 @cli.command()
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
 def create_instance(force):
-    """Configures instance files in $LORAX_ROOT.
+    """Configures instance files.
 
     :return:
     """
-    if 'LORAX_ROOT' not in os.environ:
-        print('Environmental variable LORAX_ROOT must be defined.')
-        sys.exit(1)
-    out_path = Path(os.environ['LORAX_ROOT'])
-    print('Configuring instance at "%s".' %str(out_path))
-    # Start by creating directories
-    dirs = ['etc']
-    for dir in dirs:
-        out_dir = out_path/dir
-        if not out_dir.exists():
-            print('Creating "%s" directory' %out_dir)
-            out_dir.mkdir(parents=True)
-    files = ['run_lorax.py']
-    for filename in files:
-        data = pkgutil.get_data(__name__, 'instance/' + filename)
-        file_path = out_path / filename
-        if file_path.exists() and not force:
-            print('ERROR -- File %s already exists.' %filename+
-                  'Use --force to overwrite.')
-            sys.exit(1)
-        elif file_path.exists() and force:
-            operation = 'Overwriting'
-        else:
-            operation = 'Creating'
-        with file_path.open(mode='wb') as fh:
-            print('%s file "%s".'
-                  %(operation,
-                  str(file_path)))
-            fh.write(data)
-    templates = ['etc/supervisord.conf',
-                 'etc/lorax-supervisord.conf',
-                 'etc/alignment-supervisord.conf',
-                 'etc/redis-supervisord.conf',
-                 'etc/treebuilder-supervisord.conf',
-                 'etc/redis.conf',
-                 'etc/supervisord-unix.conf',
-                 'etc/supervisord-inet.conf']
-    for filename in templates:
-        data = pkgutil.get_data(__name__, 'instance/'+ filename)
-        data_string = data.decode('UTF-8')
-        template = Template(data_string)
-        out_string = template.substitute(current_app.config)
-        file_path = out_path / filename
-        if file_path.exists() and not force:
-            print('ERROR -- File %s already exists.' %filename+
-                  'Use --force to overwrite.')
-            sys.exit(1)
-        elif file_path.exists() and force:
-            operation = 'Overwriting'
-        else:
-            operation = 'Creating'
-        with file_path.open(mode='wt') as fh:
-            print('%s file "%s" from template.'
-                  %(operation, str(file_path)))
-            fh.write(out_string)
+    copy_files('etc', Path(current_app.config['ROOT'])/'etc', force)
+    dirs = [('TMP',''),
+            ('LOG',''),
+            ('VAR','redis'),
+            ('VAR', 'run'),
+            ('DATA',''),
+            ('USERDATA','')]
+    for dir_tuple in dirs:
+        create_dir(*dir_tuple)
+

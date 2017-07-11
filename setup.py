@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of lorax
+# This file is part of lorax.
 # Copyright (C) 2017, NCGR.
 #
 # lorax is free software; you can redistribute it and/or modify
@@ -24,16 +24,23 @@ from setuptools import setup, find_packages
 from setuptools.command import build_py, develop, install
 # restrict to python 3.4 or later
 if sys.version_info < (3, 4, 0, 'final', 0):
-    raise SystemExit("lorax requires python 3.4 or higher.")
+    raise SystemExit("This package requires python 3.4 or higher.")
 from pathlib import Path  # python 3.4
 
-FASTTREE_BINARY = 'FastTree-lorax'
-FASTTREE_PATH = Path('.')/'lorax'/'fasttree'
-BINARY_PATH = Path('.')/'lorax'/'bin'
+NAME = 'lorax'
+C_NAME = 'FastTree'
+C_VERSION = '2.1.10'
+BINARY_NAME = C_NAME + '-' + NAME
+ENV_SCRIPT_INNAME = 'server_env'
+ENV_SCRIPT_OUTNAME = NAME + '_env'
+RUN_SCRIPT_INNAME = 'server_run.py'
+RUN_SCRIPT_OUTNAME = NAME + '_run.py'
+SOURCE_PATH = Path('.') / NAME / C_NAME.lower()
+BUILD_PATH = Path('.') / NAME / 'bin'
 
-class BuildFasttreeCommand(Command):
-  """Compile FastTree with custom switches."""
-  description = 'Build FastTree with gcc'
+class BuildCBinaryCommand(Command):
+  """Compile C binary with custom switches."""
+  description = 'Build ' + C_NAME + ' C binary'
   user_options = [
       # The format is (long option, short option, description).
       ('cc=', None, 'path to c compiler'),
@@ -52,7 +59,7 @@ class BuildFasttreeCommand(Command):
         self.cc = 'gcc'
         self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' +\
                   ' -O3 -march=native -DOPENMP -fopenmp -lm'
-    elif system == 'FreeBSD':
+    elif system.endswith('BSD'):
         self.cc = 'clang'
         self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' +\
                   ' -O3 -march=native -lm'
@@ -68,30 +75,30 @@ class BuildFasttreeCommand(Command):
     self.cflag_list = self.cflags.split()
 
   def run(self):
-    """Build FastTree with c compiler."""
+    """Build C binary."""
     # Check if build is disabled by environmental variable.
-    if 'LORAX_NO_COMPILE' in environ and\
-            environ['LORAX_NO_COMPILE'] == 'True':
-        logger.info('skipping compile of FastTree binary')
+    if NAME.upper()+'_NO_COMPILE' in environ and\
+            environ[NAME.upper()+'_NO_COMPILE'] == 'True':
+        logger.info('skipping compile of '+ C_NAME +' binary')
         return
-    if (BINARY_PATH/FASTTREE_BINARY).exists():
-        logger.info('FastTree binary already built')
+    if (BUILD_PATH/BINARY_NAME).exists():
+        logger.info(C_NAME + ' binary already built')
         return
-    logger.info('compiling FastTree binary')
+    logger.info('compiling ' + C_NAME + ' v' + C_VERSION + ' binary')
     command = [shutil.which(self.cc)] +\
               self.cflag_list + ['-o',
-              '../bin/'+FASTTREE_BINARY,
-              'FastTree-2.1.10.c']
+              '../bin/'+BINARY_NAME,
+              C_NAME+'-' + C_VERSION + '.c']
     logger.debug('  %s' % (' '.join(command)))
     pipe = subprocess.Popen(command,
-                            cwd='lorax/fasttree',
+                            cwd=NAME+'/' + C_NAME.lower(),
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
     logger.debug(pipe.stdout.read().decode('UTF-8'))
     stderr_messages = pipe.stderr.read().decode('UTF-8')
     if stderr_messages != '':
         logger.error(stderr_messages)
-        raise SystemError("Unable to compile FastTree.")
+        raise SystemError("Unable to compile C binary.")
     if platform.system() == 'Darwin':
         logger.info('fixing library file paths in MacOS executable')
         gomp_name = 'libgomp.1.dylib'
@@ -103,7 +110,7 @@ class BuildFasttreeCommand(Command):
                                '-change',
                                '@rpath/'+gomp_name,
                                str(gomp_path),
-                               str(BINARY_PATH/FASTTREE_BINARY)],
+                               str(BUILD_PATH/BINARY_NAME)],
                               )
 
 
@@ -112,68 +119,77 @@ class InstallBinariesCommand(Command):
   description = 'Copy binaries to install location'
   user_options = [('bindir=', None, 'binaries directory')]
 
-
   def initialize_options(self):
     """Set default values for options."""
-    install_root = self.distribution.get_command_obj('install').root
-    if install_root is not None:
-        install_dir = install_root + '/usr'
-    elif hasattr(sys, 'real_prefix'):
-        install_dir = sys.prefix
-    elif hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix:
-        install_dir = sys.prefix
-    elif 'conda' in sys.prefix:
-        install_dir = sys.prefix
+    if NAME.upper()+'_ROOT' in environ:
+        install_path = Path(environ[NAME.upper()+'_ROOT'])
     else:
-        install_dir = '.'
-    self.bin_path = Path(install_dir)/'bin'
+        install_path = Path(sys.prefix)
+    self.bin_path = install_path/'bin'
+    self.etc_path = install_path/'etc'/ NAME
 
   def finalize_options(self):
     """Post-process options."""
     if not self.bin_path.exists():
         logger.info('creating binary directory "%s"' % (str(self.bin_path)))
         self.bin_path.mkdir(parents=True)
+    if not self.etc_path.exists():
+        logger.info('creating etc directory "%s"' % (str(self.etc_path)))
+        self.etc_path.mkdir(parents=True)
 
   def run(self):
     """Run command."""
     # Check if build is disabled by environmental variable.
-    if 'LORAX_NO_BINARIES' in environ and\
-            environ['LORAX_NO_BINARIES'] == 'True':
+    no_binaries = NAME.upper() + '_NO_BINARIES'
+    if no_binaries in environ and\
+            environ[no_binaries] == 'True':
         logger.info('skipping install of binary files')
     else:
-        logger.info('copying binaries to %s' % (str(self.bin_path)))
-        for binary in BINARY_PATH.iterdir():
-            shutil.copy2(str(binary), str(self.bin_path))
+        logger.info('copying binary to %s' % (str(self.bin_path)))
+        shutil.copy2(str(BUILD_PATH/BINARY_NAME),
+                     str(self.bin_path/BINARY_NAME))
+        logger.info('copying environment script to %s' % (str(self.bin_path)))
+        shutil.copy2(str(BUILD_PATH/ENV_SCRIPT_INNAME),
+                     str(self.bin_path/ENV_SCRIPT_OUTNAME))
+        shutil.copy2(str(BUILD_PATH/RUN_SCRIPT_INNAME),
+                     str(self.bin_path/RUN_SCRIPT_OUTNAME))
+        my_python = self.bin_path/(NAME + '_python')
+        if not my_python.exists():
+            logger.info('creating '+ str(my_python) + ' link')
+            my_python.symlink_to(sys.executable)
 
 
 class BuildPyCommand(build_py.build_py):
-  """Build FastTree as part of build."""
+  """Build C binary as part of build."""
 
   def run(self):
-    self.run_command('build_fasttree')
+    self.run_command('build_cbinary')
     build_py.build_py.run(self)
 
 
 class DevelopCommand(develop.develop):
-    """Build FastTree as part of develop."""
+    """Build C binary as part of develop."""
 
     def run(self):
-        self.run_command('build_fasttree')
+        self.run_command('build_cbinary')
         self.run_command('install_binaries')
         develop.develop.run(self)
 
+
 class InstallCommand(install.install):
-    """Install FastTree as part of install."""
+    """Install C binary as part of install."""
 
     def run(self):
-        self.run_command('build_fasttree')
+        self.run_command('build_cbinary')
         self.run_command('install_binaries')
         install.install.run(self)
+
+
 #
 # Most of the setup function has been moved to setup.cfg,
 # which requires a recent setuptools to work.  Current
 # anaconda setuptools is too old, so it is strongly
-# urged that lorax be installed in a virtual environment.
+# urged this package be installed in a virtual environment.
 #
 tests_require = [
     'check-manifest>=0.25',
@@ -207,10 +223,10 @@ setup(
                     'setuptools-scm>1.5'
                     ],
     entry_points={
-        'console_scripts': ['lorax = lorax.cli:cli']
+        'console_scripts': [NAME +' = '+ NAME +'.cli:cli']
     },
     cmdclass={
-        'build_fasttree': BuildFasttreeCommand,
+        'build_cbinary': BuildCBinaryCommand,
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
         'install_binaries': InstallBinariesCommand,
@@ -219,7 +235,7 @@ setup(
     use_scm_version={
         'version_scheme': 'guess-next-dev',
         'local_scheme': 'dirty-tag',
-        'write_to': 'lorax/version.py'
+        'write_to': NAME +'/version.py'
     },
     extras_require=extras_require,
     tests_require=tests_require,

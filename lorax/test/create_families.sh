@@ -47,18 +47,19 @@ hmmpath=$2
 #
 # Loop over FASTA files, POST FASTA and PUT HMM.
 #
-nfiles=`ls ${fastapath} | wc -l`
+nfiles=`find ${fastapath} -type f | wc -l`
 let count=0
+rm -f families.raw
 echo -e "#family_name\tseqs\tavg_len" >families.tsv
-for seqfile in `ls -S ${fastapath}/*` ; do
+for seqfile in `find ${fastapath}/* -type f` ; do
         let count=${count}+1
         seqname=${seqfile##*/}
 	fam=${seqname%%.*}
 	nseqs=`grep \> ${seqfile} | wc -l`
 	nchars=`grep -v \> ${seqfile} | wc -c`
-	avg_len=`python -c "print(int(round(${nchars}/${nseqs})))"`
+	avg_len=`echo "$nchars $nseqs" | awk '{print int($1/$2+0.5)'`
 	if [ "$_V" -ne 0 ]; then
-		echo "creating family ${fam} with ${nseqs} sequences of length ${avg_len}"
+		echo "Creating family ${fam} with ${nseqs} sequences of length ${avg_len}."
 	elif [ "$_Q" -eq 0 ]; then
 		ProgressBar ${count} ${nfiles}
 	fi
@@ -72,10 +73,22 @@ for seqfile in `ls -S ${fastapath}/*` ; do
 		echo "PUT of HMM failed on ${fam}"
 		exit 1
 	fi
-	echo -e "${fam}\t${nseqs}\t${avg_len}">>families.tsv
+	echo -e "${fam}\t${nseqs}\t${avg_len}">>families.raw
 done
 if [ "$_Q" -ne 0 ]; then
-  echo "" # newline after progress bar
+  echo "" # newline after progress barq
 fi
-echo "Size-ordered (large to small) list of families can be found in families.txt"
-
+#
+# Sort, histogram, and print stats on families.
+#
+echo "${nfilmes} families created."
+sort -rgk2 families.raw >> families.tsv
+echo "Size-ordered (large to small) list of families can be found in families.tsv"
+rm -f families.raw families_histogram.tsv
+echo "Histogram of family sizes can be found in families_histogram.tsv"
+echo -e "#size\tfamilies" >families_histogram.tsv
+grep -v \# families.tsv | awk '{n[$2]++} END {for (i in n) print i,"\t",n[i]}' | sort -n >>families_histogram.tsv
+IFS=',' read -r -a bigfam <<< `grep -v \# families.tsv | head -1| tr "\\t" ","`
+echo "Largest familiy is ${bigfam[0]} with ${bigfam[1]} members of average length ${bigfam[2]}."
+IFS=',' read -r -a modal <<< `grep -v \# families_histogram.tsv | sort -rgk 2 | head -1 | tr "\\t" ","`
+echo "Modal size of families is ${modal[0]} sequences, with ${modal[1]} examples."

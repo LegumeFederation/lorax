@@ -44,13 +44,24 @@ Next use pip to install dependencies:
 	pip install --global-option=build_py lorax
 
 
-Define alias command
---------------------
-Next, we define a command of convenience for running a script that
-defines two environmental variables and activates the correct virtual
-environment from _outside_ the virtual environment:
 
-    alias runinenv="${PWD}/bin/run_in_lorax_env"
+Put lorax_env script in alias or on path
+----------------------------------------
+The lorax_env script is the only executable that you will need to control
+lorax and associated process. You should usually not put the entire lorax
+bin/ directory into your path, as this may cause binaries from the virtual
+environment such as python to be used in contexts where they were not intended
+to be used.  The easiest way to do this is with a symlink to a directory
+on your path, typically ~/bin:
+
+        ln -s /path/to/loraxenv/bin/lorax_env ~/bin
+n/
+
+Deactivate virtual environment
+------------------------------
+You no longer need to work inside the virtual environment you created.  Leave
+the virtual environment with the following command:
+
     deactivate
 
 Next, follow the instructions in INSTALL.configure+run.txt.

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Configuration variables for lorax.
+"""Define, override, and handle onfiguration variables.
 
-Definitions in this file are selected by the LORAX_CONFIGURATION environmental
+Definitions in this file are selected by the MYAPP_CONFIGURATION environmental
 variable.  This variable may take on the following values:
     * default
     * development
@@ -10,8 +10,8 @@ variable.  This variable may take on the following values:
 
 
 These definitions may be overridden via two ways:
-  1) a python file pointed to by the environmental variable LORAX_SETTINGS.
-  2) an environmental variable that starts with "LORAX_".  If its value is
+  1) a python file pointed to by the environmental variable MYAPP_SETTINGS.
+  2) an environmental variable that starts with "MYAPP_".  If its value is
      "True" or "False", then it will be interpreted as a logical value.
      If its value can be parsed as an integer, then it will be.
 """

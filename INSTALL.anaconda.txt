@@ -57,22 +57,46 @@ Failure to do this step will result in a message to the effect "Unable to
 resolve paths in MacOS executable" in the lorax installation step 
 later.
 
-Do pip installs
----------------
+Upgrade setuptools
+------------------
 Next continue the installation by updating setuptools and installing lorax.
 The first will end with an error; this is expected, so don't be worried by it:
 
 	pip install -U setuptools
+
+Choose root location
+--------------------
+When lorax installs itself, it will place some files in the bin/ and etc/
+subdirectories of LORAX_ROOT.  Normally LORAX_ROOT is set to the same directory
+as parent of the python installation in use (that is, in sys.prefix).  This
+is usually fine for most installations, but if you wish to override it,
+you must define LORAX_ROOT before installation:
+
+    export LORAX_ROOT=some_directory_you_choose
+
+
+Install lorax
+-------------
+Next, install the lorax dependencies and binaries:
+
 	pip install --global-option=build_py lorax
 
+Put lorax_env script in alias or on path
+----------------------------------------
+The lorax_env script is the only executable that you will need to control
+lorax and associated process. You should usually not put the entire lorax
+bin/ directory into your path, as this may cause binaries from the virtual
+environment such as python to be used in contexts where they were not intended
+to be used.  The easiest way to do this is with a symlink to a directory
+on your path, such as the Anaconda Python directory:
 
-Create a temporary command alias
----------------------------------
-Next, we define a command of convenience for running a script that
-defines two environmental variables and activates the correct virtual
-environment from _outside_ the virtual environment:
+	ln -s /path/to/anaconda/envs/loraxenv/bin/lorax_env /path/to/anaconda/bin
 
-    alias runinenv="${CONDA_PREFIX}/bin/run_in_lorax_env"
-    source deactivate
+Deactivate virtual environment
+------------------------------
+You no longer need to work inside the virtual environment you created.  Leave
+the virtual environment with the following command:
+
+   source deactivate
 
 Next, follow the instructions in INSTALL.configure+run.txt.
