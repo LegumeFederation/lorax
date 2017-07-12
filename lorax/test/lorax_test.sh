@@ -2,15 +2,14 @@
 # Test all lorax targets.
 #
 # Usage:
-#       test_all.sh [-v]
+#       lorax_test.sh [-v]
 #
 # Options:
 #       -v  verbose mode, shows all returns.
 #
 #
-# Before running this script, lorax should be started in a
-# separate window and the environmental variables LORAX_HOST
-# and LORAX_PORT must be defined.
+# Before running this script, lorax should be configured and
+# started via the lorax_env script.
 #
 
 #
@@ -28,14 +27,9 @@ do
    esac
 done
 #
-# If environmental variables not set, use defaults.
+# Get environmental variables.
 #
-if [ -z "$LORAX_HOST" ] ; then
-	export LORAX_HOST=localhost
-fi
-if [ -z "$LORAX_PORT" ] ; then
-	export LORAX_PORT=58927
-fi
+source lorax_envvars
 #
 # Functions
 #
@@ -51,7 +45,7 @@ test_GET () {
    else
       code="${2}"
    fi
-   status=$(curl -s -o ${tmpfile} -w '%{http_code}' ${LORAX_HOST}:${LORAX_PORT}${1})
+   status=$(curl ${LORAX_CURL_ARGS} -s -o ${tmpfile} -w '%{http_code}' ${LORAX_CURL_URL}${1})
    if [ "${status}" -eq "${code}" ]; then
       echo "GET ${1} returned HTTP code ${status} as expected."
       if [ "$_V" -eq 1 ]; then
@@ -83,7 +77,7 @@ test_DELETE () {
    else
       code="${2}"
    fi
-   status=$(curl -s -o ${tmpfile} -w '%{http_code}' -X 'DELETE' ${LORAX_HOST}:${LORAX_PORT}${1})
+   status=$(curl ${LORAX_CURL_ARGS} -s -o ${tmpfile} -w '%{http_code}' -X 'DELETE' ${LORAX_CURL_URL}${1})
    if [ "${status}" -eq "${code}" ]; then
       echo "DELETE ${1} returned HTTP code ${status} as expected."
       if [ "$_V" -eq 1 ]; then
@@ -106,7 +100,7 @@ test_DELETE () {
 
 poll_until_positive() {
    echo -n "Polling ${1} "
-   while [ `curl -s ${LORAX_HOST}:${LORAX_PORT}${1}` -lt 0 ]; do
+   while [ `curl ${LORAX_CURL_ARGS} -s ${LORAX_CURL_URL}${1}` -lt 0 ]; do
      echo -n "."
      sleep ${SLEEPTIME}
    done
@@ -114,7 +108,7 @@ poll_until_positive() {
 }
 
 # GET a bad target throws a 404.
-echo "testing server on http://${LORAX_HOST}:${LORAX_PORT}"
+echo "testing lorax server on ${LORAX_URL}"
 
 test_GET /badtarget 404
 

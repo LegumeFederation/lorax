@@ -18,10 +18,9 @@ Example:
 Options:
       -v   verbose mode, shows all returns.
 
- Before running this script, lorax should be started.
- If the lorax server is running at an address other than the
- default, the environmental variables LORAX_HOST
- and LORAX_PORT must be defined.
+ Before running this script, lorax should be started, and the
+ environmental variables LORAX_CURL_ARGS and LORAX_CURL_URL
+ must be defined.
 "
 #
 # Parse option (verbose flag)
@@ -38,12 +37,7 @@ done
 #
 # Get environmental variables.
 #
-if [ -z "$LORAX_HOST" ] ; then
-	LORAX_HOST=localhost
-fi
-if [ -z "$LORAX_PORT" ] ; then
-	LORAX_PORT=58927
-fi
+source lorax_envvars
 #
 # Parse arguments
 #
@@ -89,7 +83,7 @@ fi
 #
 full_target="/trees/${3}/${target}"
 tmpfile=$(mktemp /tmp/post_FASTA.XXX)
-status=$(curl -s -o ${tmpfile} -w '%{http_code}' -F "${type}=@${2}" ${LORAX_HOST}:${LORAX_PORT}${full_target})
+status=$(curl ${LORAX_CURL_ARGS} -s -o ${tmpfile} -w '%{http_code}' -F "${type}=@${2}" ${LORAX_CURL_URL}${full_target})
 if [ "${status}" -eq "${code}" ]; then
    if [ "$_V" -eq 1 ]; then
       echo "POST of ${2} to ${full_target} returned HTTP code ${status} as expected."

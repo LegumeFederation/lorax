@@ -9,7 +9,15 @@
 # to the value referenced by the value of $var.
 #
 realpath() {
-    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+  pushd "$(dirname "$1")" 2&>/dev/null
+  islink=$(readlink "$(basename "$1")")
+  while [ "$islink" ]; do
+    cd "$(dirname "$islink")"
+    islink=$(readlink "$(basename "$1")")
+  done
+  path="${PWD}/$(basename "$1")"
+  popd 2&>/dev/null
+  echo "$path"
 }
 #
 # Get the real path to this script.
@@ -92,7 +100,7 @@ shift $#
 # Set environmental variables.
 #
 export FLASK_APP="${pkg}"
-if [ -e "${root_dir}/etc/conf.d/${pkg}" ]; then
+if [ -e "${root_dir}/etc/${pkg}-conf.sh" ]; then
         source "${root_dir}/etc/conf.d/${pkg}"
 fi
 export ${PKG}_ROOT=${root_dir}
@@ -127,6 +135,7 @@ fi
 #
 # Activate the virtual environment if necessary.
 #
+in_venv=0
 if [ -x "${bin_dir}/conda" ]; then
     # Running Anaconda python.  Check to see if the virtual environment
     # is already active.  If not, find the name of the virtual environment
@@ -200,7 +209,7 @@ fi
 #
 if [ "$_I" -eq 1 ]; then
   echo "Executing commands in ${environ}, control-D to exit."
-  while read -p "${script_name}> " command; do $command; done
+  PS1="${script_name}> " bash
   echo ""
 else
   if [ "$_V" -eq 1 ]; then

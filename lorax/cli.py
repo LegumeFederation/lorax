@@ -17,20 +17,21 @@ from datetime import datetime
 from distutils.util import strtobool
 from pydoc import locate
 from pathlib import Path  # python 3.4 or later
-from string import Template
+#
 #
 # third-party imports.
 import click
 from flask import current_app
 from flask.cli import FlaskGroup
+from jinja2 import Environment, PackageLoader
 #
 # Local imports.
 #
 from .logging import configure_logging
+from .filesystem import init_filesystem, create_dir
 #
 # Global variables.
 #
-MODULE = __name__.split('.')[0]
 AUTHOR = 'Joel Berendzen'
 EMAIL = 'joelb@ncgr.org'
 COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.
@@ -45,26 +46,6 @@ PROJECT_HOME = 'https://github.com/LegumeFederation/'+__name__
 def cli():
     pass
 
-
-def create_dir(config_path, subdir, app=current_app):
-    """Creates runtime directories, if they don't exist.
-
-    :param app:
-    :return:
-    """
-    dir_path = Path(app.config[config_path])/subdir
-    if not dir_path.is_dir():  # create logs/ dir
-        app.logger.info('Creating directory %s/%s at %s.',
-                        config_path, subdir, str(dir_path))
-        try:
-            dir_path.mkdir(mode=app.config['DIR_MODE'],
-                           parents=True)
-        except OSError:
-            app.logger.error('Unable to create directory "%s"',
-                             str(dir_path))
-            raise OSError
-
-
 @cli.command()
 def run():
     """Run a server directly."""
@@ -75,9 +56,8 @@ def run():
     port = current_app.config['PORT']
     host = current_app.config['HOST']
     debug = current_app.config['DEBUG']
+    init_filesystem(current_app)
     configure_logging(current_app)
-    create_dir('DATA', '')
-    create_dir('USERDATA', '')
     current_app.run(host=host,
                     port=port,
                     debug=debug)
@@ -207,7 +187,7 @@ def config(var, value, vartype, verbose, delete):
         #
         # Create a config file, if needed.
         #
-        create_dir('ROOT', 'etc/')
+        create_dir('ROOT', 'etc', current_app)
         if not config_file_path.exists():
             with config_file_path.open(mode='w') as config_fh:
                 print('Creating instance config file at "%s".' % str(
@@ -246,8 +226,7 @@ typing rules.
 
 @cli.command()
 def test_logging():
-    """Test logging at the different levels.
-    """
+    """Test logging at the different levels."""
     configure_logging(current_app)
     current_app.logger.debug('Debug message.')
     current_app.logger.info('Info message.')
@@ -255,31 +234,9 @@ def test_logging():
     current_app.logger.error('Error message.')
 
 
-@cli.command()
-@click.option('--force/--no-force', help='Force overwrites of existing files',
-              default=False)
-def create_test_files(force):
-    """Create test files to the current directory.
-
-    :return:
-    """
-    pwd_path = Path('.')
-    test_files = pkg_resources.resource_listdir(__name__, 'test')
-    for filename in test_files:
-        path_string = 'test/' + filename
-        if not pkg_resources.resource_isdir(__name__, path_string):
-            print('Creating file ./%s":' %filename)
-            data = pkgutil.get_data(__name__, 'test/' + filename)
-            file_path = pwd_path/filename
-            if file_path.exists() and not force:
-                print('ERROR-- File %s already exists.'%filename +
-                      '  Use --force to overwrite.')
-                sys.exit(1)
-            with file_path.open(mode='wb') as fh:
-                fh.write(data)
-
 def walk_package(root):
-    """walk through a package_resource
+    """Walk through a package_resource.
+
     :type module_name: basestring
     :param module_name: module to search in
     :type dirname: basestring
@@ -298,7 +255,15 @@ def walk_package(root):
     yield root, dirs, files
 
 
-def copy_files(pkg_subdir, out_head, force):
+def copy_files(pkg_subdir, out_head, force, notemplate_exts=[]):
+    """Copy files from package, with templating.
+
+    :param pkg_subdir:
+    :param out_head:
+    :param force:
+    :param notemplate_exts:
+    :return:
+    """
     for root, dirs, files in walk_package(pkg_subdir):
         split_dir = os.path.split(root)
         if split_dir[0] == '':
@@ -308,51 +273,63 @@ def copy_files(pkg_subdir, out_head, force):
         out_path = out_head / out_subdir
         if not out_path.exists() and len(files)>0:
             print('Creating "%s" directory' %str(out_path))
-            out_path.mkdir(mode=current_app.config['DIR_MODE'],
+            out_path.mkdir(mode=int(current_app.config['DIR_MODE'],8),
             parents=True)
+        #
+        # Initialize Jinja2 template engine on this directory.
+        #
+        template_env = Environment(loader=PackageLoader(__name__, root),
+                                   trim_blocks=True,
+                                   lstrip_blocks=True
+                                   )
         for filename in files:
-            executable = False
-            if filename.endswith('.sh'):
-                executable = True
-            data = pkgutil.get_data(__name__,
-                                    root +
-                                    '/' +
-                                    filename)
-            data_string = data.decode('UTF-8')
-            if not executable: # template first
-                template_string = Template(data_string)
-                data_string = template_string.substitute(current_app.config)
-            file_path = out_path / filename
+            try:
+                ext = os.path.splitext(filename)[1].lstrip('.')
+            except IndexError:
+                ext = ''
+            if ext in notemplate_exts:
+                templated = 'directly'
+                data_string = pkgutil.get_data(__name__,
+                                               root + '/' +
+                                               filename).decode('UTF-8')
+            else:
+                templated = 'from template'
+                template = template_env.get_template(filename)
+                data_string = template.render(current_app.config)
+            outfilename = filename.replace('server', current_app.config['NAME'])
+            file_path = out_path / outfilename
             if file_path.exists() and not force:
-                print('ERROR -- File %s already exists.' %filename+
-                      'Use --force to overwrite.')
+                print('ERROR -- File %s already exists.' %str(file_path) +
+                      '  Use --force to overwrite.')
                 sys.exit(1)
             elif file_path.exists() and force:
                 operation = 'Overwriting'
             else:
                 operation = 'Creating'
             with file_path.open(mode='wt') as fh:
-                print('%s file "%s" from template.'
-                      %(operation, str(file_path)))
+                print('%s file "%s" %s.'
+                      %(operation, str(file_path), templated))
                 fh.write(data_string)
-            if executable:
+            if filename.endswith('.sh') or filename == current_app.config['NAME']:
                 file_path.chmod(0o755)
+
 
 @cli.command()
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
 def create_instance(force):
-    """Configures instance files.
-
-    :return:
-    """
+    """Configures instance files."""
     copy_files('etc', Path(current_app.config['ROOT'])/'etc', force)
-    dirs = [('TMP',''),
-            ('LOG',''),
-            ('VAR','redis'),
-            ('VAR', 'run'),
-            ('DATA',''),
-            ('USERDATA','')]
-    for dir_tuple in dirs:
-        create_dir(*dir_tuple)
+    init_filesystem(current_app)
+
+
+@cli.command()
+@click.option('--force/--no-force', help='Force overwrites of existing files',
+              default=False)
+def create_test_files(force):
+    """Create test files to the current directory."""
+    copy_files('test',
+               Path('.'),
+               force,
+               notemplate_exts=['hmm', 'faa','sh'])
 

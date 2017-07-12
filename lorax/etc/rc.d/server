@@ -1,0 +1,42 @@
+{% if PLATFORM.endswith('BSD') %}
+#!/bin/sh
+# PROVIDE: {{NAME}}
+# rc file for {{NAME}} version {{VERSION}} in {{MODE}} mode.
+# Templated on node {{HOSTNAME}} on {{DATETIME}} by {{USER}}.
+
+. /etc/rc.subr
+
+name="{{NAME}}"
+rcvar="set_rcvar"
+start_cmd="{{NAME}}_start"
+stop_cmd="{{NAME}}_stop"
+
+load_rc_config $name
+
+rc_user="${{ '{' }}{{NAME}}_user}"
+command="${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env"
+command_args="supervisord"
+pidfile="${{ '{' }}{{NAME}}_var}/run/supervisord.pid"
+required_files="${{ '{' }}{{NAME}}_root}/etc/supervisord.conf ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_run.py"
+required_dirs="${{ '{' }}{{NAME}}_var} ${{ '{' }}{{NAME}}_log} ${{ '{' }}{{NAME}}_tmp} ${{ '{' }}{{NAME}}_data} ${{ '{' }}{{NAME}}_userdata}"
+sig_reload="USR1"
+extra_commands="status"
+status="{{NAME}}_status"
+
+{{NAME}}_start()
+{
+ ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisord
+}
+
+{{NAME}}_stop()
+{
+ ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl shutdown
+}
+
+{{NAME}}_status()
+{
+ ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl status
+}
+
+run_rc_command "$1"
+{% endif %}

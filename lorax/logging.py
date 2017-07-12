@@ -87,7 +87,7 @@ def configure_logging(app):
     # Start log file.
     #
     if app.config['LOGFILE']:  # start a log file
-        logfile_name = app.config['LOGGER_NAME'] + '.log'
+        logfile_name = app.config['LOGGER_NAME'] + '_errors.log'
         app.config['LOGFILE_NAME'] = logfile_name
         logfile_path = Path(app.config['LOG']) / logfile_name
         if app.config['DEBUG']:
@@ -95,7 +95,7 @@ def configure_logging(app):
                   file=sys.stderr)
         if not logfile_path.parent.is_dir():  # create logs/ dir
             try:
-                logfile_path.parent.mkdir(mode=app.config['DIR_MODE'],
+                logfile_path.parent.mkdir(mode=int(app.config['DIR_MODE'],8),
                                           parents=True)
             except OSError:
                 app.logger.error('Unable to create logfile directory "%s"',

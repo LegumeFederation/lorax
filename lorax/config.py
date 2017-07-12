@@ -20,6 +20,7 @@ These definitions may be overridden via two ways:
 # Library imports.
 #
 import os
+import platform
 import sys
 from getpass import getuser
 from socket import getfqdn
@@ -32,7 +33,10 @@ import arrow
 # Local imports
 #
 from .version import version as __version__  # noqa
-MODULE = __name__.split('.')[0]
+#
+# Name of this service.
+#
+SERVICE_NAME = os.getenv('FLASK_APP', __name__.split('.')[0])
 #
 # Definitions that *must* be set in environmental variables.  Trying to
 # set these from the config file would be too late, so they are
@@ -44,7 +48,7 @@ PATHVARS = ('ROOT', 'VAR', 'LOG', 'TMP', 'DATA', 'USERDATA')
 
 def get_path(name, default):
     """Get path from environ, checking absoluteness."""
-    varname = MODULE.upper() + '_' + name.upper()
+    varname = SERVICE_NAME.upper() + '_' + name.upper()
     if varname in os.environ:
         path_str = os.environ[varname]
         try:
@@ -65,6 +69,10 @@ class BaseConfig(object):
     configuration object.
     """
     #
+    # Name of this service.
+    #
+    NAME = SERVICE_NAME
+    #
     # File path locations.  All of these are immutable except DATA.
     # Since different components run from different locations, these
     # must be absolute.  The immutable ones should be created before
@@ -80,7 +88,7 @@ class BaseConfig(object):
     #
     #
     PROCESS_UMASK = '007'
-    DIR_MODE = 0o770 # Note interaction with process umask
+    DIR_MODE = '770' # Note interaction with process umask
     #
     # The DEBUG parameter has multiple implications:
     #           * access to python debugging via flask
@@ -108,7 +116,7 @@ class BaseConfig(object):
     #
     # Settings file name.
     #
-    SETTINGS = MODULE +'.conf'
+    SETTINGS = SERVICE_NAME +'.conf'
     #
     # Number of threads used in queued commands.  0 = use as many as available.
     #
@@ -119,8 +127,9 @@ class BaseConfig(object):
     RQ_ASYNC = True
     TREE_QUEUE = 'treebuilding'
     ALIGNMENT_QUEUE = 'alignment'
+    START_QUEUES = []
     RQ_QUEUES = [TREE_QUEUE, ALIGNMENT_QUEUE]
-    REDIS_UNIX_SOCKET = False
+    REDIS_UNIX_SOCKET = True
     RQ_REDIS_PORT = 58929
     RQ_REDIS_HOST = 'localhost'
     RQ_SCHEDULER_INTERVAL = 60
@@ -151,7 +160,7 @@ class BaseConfig(object):
     #
     # Binaries.
     #
-    FASTTREE_EXE = 'FastTree-'+MODULE
+    FASTTREE_EXE = 'FastTree-'+SERVICE_NAME
     RAXML_EXE = 'raxmlHPC'
     #
     # Current run.
@@ -162,17 +171,28 @@ class BaseConfig(object):
     #
     # supervisord defs.
     #
-    SUPERVISORD_UNIX_SOCKET = False
+    SUPERVISORD_UNIX_SOCKET = True
     SUPERVISORD_PORT = 58928
     SUPERVISORD_HOST = '127.0.0.1'
-    SUPERVISORD_USER = MODULE
-    SUPERVISORD_PASSWORD = MODULE + '_default_password'
+    SUPERVISORD_USER = SERVICE_NAME
+    SUPERVISORD_PASSWORD = SERVICE_NAME + '_default_password'
     SUPERVISORD_START_REDIS = True
     SUPERVISORD_START_SERVER = True
     SUPERVISORD_START_REDIS = True
     SUPERVISORD_START_ALIGNMENT = True
-    SUPERVISORD_START_TREEBUILDER = True
+    SUPERVISORD_START_TREEBUILDING = True
     SUPERVISORD_START_CRASHMAIL = True
+    #
+    # gunicorn defs--these will not be used in debugging mode.
+    #
+    GUNICORN_LOG_LEVEL = 'debug'
+    GUNICORN_UNIX_SOCKET = False
+    #
+    # URL defs--these will be used in testing.
+    #
+    CURL_ARGS = ''
+    CURL_URL = HOST + ':' + str(PORT)
+    URL = ''
     #
     # crashmail defs.
     #
@@ -204,9 +224,6 @@ class BaseConfig(object):
     FILE_LOG_FORMAT = '%(levelname)s: %(message)s'
 
 
-
-
-
 class DevelopmentConfig(BaseConfig):
     """Start internal server, no queues."""
     DEBUG = True
@@ -217,7 +234,7 @@ class DevelopmentConfig(BaseConfig):
     SUPERVISORD_START_ALIGNMENT = False
     SUPERVISORD_START_TREEBUILDER = False
     # Use debug config settings
-    SETTINGS = MODULE + '-debug.conf'
+    SETTINGS = SERVICE_NAME + '-debug.conf'
 
 
 class ServerOnlyConfig(BaseConfig):
@@ -245,11 +262,11 @@ class AlignerConfig(BaseConfig):
 #  the _CONFIGURATION environmental variable.
 #
 config_dict = {
-    'default': MODULE +'.config.BaseConfig',
-    'development': MODULE +'.config.DevelopmentConfig',
-    'serverOnly': MODULE +'.config.ServerOnlyConfig',
-    'treebuilder': MODULE +'.config.TreebuilderConfig',
-    'aligner': MODULE +'.config.AlignerConfig'
+    'default': SERVICE_NAME +'.config.BaseConfig',
+    'development': SERVICE_NAME +'.config.DevelopmentConfig',
+    'serverOnly': SERVICE_NAME +'.config.ServerOnlyConfig',
+    'treebuilder': SERVICE_NAME +'.config.TreebuilderConfig',
+    'aligner': SERVICE_NAME +'.config.AlignerConfig'
 }
 
 def configure_app(app):
@@ -258,7 +275,7 @@ def configure_app(app):
     :param app:
     :return:
     """
-    config_name = os.getenv(MODULE.upper()+'_MODE', 'default')
+    config_name = os.getenv(SERVICE_NAME.upper()+'_MODE', 'default')
     if config_name not in config_dict:
         print('ERROR -- mode "%s" not known.' % config_name,
               file=sys.stderr)
@@ -268,9 +285,10 @@ def configure_app(app):
     #
     # Get instance-specific configuration, if it exists.
     #
-    if MODULE.upper()+'_ROOT' in os.environ:
-        app.instance_path = os.getenv(MODULE.upper()+'_ROOT')
-    pyfile_name = os.getenv(MODULE.upper()+'_SETTINGS', app.config['SETTINGS'])
+    app.instance_path = os.getenv(SERVICE_NAME.upper()+'_ROOT',
+                                  app.config['ROOT'])
+    pyfile_name = os.getenv(SERVICE_NAME.upper()+'_SETTINGS',
+                            app.config['SETTINGS'])
     pyfile_path = str(Path(app.instance_path)/'etc'/pyfile_name)
     app.config.from_pyfile(pyfile_path, silent=True)
     #
@@ -278,7 +296,7 @@ def configure_app(app):
     #
     for my_envvar, envvar in [(i, i[6:])
                                  for i in sorted(os.environ)
-                                 if i.startswith(MODULE.upper() + '_')]:
+                                 if i.startswith(SERVICE_NAME.upper() + '_')]:
         value = os.environ[my_envvar]
         if value == 'True':
             value = True
@@ -292,9 +310,10 @@ def configure_app(app):
         if envvar not in PATHVARS: # paths already configured from envvars
             app.config[envvar] = value
     #
-    # Set version.
+    # Set version and platform (output only, not configurable).
     #
     app.config['VERSION'] = __version__
+    app.config['PLATFORM'] = platform.system()
     #
     # Set redis socket type.
     #
@@ -302,54 +321,54 @@ def configure_app(app):
         app.config['RQ_REDIS_PORT'] = 0
         app.config['RQ_REDIS_HOST'] = '127.0.0.1'
         app.config['RQ_REDIS_URL'] = "unix://@'" + \
-            app.config['TMP'] + '/redis.sock?db=0'
-        app.config['RQ_UNIXSOCKET'] = 'unixsocket %s/redis.sock' %(app.config['TMP'])
+                                     app.config['VAR'] + \
+                                     '/run/redis.sock?db=0'
+        app.config['RQ_UNIXSOCKET'] = 'unixsocket %s/run/redis.sock' %(app.config['VAR'])
     else:
-        app.config['RQ_REDIS_URL'] = 'redis://'+\
-                                     app.config['RQ_REDIS_HOST'] +\
+        app.config['RQ_REDIS_URL'] = 'redis://'+ \
+                                     app.config['RQ_REDIS_HOST'] + \
                                      ':' +\
-                                     str(app.config['RQ_REDIS_PORT']) +\
+                                     str(app.config['RQ_REDIS_PORT']) + \
                                      '/0'
         app.config['RQ_UNIXSOCKET'] = ''
     #
     # Supervisord socket type.
     #
     if app.config['SUPERVISORD_UNIX_SOCKET']:
-        app.config['SOCKET_CONF'] = '%(ENV_' +\
-                                    MODULE.upper() +\
-                                    '_ROOT)s/etc/' +\
-                                    MODULE +\
-                                    '/supervisord-unix.conf'
-        app.config['SUPERVISORD_SERVERURL'] = 'unix://%{ENV_' +\
-                                              MODULE.upper() +\
-                                              '_TMP}s/supervisord.sock'
+        app.config['SUPERVISORD_SERVERURL'] = 'unix://%(ENV_' +\
+                                              SERVICE_NAME.upper() +\
+                                              '_VAR)s/run/supervisord.sock'
     else:
-        app.config['SOCKET_CONF'] = '%(ENV_'+\
-                                    MODULE.upper() +\
-                                    '_ROOT)s/etc/supervisord-inet.conf'
         app.config['SUPERVISORD_SERVERURL'] = 'http://' + \
                 app.config['SUPERVISORD_HOST'] + ':'+ \
                 str(app.config['SUPERVISORD_PORT'])
-    supervisord_services = ['SERVER',
-                            'REDIS',
-                            'ALIGNMENT',
-                            'TREEBUILDER',
-                            'CRASHMAIL']
-    has_debug = [MODULE.upper()]
-    for service in supervisord_services:
-        if app.config['SUPERVISORD_START_'+service]:
-            if service in has_debug:
-                app.config[service+'_CONF'] = '%(ENV_' +\
-                                              MODULE.upper() +\
-                                              '_ROOT)s/etc/' +\
-                                              service.lower() +\
-                                              '-supervisord-debug.conf'
-            else:
-                app.config[service+'_CONF'] = '%(ENV_' +\
-                                              MODULE.upper() +\
-                                              '_ROOT)s/etc/' +\
-                                              service.lower() +\
-                                              '-supervisord.conf'
-        else:
-            app.config[service+'_CONF'] = ''
+    #
+    # Gunicorn socket type.
+    #
+    if app.config['GUNICORN_UNIX_SOCKET']:
+        app.config['URL'] = 'unix://' +\
+                            app.config['VAR'] +\
+                            '/run/lorax.sock'
+        app.config['GUNICORN_URL'] = 'unix://%(ENV_' +\
+                            SERVICE_NAME.upper() +\
+                            '_VAR)s/run/lorax.sock'
+        app.config['CURL_ARGS'] = '--unix-socket ' + \
+                                  app.config['VAR'] +\
+                                             '/run/lorax.sock'
+        app.config['CURL_URL'] = 'http:'
+    else:
+        app.config['URL'] = 'http://' + \
+                            app.config['HOST'] + ':'+ \
+                            str(app.config['PORT'])
+        app.config['GUNICORN_URL'] = app.config['HOST'] + ':'+ \
+                            str(app.config['PORT'])
+        app.config['CURL_URL'] = app.config['HOST'] + ':' +\
+                                 str(app.config['PORT'])
+    #
+    # Set queues to be started.
+    #
+    for queue in app.config['RQ_QUEUES']:
+        if app.config['SUPERVISORD_START_'+queue.upper()]:
+            app.config['START_QUEUES'].append(queue)
+
 
