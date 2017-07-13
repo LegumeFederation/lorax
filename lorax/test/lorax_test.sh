@@ -110,11 +110,15 @@ poll_until_positive() {
 # GET a bad target throws a 404.
 echo "testing lorax server on ${LORAX_URL}"
 
+test_GET /
+
+test_GET /healthcheck
+
+test_GET /log.txt
+
 test_GET /badtarget 404
 
 test_GET /test_exception 500
-
-test_GET /log.txt
 
 test_GET /trees/families.json
 

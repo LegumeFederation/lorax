@@ -6,3 +6,4 @@ gunicorn
 raven[flask]
 -e git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0
 superlance
+healthcheck

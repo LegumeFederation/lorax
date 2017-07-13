@@ -21,6 +21,7 @@ from flask_cli import FlaskCLI
 from flask_rq2 import RQ
 import rq_dashboard
 from Bio import SeqIO, AlignIO, Phylo
+from healthcheck import HealthCheck, EnvironmentDump
 #
 # local imports
 #
@@ -67,6 +68,11 @@ TEXT_MIMETYPE = 'text/plain'
 HMM_SWITCHES = {'peptide': 'amino',
                 'DNA': 'dna'}
 #
+# Application data.
+#
+MAINTAINER = 'Joel Berendzen'
+GIT_REPO = 'https://github.com/LegumeFederation/lorax'
+#
 # Library path for fixing external libraries.
 #
 LIBRARY_PATH_ENVVAR = {'Darwin': 'DYLD_LIBRARY_PATH'}
@@ -87,6 +93,18 @@ rq = RQ(app)
 if app.config['RQ_ASYNC']:
     app.config.from_object(rq_dashboard.default_settings)
     app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
+#
+# Application data for optional environment dump.
+#
+def application_data():
+    return {'maintainer': MAINTAINER,
+            'git_repo': GIT_REPO}
+#
+# Create /healthcheck and /environment URLs.
+#
+health = HealthCheck(app,'/healthcheck')
+envdump = EnvironmentDump(app, '/environment')
+envdump.add_section('application', application_data)
 #
 # Helper function defs start here.
 #
@@ -604,6 +622,16 @@ def queue_calculation(familyname,
 #
 # Target definitions begin here.
 #
+@app.route('/')
+def hello_world():
+    """
+
+    :return: JSON application data
+    """
+    app_data = {'name': __name__,
+                'version': app.config['VERSION']}
+    return Response(json.dumps(app_data), mimetype=JSON_MIMETYPE)
+
 @app.route('/log.txt')
 def return_log():
     """Return the log file.
@@ -612,7 +640,7 @@ def return_log():
     """
     content = get_file(app.config['LOGFILE_NAME'],
                        file_type='log')
-    return Response(content, mimetype='text/plain')
+    return Response(content, mimetype=TEXT_MIMETYPE)
 
 
 @app.route('/trees/' + FAMILIES_NAME)

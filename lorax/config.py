@@ -72,6 +72,7 @@ class BaseConfig(object):
     # Name of this service.
     #
     NAME = SERVICE_NAME
+    ENVIRONMENT_DUMP = False
     #
     # File path locations.  All of these are immutable except DATA.
     # Since different components run from different locations, these
@@ -229,6 +230,7 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
     TESTING = True
     RQ_ASYNC = False
+    ENVIRONMENT_DUMP = True
     # Running synchronous--no need to start queues.
     SUPERVISORD_START_REDIS  = False
     SUPERVISORD_START_ALIGNMENT = False
@@ -355,7 +357,7 @@ def configure_app(app):
         app.config['CURL_ARGS'] = '--unix-socket ' + \
                                   app.config['VAR'] +\
                                              '/run/lorax.sock'
-        app.config['CURL_URL'] = 'http:'
+        app.config['CURL_URL'] = 'http::'
     else:
         app.config['URL'] = 'http://' + \
                             app.config['HOST'] + ':'+ \
