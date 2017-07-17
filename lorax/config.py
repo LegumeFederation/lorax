@@ -176,7 +176,6 @@ class BaseConfig(object):
     SUPERVISORD_PORT = 58928
     SUPERVISORD_HOST = '127.0.0.1'
     SUPERVISORD_USER = SERVICE_NAME
-    SUPERVISORD_PASSWORD = SERVICE_NAME + '_default_password'
     SUPERVISORD_START_REDIS = True
     SUPERVISORD_START_SERVER = True
     SUPERVISORD_START_REDIS = True
@@ -374,3 +373,27 @@ def configure_app(app):
             app.config['START_QUEUES'].append(queue)
 
 
+def print_config_var(app, var, config_file_obj):
+    """Print configuration variable with type and provenance.
+
+    :param var:
+    :param obj:
+    :return:
+    """
+    if __name__.upper()+'_' + var in os.environ:
+        source = ' <- from environment'
+    elif var in config_file_obj.__dict__:
+        source = ' <- from config file'
+    else:
+        from_environ = ''
+    val = app.config[var]
+    if isinstance(val, str):
+        quote = '"'
+    else:
+        quote = ''
+    print('  %s type(%s) =  %s%s%s %s' % (var,
+                                          type(val).__name__,
+                                          quote,
+                                          val,
+                                          quote,
+                                          source))

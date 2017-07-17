@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """Create and manage essential filesystem locations."""
 
+import os
 from pathlib import Path # python 3.4 or later
+from flask import current_app
+from .config_file import create_config_file
 
 DIRS = [('TMP', ''),
         ('LOG', ''),
@@ -9,7 +12,7 @@ DIRS = [('TMP', ''),
         ('VAR', 'run'),
         ('DATA', ''),
         ('USERDATA', '')]
-
+SERVICE_NAME = os.getenv('FLASK_APP', __name__.split('.')[0])
 
 def create_dir(config_path, subdir, app):
     """Creates runtime directories, if they don't exist."""
@@ -30,3 +33,8 @@ def init_filesystem(app):
     """Initialize the filesystem."""
     for dir_tuple in DIRS:
         create_dir(*dir_tuple, app=app)
+    #
+    # Config file may not exist if SETTINGS value was changed.
+    #
+    create_config_file(Path(current_app.config['ROOT'])/ 'etc' /
+                       current_app.config['SETTINGS'])

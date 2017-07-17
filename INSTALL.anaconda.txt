@@ -42,7 +42,7 @@ environment names.  You should create this environment as the user under which
 you intend the web server to run (using "sudo -u USER -i " if necessary),
 using the following commands:
 
-	conda create -y --name loraxenv biopython click hmmer raxml redis
+	conda create -y --name loraxenv biopython click hmmer raxml redis nginx
 	source activate loraxenv
 
 

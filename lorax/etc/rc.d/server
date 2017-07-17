@@ -20,8 +20,9 @@ pidfile="${{ '{' }}{{NAME}}_var}/run/supervisord.pid"
 required_files="${{ '{' }}{{NAME}}_root}/etc/supervisord.conf ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_run.py"
 required_dirs="${{ '{' }}{{NAME}}_var} ${{ '{' }}{{NAME}}_log} ${{ '{' }}{{NAME}}_tmp} ${{ '{' }}{{NAME}}_data} ${{ '{' }}{{NAME}}_userdata}"
 sig_reload="USR1"
-extra_commands="status"
+extra_commands="status supervisorctl"
 status="{{NAME}}_status"
+supervisorctl="{{NAME}}_supervisorctl"
 
 {{NAME}}_start()
 {
@@ -36,6 +37,11 @@ status="{{NAME}}_status"
 {{NAME}}_status()
 {
  ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl status
+}
+
+{{NAME}}_supervisorctl()
+{
+ ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl
 }
 
 run_rc_command "$1"

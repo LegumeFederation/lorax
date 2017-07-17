@@ -26,6 +26,7 @@ from setuptools.command import build_py, develop, install
 if sys.version_info < (3, 4, 0, 'final', 0):
     raise SystemExit("This package requires python 3.4 or higher.")
 from pathlib import Path  # python 3.4
+from lorax.config_file import create_config_file
 
 NAME = 'lorax'
 C_NAME = 'FastTree'
@@ -126,7 +127,7 @@ class InstallBinariesCommand(Command):
     else:
         install_path = Path(sys.prefix)
     self.bin_path = install_path/'bin'
-    self.etc_path = install_path/'etc'/ NAME
+    self.etc_path = install_path/'etc'
 
   def finalize_options(self):
     """Post-process options."""
@@ -157,6 +158,8 @@ class InstallBinariesCommand(Command):
         if not my_python.exists():
             logger.info('creating '+ str(my_python) + ' link')
             my_python.symlink_to(sys.executable)
+        create_config_file(self.etc_path/  (NAME + '.conf'))
+
 
 
 class BuildPyCommand(build_py.build_py):

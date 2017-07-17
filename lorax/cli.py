@@ -13,7 +13,6 @@ import pkg_resources
 import pkgutil
 import sys
 import types
-from datetime import datetime
 from distutils.util import strtobool
 from pydoc import locate
 from pathlib import Path  # python 3.4 or later
@@ -28,7 +27,9 @@ from jinja2 import Environment, PackageLoader
 # Local imports.
 #
 from .logging import configure_logging
-from .filesystem import init_filesystem, create_dir
+from .filesystem import init_filesystem
+from .config_file import create_config_file, write_kv_to_config_file
+from .config import print_config_var
 #
 # Global variables.
 #
@@ -45,6 +46,7 @@ PROJECT_HOME = 'https://github.com/LegumeFederation/'+__name__
              epilog=AUTHOR + ' <' + EMAIL + '>. ' + COPYRIGHT + PROJECT_HOME)
 def cli():
     pass
+
 
 @cli.command()
 def run():
@@ -63,32 +65,6 @@ def run():
                     debug=debug)
 
 
-def print_config_var(var, obj):
-    """Print configuration variable with type and provenance.
-
-    :param var:
-    :param obj:
-    :return:
-    """
-    if __name__.upper()+'_' + var in os.environ:
-        from_environ = ' <- from environment'
-    elif var in obj.__dict__:
-        from_environ = ' <- from config file'
-    else:
-        from_environ = ''
-    val = current_app.config[var]
-    if isinstance(val, str):
-        quote = '"'
-    else:
-        quote = ''
-    print('  %s type(%s) =  %s%s%s %s' % (var,
-                                          type(val).__name__,
-                                          quote,
-                                          val,
-                                          quote,
-                                          from_environ))
-
-
 @cli.command()
 @click.option('--vartype',
               help='Type of variable, if not previously defined.',
@@ -100,34 +76,35 @@ def print_config_var(var, obj):
 @click.argument('value', required=False)
 def config(var, value, vartype, verbose, delete):
     """Gets, sets, or deletes config variables."""
-    config_file_path = Path(current_app.config['ROOT']) \
-                       / 'etc'/ current_app.config['SETTINGS']
+    config_file_path = Path(current_app.config['ROOT']) / 'etc' /\
+                        current_app.config['SETTINGS']
     if delete:
         if config_file_path.exists():
             print('Deleting config file %s.' %(str(config_file_path)))
             config_file_path.unlink()
+            create_config_file(config_file_path)
             sys.exit(0)
         else:
             print('ERROR--config file %s does not exist.'
                   %(str(config_file_path)))
             sys.exit(1)
     if value is None:  # No value specified, this is a get.
-        config_obj = types.ModuleType('config')  # noqa
+        config_file_obj = types.ModuleType('config')  # noqa
         if config_file_path.exists():
             config_file_status = 'exists'
-            config_obj.__file__ = str(config_file_path)
+            config_file_obj.__file__ = str(config_file_path)
             try:
                 with config_file_path.open(mode='rb') as config_file:
                     exec(compile(config_file.read(), str(config_file_path),
                                  'exec'),
-                         config_obj.__dict__)
+                         config_file_obj.__dict__)
             except IOError as e:
                 e.strerror = 'Unable to load configuration file (%s)' \
                              % e.strerror
                 raise
         else:
             config_file_status = 'does not exist'
-            config_obj.__file__ = None
+            config_file_obj.__file__ = None
         if var is None:  # No variable specified, list them all.
             print('The instance-specific config file is at %s %s.' % (
                 str(config_file_path),
@@ -135,7 +112,7 @@ def config(var, value, vartype, verbose, delete):
             print('Listing all %d defined configuration variables:'
                   % (len(current_app.config)))
             for key in sorted(current_app.config):
-                print_config_var(key, config_obj)
+                print_config_var(current_app, key, config_file_obj)
             return
         else:
             var = var.upper()
@@ -143,7 +120,7 @@ def config(var, value, vartype, verbose, delete):
                 var = var[6:]
             if var in current_app.config:
                 if verbose:
-                    print_config_var(var, config_obj)
+                    print_config_var(current_app, var, config_file_obj)
                 else:
                     print(current_app.config[var])
                 return
@@ -185,43 +162,14 @@ def config(var, value, vartype, verbose, delete):
                     file=sys.stderr)
                 sys.exit(1)
         #
-        # Create a config file, if needed.
+        # Write key/value pair to config file.
         #
-        create_dir('ROOT', 'etc', current_app)
-        if not config_file_path.exists():
-            with config_file_path.open(mode='w') as config_fh:
-                print('Creating instance config file at "%s".' % str(
-                    config_file_path))
-                print("""# -*- coding: utf-8 -*-
-'''Overrides of default configurations.
-
-This file will be placed in an instance-specific folder and sourced
-after default configs but before environmental variables.  You may
-hand-edit this file, but further sets will append and possibly supercede
-hand-edited values.  You may also delete these file and start again
-with the config --delete switch.
-
-Note that configuration variables are all-caps.  Types are from python
-typing rules.
-'''""", file=config_fh)  # noqa
-        if isinstance(value, str):
-            quote = '"'
-        else:
-            quote = ''
-        print('%s was %s%s%s, now set to %s%s%s (type %s) \n in config file "%s".'
-              % (var,
-                 quote, old_value, quote,
-                 quote, value, quote,
-                 type(value).__name__,
-                 str(config_file_path)))
-        with config_file_path.open(mode='a') as config_fh:
-            isodate = datetime.now().isoformat()[:-7]
-            print('%s = %s%s%s # set at %s' % (var,
-                                               quote,
-                                               value,
-                                               quote,
-                                               isodate),
-                  file=config_fh)  # noqa
+        create_config_file(config_file_path)
+        write_kv_to_config_file(config_file_path,
+                                var,
+                                value,
+                                value_type,
+                                old_value)
 
 
 @cli.command()

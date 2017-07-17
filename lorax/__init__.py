@@ -632,6 +632,7 @@ def hello_world():
                 'version': app.config['VERSION']}
     return Response(json.dumps(app_data), mimetype=JSON_MIMETYPE)
 
+
 @app.route('/log.txt')
 def return_log():
     """Return the log file.
