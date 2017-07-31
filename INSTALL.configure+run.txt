@@ -18,16 +18,16 @@ desired values in the places beginning with MY_):
 
 	lorax config host MY_IP_ADDRESS
 	lorax config crashmail_email MY_EMAIL_ADDRESS
+	lorax config secret_key # prints value of secret_key
 	lorax create_instance
 
+Now exit the lorax_env shell with control-D.  Run lorax and its associated
+processes:
 
-Now it is time to run lorax and associate processes:
+	/path/to/lorax_env supervisord; sleep 10
+	/path/to/lorax_env supervisorctl status
 
-	supervisord; sleep 10
-	supervisorctl status
-
-The first command daemonizes lorax and associated processes.  The last
-should return a list of commands, all with status RUNNING. You may then
-enter "control-D" to exit the lorax_env environment.
+The first command runs all the requested processes under control of a daemon.
+The last should return a list of commands, all with status RUNNING.
 
 Next, follow the instructions for testing in INSTALL.test.txt.

@@ -101,7 +101,7 @@ shift $#
 #
 export FLASK_APP="${pkg}"
 if [ -e "${root_dir}/etc/${pkg}-conf.sh" ]; then
-        source "${root_dir}/etc/conf.d/${pkg}"
+        source "${root_dir}/etc/${pkg}-conf.sh"
 fi
 export ${PKG}_ROOT=${root_dir}
 if [ -z "${!PKG_VAR}" ]; then

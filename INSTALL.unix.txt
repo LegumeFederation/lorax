@@ -38,9 +38,3 @@ are intended to go in a local overlay under dev-python/.
 Gentoo puts the redis-server binary in /usr/sbin, so you will need to prepend
 this directory to your path in order for the redis process to start.
 
-BSD
----
-Python3 on BSD may require the following environmental variables to be
-set:
-    LC_ALL=en_US.UTF-8
-    LANG=en_US.UTF-8

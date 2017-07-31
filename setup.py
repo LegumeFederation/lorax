@@ -17,7 +17,9 @@ from distutils.cmd import Command
 import distutils.log as logger
 from os import environ as environ
 import platform
+import secrets
 import shutil
+import string
 import subprocess
 import sys
 from setuptools import setup, find_packages
@@ -26,7 +28,7 @@ from setuptools.command import build_py, develop, install
 if sys.version_info < (3, 4, 0, 'final', 0):
     raise SystemExit("This package requires python 3.4 or higher.")
 from pathlib import Path  # python 3.4
-from lorax.config_file import create_config_file
+
 
 NAME = 'lorax'
 C_NAME = 'FastTree'
@@ -38,6 +40,9 @@ RUN_SCRIPT_INNAME = 'server_run.py'
 RUN_SCRIPT_OUTNAME = NAME + '_run.py'
 SOURCE_PATH = Path('.') / NAME / C_NAME.lower()
 BUILD_PATH = Path('.') / NAME / 'bin'
+PASSWORD_LENGTH = 12
+DIR_MODE = 0o775
+
 
 class BuildCBinaryCommand(Command):
   """Compile C binary with custom switches."""
@@ -69,11 +74,13 @@ class BuildCBinaryCommand(Command):
         self.cc = 'gcc'
         self.cflags = '-DUSE_DOUBLE -lm'
 
+
   def finalize_options(self):
     """Post-process options."""
     assert shutil.which(self.cc) is not None, (
           'C compiler %s is not found on path.' % self.cc)
     self.cflag_list = self.cflags.split()
+
 
   def run(self):
     """Build C binary."""
@@ -120,6 +127,7 @@ class InstallBinariesCommand(Command):
   description = 'Copy binaries to install location'
   user_options = [('bindir=', None, 'binaries directory')]
 
+
   def initialize_options(self):
     """Set default values for options."""
     if NAME.upper()+'_ROOT' in environ:
@@ -129,14 +137,33 @@ class InstallBinariesCommand(Command):
     self.bin_path = install_path/'bin'
     self.etc_path = install_path/'etc'
 
+
   def finalize_options(self):
     """Post-process options."""
     if not self.bin_path.exists():
         logger.info('creating binary directory "%s"' % (str(self.bin_path)))
-        self.bin_path.mkdir(parents=True)
+        self.bin_path.mkdir(parents=True, mode=DIR_MODE)
     if not self.etc_path.exists():
         logger.info('creating etc directory "%s"' % (str(self.etc_path)))
-        self.etc_path.mkdir(parents=True)
+        self.etc_path.mkdir(parents=True, mode=DIR_MODE)
+
+
+  def create_config_file(self, file_name):
+      """Initializes config file with secret key."""
+      file_path = self.etc_path / file_name
+      if not file_path.exists():
+          with file_path.open(mode='w') as config_fh:
+              print('Creating instance config file at "%s".' % str(
+                  file_path))
+              alphabet = string.ascii_lowercase + string.digits + string.ascii_uppercase
+              nchars = 0
+              password = ''
+              while nchars < PASSWORD_LENGTH:
+                  password += secrets.choice(alphabet)
+                  nchars += 1
+              print('SECRET_KEY = "%s" # set at install time' % (password),
+                    file=config_fh)
+
 
   def run(self):
     """Run command."""
@@ -158,7 +185,7 @@ class InstallBinariesCommand(Command):
         if not my_python.exists():
             logger.info('creating '+ str(my_python) + ' link')
             my_python.symlink_to(sys.executable)
-        create_config_file(self.etc_path/  (NAME + '.conf'))
+        self.create_config_file(NAME + '.conf')
 
 
 

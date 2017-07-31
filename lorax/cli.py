@@ -103,7 +103,7 @@ def config(var, value, vartype, verbose, delete):
                              % e.strerror
                 raise
         else:
-            config_file_status = 'does not exist'
+            r = 'does not exist'
             config_file_obj.__file__ = None
         if var is None:  # No variable specified, list them all.
             print('The instance-specific config file is at %s %s.' % (
@@ -117,7 +117,7 @@ def config(var, value, vartype, verbose, delete):
         else:
             var = var.upper()
             if var.startswith(__name__.upper()+'_'):
-                var = var[6:]
+                var = var[len(__name__)+1:]
             if var in current_app.config:
                 if verbose:
                     print_config_var(current_app, var, config_file_obj)

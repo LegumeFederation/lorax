@@ -26,7 +26,7 @@ Types are derived from python typing rules.
 def generate_random_password(length=DEFAULT_PASSWORD_LENGTH,
                              grouping=DEFAULT_GROUPING,
                              use_uppercase=True,
-                             use_punctuation=True):
+                             use_punctuation=False):
     """Generate a password from an alphabet"""
     alphabet = string.ascii_lowercase + string.digits
     if use_uppercase:

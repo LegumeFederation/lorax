@@ -167,6 +167,7 @@ class BaseConfig(object):
     # Current run.
     #
     USER = getuser()
+    GROUP = 'staff'
     HOSTNAME = getfqdn()
     DATETIME = arrow.now().format('YYYY-MM-DD HH:mm:ss')
     #
@@ -182,6 +183,13 @@ class BaseConfig(object):
     SUPERVISORD_START_ALIGNMENT = True
     SUPERVISORD_START_TREEBUILDING = True
     SUPERVISORD_START_CRASHMAIL = True
+    SUPERVISORD_START_NGINX = True
+    #
+    # nginx defs.
+    #
+    NGINX_PORT = 1010
+    NGINX_SERVER_NAME = 'legfed.org'
+
     #
     # gunicorn defs--these will not be used in debugging mode.
     #
@@ -284,14 +292,31 @@ def configure_app(app):
     app.config.from_object(config_dict[config_name])
     app.config['MODE'] = config_name
     #
-    # Get instance-specific configuration, if it exists.
+    # Do overrides from configuration, if it exists.
     #
     app.instance_path = os.getenv(SERVICE_NAME.upper()+'_ROOT',
                                   app.config['ROOT'])
     pyfile_name = os.getenv(SERVICE_NAME.upper()+'_SETTINGS',
                             app.config['SETTINGS'])
-    pyfile_path = str(Path(app.instance_path)/'etc'/pyfile_name)
-    app.config.from_pyfile(pyfile_path, silent=True)
+    pyfile_path = Path(app.instance_path)/'etc'/pyfile_name
+    pyfile_dict = {}
+    try:
+        with pyfile_path.open(mode='rb') as config_file:
+            exec(compile(config_file.read(), str(pyfile_path),
+                         'exec'),
+                 pyfile_dict)
+    except IOError:
+        print('Unable to load configuration file "%s".' %str(pyfile_path))
+    for internal_key in ['__doc__', '__builtins__']:
+        if internal_key in pyfile_dict:
+            del pyfile_dict[internal_key]
+    if 'VAR' in pyfile_dict: # VAR is hierarchical special case
+        for subdir in ['tmp', 'log', 'data', 'userdata']:
+            if not subdir.upper() in pyfile_dict:
+                pyfile_dict[subdir.upper()] = pyfile_dict['VAR'] + '/' + subdir
+
+    for key in pyfile_dict:
+        app.config[key] = pyfile_dict[key]
     #
     # Do overrides from environmental variables.
     #
@@ -385,7 +410,7 @@ def print_config_var(app, var, config_file_obj):
     elif var in config_file_obj.__dict__:
         source = ' <- from config file'
     else:
-        from_environ = ''
+        source = ''
     val = app.config[var]
     if isinstance(val, str):
         quote = '"'

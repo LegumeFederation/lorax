@@ -36,5 +36,5 @@ def init_filesystem(app):
     #
     # Config file may not exist if SETTINGS value was changed.
     #
-    create_config_file(Path(current_app.config['ROOT'])/ 'etc' /
-                       current_app.config['SETTINGS'])
+    create_config_file(Path(app.config['ROOT'])/ 'etc' /
+                       app.config['SETTINGS'])
