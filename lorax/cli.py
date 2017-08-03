@@ -275,7 +275,7 @@ def create_instance(force):
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
 def create_test_files(force):
-    """Create test files to the current directory."""
+    """Create test files."""
     copy_files('test',
                Path('.'),
                force,

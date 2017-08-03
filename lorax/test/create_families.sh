@@ -1,5 +1,6 @@
 #!/bin/bash
 # Create a set of gene familes using peptide FASTAs and HMMs.
+set -e
 DOC="
 Create a set of protein family definitions from unaligned peptide 
 FASTA files and HMM's.  The HMM's may be in different directories,

@@ -8,21 +8,31 @@
 # (slightly unusual) indirect variable expansion ${!var} which evaluates
 # to the value referenced by the value of $var.
 #
-realpath() {
-  pushd "$(dirname "$1")" 2&>/dev/null
-  islink=$(readlink "$(basename "$1")")
-  while [ "$islink" ]; do
-    cd "$(dirname "$islink")"
-    islink=$(readlink "$(basename "$1")")
-  done
-  path="${PWD}/$(basename "$1")"
-  popd 2&>/dev/null
-  echo "$path"
+set -e # exit on error
+error_exit() {
+  echo "ERROR--unexpected exit from environment script."
+}
+trap error_exit EXIT
+}
+myrealpath() {
+  if hash realpath 2>/dev/null; then
+     realpath "$@"
+  else # realpath doesn't exist, fake it
+     pushd "$(dirname "$1")" 2&>/dev/null
+     islink=$(readlink "$(basename "$1")")
+     while [ "$islink" ]; do
+       cd "$(dirname "$islink")"
+       islink=$(readlink "$(basename "$1")")
+     done
+     path="${PWD}/$(basename "$1")"
+     popd 2&>/dev/null
+     echo "$path"
+  fi
 }
 #
 # Get the real path to this script.
 #
-script_path=`realpath "${BASH_SOURCE}"`
+script_path=`myrealpath "${BASH_SOURCE}"`
 script_name=`basename "${script_path}"`
 bin_dir=`dirname "${script_path}"`
 root_dir=`dirname "${bin_dir}"`
@@ -52,6 +62,7 @@ Flags:
     -h  Print this help message and exit.
     -v  Verbose output on environment before executing command.
     -i  Interactive mode, read commands in a loop.
+    -r  Returns the root directory.
 
 
 Environmental variables:
@@ -75,6 +86,7 @@ for Genome Resources.  All rights reserved.
 # Process command-line arguments.
 #
 if [ "$1" == "-h" ]; then
+  trap - EXIT
   echo "$DOC"
   exit 0
 fi
@@ -88,8 +100,12 @@ if [ "$1" == "-i" ]; then
   _I=1
   shift 1
 elif [ "$#" -eq 0 ]; then
+  trap - EXIT
   echo "$DOC"
   exit 1
+fi
+if [ "$1" == "-i" ]; then
+  echo "$root_dir"
 fi
 #
 # Copy command out of argv, else it can mess up later sourcings.
@@ -163,6 +179,7 @@ if [ -x "${bin_dir}/conda" ]; then
          fi
       done <<< "$environments"
       if [ -z "$venv_name" ] ; then
+        trap - EXIT
         echo "ERROR -- conda virtual environment not properly configured"
         exit 1
       fi
@@ -207,6 +224,8 @@ fi
 #
 # In proper environment now, exec command(s).
 #
+trap - EXIT
+set +e
 if [ "$_I" -eq 1 ]; then
   echo "Executing commands in ${environ}, control-D to exit."
   PS1="${script_name}> " bash

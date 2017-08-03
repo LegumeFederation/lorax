@@ -11,7 +11,11 @@
 # Before running this script, lorax should be configured and
 # started via the lorax_env script.
 #
-
+set -e # exit on errors
+error_exit() {
+  echo "ERROR-unexpected exit of test."
+}
+trap error_exit EXIT
 #
 # Process option (verbose flag)
 #
@@ -136,21 +140,13 @@ fi
 
 # Post alignment.
 ./post_FASTA.sh ${verbose_flag}  peptide aspartic_peptidases_aligned.faa prealigned alignment
-if [ "$?" -eq 1 ] ; then
-   exit 1
-fi
 
 # Post an invalid HMM throws a 406.
 ./put_HMM.sh ${verbose_flag} aspartic_peptidases.faa prealigned 406
-if [ "$?" -eq 1 ] ; then
-   exit 1
-fi
 
 # Post a valid HMM.
 ./put_HMM.sh ${verbose_flag} 59026816.hmm aspartic_peptidases
-if [ "$?" -eq 1 ] ; then
-   exit 1
-fi
+
 
 test_GET /trees/aspartic_peptidases/hmmalign
 
@@ -172,15 +168,10 @@ test_GET /trees/aspartic_peptidases/FastTree/run_log.txt
 
 # Post superfamily to forbidden name.
 ./post_FASTA.sh ${verbose_flag}  peptide zeama.faa prealigned.FastTree sequences 403
-if [ "$?" -eq 1 ] ; then
-   exit 1
-fi
 
 # Post superfamily.
 ./post_FASTA.sh ${verbose_flag}  peptide zeama.faa aspartic_peptidases.myseqs sequences
-if [ "$?" -eq 1 ] ; then
-   exit 1
-fi
+
 
 # Test superfamily.
 test_GET /trees/aspartic_peptidases.myseqs/hmmalign_FastTree
@@ -202,5 +193,6 @@ test_DELETE /trees/aspartic_peptidases.myseqs
 #if [ "$_V" -eq 0 ]; then
 # rm -r data/*  # remove data if not verbose
 #fi
+trap - EXIT
 echo "lorax tests completed successfully."
 exit 0

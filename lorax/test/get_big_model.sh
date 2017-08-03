@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 echo "This script will download a 900 MB file of gene families, and"
 echo "unpack it into a 7 GB directory."
 read -r -p "Are you sure? [y/N] " response
