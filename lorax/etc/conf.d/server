@@ -20,7 +20,7 @@ export {{NAME}}_root="{{ROOT}}"
 export {{NAME}}_var="{{VAR}}"
 export {{NAME}}_log="{{LOG}}"
 export {{NAME}}_tmp="{{TMP}}"
-export {{NAME}}_data="{{data}}"
+export {{NAME}}_data="{{DATA}}"
 export {{NAME}}_userdata="{{USERDATA}}"
 export {{NAME}}_user="{{USER}}"
 

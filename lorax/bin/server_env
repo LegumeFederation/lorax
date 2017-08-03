@@ -9,11 +9,12 @@
 # to the value referenced by the value of $var.
 #
 set -e # exit on error
+#
 error_exit() {
   echo "ERROR--unexpected exit from environment script."
 }
 trap error_exit EXIT
-}
+#
 myrealpath() {
   if hash realpath 2>/dev/null; then
      realpath "$@"

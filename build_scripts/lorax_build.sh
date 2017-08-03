@@ -6,7 +6,7 @@ error_exit() {
 }
 trap error_exit EXIT
 script_name=`basename "${BASH_SOURCE}"`
-pkg="${script_name%_build}"
+pkg="${script_name%_build.sh}"
 confdir=~/.${pkg}/build
 TOP_DOC="""Builds and installs ${pkg} components.
 

@@ -39,7 +39,7 @@ export PATH="`./lorax_build.sh root`/bin:${PATH}"
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 pip install -U setuptools
-pip install -e git+https://github.com/LegumeFederation/supervisor.git@4.0.0
+pip install -e git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0
 pip install lorax
 ./lorax_build.sh make_link
 #
