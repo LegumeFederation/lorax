@@ -33,6 +33,7 @@ Variables (accessed by set command):
               hmmer - The HMMer version string.
               redis - The redis version string.
        redis_cflags - CFLAGS for use in building redis.
+              nginx - The nginx version string.
 """
 # Helper functions.
 get_value() {
@@ -90,7 +91,7 @@ install_hmmer() {
 }
 install_redis() {
    redis_cflags=`get_value redis_cflags` # -DAF_LOCAL=1
-   echo "Installing redis $1 to $2"
+   echo "Installing redis $1 to ${2}."
    curl -L -o redis-${1}.tar.gz  http://download.redis.io/releases/redis-${1}.tar.gz
    tar xf redis-${1}.tar.gz
    rm redis-${1}.tar.gz
@@ -105,6 +106,49 @@ install_redis() {
    gmake install
    popd
    rm -r redis-${1}
+}
+install_nginx() {
+   var=`get_value var_dir`
+   tmp=`get_value tmp_dir`
+   log=`get_value log_dir`
+   echo "Installing nginx $1 to ${2}."
+   curl -L -o nginx-${1}.tar.gz http://nginx.org/download/nginx-${1}.tar.gz
+   tar xf nginx-${1}.tar.gz
+   rm nginx-${1}.tar.gz
+   mkdir -p ${2}/etc/nginx
+   pushd nginx-${1}
+   ./configure --prefix=${2} \
+   --with-threads \
+   --with-stream \
+   --with-stream=dynamic \
+   --with-pcre \
+   --with-pcre-jit \
+   --with-cc=${3} \
+   --with-http_ssl_module \
+   --with-http_v2_module \
+   --with-http_auth_request_module \
+   --with-http_addition_module \
+   --with-http_gzip_static_module \
+   --with-http_realip_module \
+   --sbin-path=bin \
+   --modules-path=${root}/lib/nginx/modules \
+   --conf-path=${root}/etc/nginx/nginx.conf \
+   --error-log-path=${log}/nginx/error.log \
+   --http-log-path=${log}/nginx/access.log \
+   --pid-path=${var}/run/nginx/nginx.pid \
+   --lock-path=${var}/run/nginx/nginx.lock \
+   --http-fastcgi-temp-path=${tmp}/nginx/fastcgi \
+   --http-client-body-temp-path=${tmp}/nginx/client \
+   --http-proxy-temp-path=${tmp}/nginx/proxy \
+   --http-uwsgi-temp-path=${tmp}/nginx/uwsgi \
+   --http-scgi-temp-path=${tmp}/nginx/scgi
+   gmake
+   gmake install
+   ${root}/bin/nginx -t
+   rm -f ${root}/etc/nginx/* # remove generated etc files
+   rm -rf ${root}/html # and html
+   popd
+   rm -r nginx-${1}
 }
 # Command-line interpreter.
 if [ "$#" -eq 0 ]; then
@@ -127,9 +171,16 @@ elif [ "$1" == "make_link" ]; then
    ln -s  ${root}/bin/${pkg}_env ${bin_dir}
 elif [ "$1" == "make_dirs" ]; then
    root=`get_root`
+   var=`get_value var_dir`
+   tmp=`get_value tmp_dir`
+   log=`get_value log_dir`
    echo "Creating directories in ${root}."
    mkdir -p ${root}/{bin,build_configuration}
    cp -R ${confdir}/ ${root}/build_configuration
+   mkdir -p ${root}/etc/nginx
+   mkdir -p ${var}/run/nginx
+   mkdir -p ${tmp}/nginx
+   mkdir -p ${log}/nginx
 elif [ "$1" == "link_python" ]; then
    root=`get_root`
    root_bin="${root}/bin"
@@ -152,9 +203,11 @@ Usage:
 
 Packages:
       python - Python interpreter.
-       raxml - RAxML binaries.
-       hmmer - HMMer binaries.
-       redis - redis binaries.
+       raxml - RAxML treebuilder.
+       hmmer - HMMer alignment.
+       redis - redis database.
+       nginx - nginx web proxy server.
+
      
 """
   if [ "$#" -ne 1 ]; then #doc
@@ -164,7 +217,7 @@ Packages:
   fi
   root=`get_root`
   cc=`get_value cc`
-  commandlist="python raxml hmmer redis"
+  commandlist="python raxml hmmer redis nginx"
   case $commandlist in
     *"$1"*)
        install_$1 `get_value $1` `get_root` `get_value cc`

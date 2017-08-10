@@ -6,13 +6,14 @@ from pathlib import Path # python 3.4 or later
 from flask import current_app
 from .config_file import create_config_file
 
-DIRS = [('TMP', ''),
-        ('LOG', ''),
+DIRS = [('TMP', 'nginx'),
+        ('LOG', 'nginx'),
         ('VAR', 'redis'),
-        ('VAR', 'run'),
+        ('VAR', 'run/nginx'),
         ('DATA', ''),
         ('USERDATA', '')]
 SERVICE_NAME = os.getenv('FLASK_APP', __name__.split('.')[0])
+
 
 def create_dir(config_path, subdir, app):
     """Creates runtime directories, if they don't exist."""

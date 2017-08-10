@@ -116,9 +116,9 @@ echo "testing lorax server on ${LORAX_URL}"
 
 test_GET /
 
-test_GET /healthcheck
+test_GET /status
 
-test_GET /log.txt
+test_GET /healthcheck
 
 test_GET /badtarget 404
 

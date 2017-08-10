@@ -85,13 +85,13 @@ app = Flask(__name__,
                                     '_ROOT', prefix),
             template_folder='templates')
 FlaskCLI(app)
+app.config.from_object(rq_dashboard.default_settings)
 configure_app(app)
 #
 # Create a global RQ object, with dashboard at /rq.
 #
 rq = RQ(app)
 if app.config['RQ_ASYNC']:
-    app.config.from_object(rq_dashboard.default_settings)
     app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 #
 # Application data for optional environment dump.
@@ -622,14 +622,15 @@ def queue_calculation(familyname,
 #
 # Target definitions begin here.
 #
-@app.route('/')
+@app.route('/status')
 def hello_world():
     """
 
     :return: JSON application data
     """
     app_data = {'name': __name__,
-                'version': app.config['VERSION']}
+                'version': app.config['VERSION'],
+                'start_date': app.config['DATETIME']}
     return Response(json.dumps(app_data), mimetype=JSON_MIMETYPE)
 
 
@@ -639,7 +640,7 @@ def return_log():
 
     :return: text/plain response
     """
-    content = get_file(app.config['LOGFILE_NAME'],
+    content = get_file(__name__+'_server.log',
                        file_type='log')
     return Response(content, mimetype=TEXT_MIMETYPE)
 

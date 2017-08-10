@@ -74,6 +74,10 @@ class BaseConfig(object):
     NAME = SERVICE_NAME
     ENVIRONMENT_DUMP = False
     #
+    # Web site associated with this project.
+    #
+    PROJECT_HOME = 'https://github.com/LegumeFederation/lorax'
+    #
     # File path locations.  All of these are immutable except DATA.
     # Since different components run from different locations, these
     # must be absolute.  The immutable ones should be created before
@@ -187,14 +191,27 @@ class BaseConfig(object):
     #
     # nginx defs.
     #
-    NGINX_PORT = 1010
-    NGINX_SERVER_NAME = 'legfed.org'
+    NGINX_SERVER_NAME = 'localhost'
+    system = platform.system()
+    if system == 'Linux':
+        NGINX_LISTEN_ARGS = 'deferred'
+        NGINX_EVENTS = 'use epoll;'
+    elif system.endswith('BSD'):
+        NGINX_LISTEN_ARGS = 'accept_filter=httpready'
+        NGINX_EVENTS = 'use kqueue;'
+    elif system == 'Darwin':
+        NGINX_LISTEN_ARGS = ''
+        NGINX_EVENTS = 'use kqueue;'
+    else:
+        NGINX_LISTEN_ARGS = ''
+        NGINX_EVENTS = ''
+    NGINX_UNIX_SOCKET = False
 
     #
     # gunicorn defs--these will not be used in debugging mode.
     #
     GUNICORN_LOG_LEVEL = 'debug'
-    GUNICORN_UNIX_SOCKET = False
+    GUNICORN_UNIX_SOCKET = True
     #
     # URL defs--these will be used in testing.
     #
@@ -371,25 +388,51 @@ def configure_app(app):
     #
     # Gunicorn socket type.
     #
-    if app.config['GUNICORN_UNIX_SOCKET']:
-        app.config['URL'] = 'unix://' +\
-                            app.config['VAR'] +\
-                            '/run/lorax.sock'
-        app.config['GUNICORN_URL'] = 'unix://%(ENV_' +\
-                            SERVICE_NAME.upper() +\
-                            '_VAR)s/run/lorax.sock'
-        app.config['CURL_ARGS'] = '--unix-socket ' + \
-                                  app.config['VAR'] +\
-                                             '/run/lorax.sock'
-        app.config['CURL_URL'] = 'http::'
-    else:
-        app.config['URL'] = 'http://' + \
-                            app.config['HOST'] + ':'+ \
-                            str(app.config['PORT'])
-        app.config['GUNICORN_URL'] = app.config['HOST'] + ':'+ \
-                            str(app.config['PORT'])
-        app.config['CURL_URL'] = app.config['HOST'] + ':' +\
-                                 str(app.config['PORT'])
+    if not app.config['SUPERVISORD_START_NGINX']:
+        app.config['NGINX_URL'] = 'noURL'
+        if app.config['GUNICORN_UNIX_SOCKET']:
+            app.config['URL'] = 'unix://' +\
+                                app.config['VAR'] +\
+                                '/run/gunicorn.sock'
+            app.config['GUNICORN_URL'] = 'unix://%(ENV_' +\
+                                SERVICE_NAME.upper() +\
+                                '_VAR)s/run/gunicorn.sock'
+            app.config['CURL_ARGS'] = '--unix-socket ' + \
+                                      app.config['VAR'] +\
+                                                 '/run/gunicorn.sock'
+            app.config['CURL_URL'] = 'http::'
+        else:
+            app.config['URL'] = 'http://' + \
+                                app.config['HOST'] + ':'+ \
+                                str(app.config['PORT'])
+            app.config['GUNICORN_URL'] = app.config['HOST'] + ':'+ \
+                                str(app.config['PORT'])
+            app.config['CURL_URL'] = app.config['HOST'] + ':' +\
+                                     str(app.config['PORT'])
+    else: # serve gunicorn to nginx through a socket
+        app.config['GUNICORN_UNIX_SOCKET'] = True
+        app.config['GUNICORN_URL'] = 'unix://%(ENV_' + \
+                                     SERVICE_NAME.upper() + \
+                                     '_VAR)s/run/gunicorn.sock'
+        if app.config['NGINX_UNIX_SOCKET']:
+            app.config['URL'] = 'unix://' + \
+                                app.config['VAR'] + \
+                                '/run/nginx.sock'
+            app.config['NGINX_URL'] = 'unix://' + \
+                                         app.config['VAR'] + \
+                                         '/run/nginx.sock'
+            app.config['CURL_ARGS'] = '--unix-socket ' + \
+                                      app.config['VAR'] + \
+                                      '/run/nginx.sock'
+            app.config['CURL_URL'] = 'http::'
+        else:
+            app.config['URL'] = 'http://' + \
+                                app.config['HOST'] + ':' + \
+                                str(app.config['PORT'])
+            app.config['NGINX_URL'] = app.config['HOST'] + ':' + \
+                                         str(app.config['PORT'])
+            app.config['CURL_URL'] = app.config['HOST'] + ':' + \
+                                     str(app.config['PORT'])
     #
     # Set queues to be started.
     #

@@ -14,6 +14,12 @@ trap error_exit EXIT
 ./lorax_build.sh set top_dir /usr/local/www
 ./lorax_build.sh set bin_dir ~/bin
 ./lorax_build.sh set directory_version 0.94
+root_dir=`./lorax_build.sh root`
+var_dir="${root_dir}/var"
+./lorax_build.sh set var_dir ${var_dir}
+./lorax_build.sh set tmp_dir ${var_dir}/tmp
+./lorax_build.sh set log_dir ${log_dir}/log
+#
 ./lorax_build.sh set python 3.6.2
 ./lorax_build.sh set cc clang
 ./lorax_build.sh set hmmer 3.1b2
@@ -22,6 +28,7 @@ trap error_exit EXIT
 ./lorax_build.sh set raxml_binsuffix -PTHREADS-SSE3
 ./lorax_build.sh set redis 4.0.1
 ./lorax_build.sh set redis_cflags -DAF_LOCAL=1
+./lorax_build.sh set nginx 1.13.1
 ./lorax_build.sh set all
 ./lorax_build.sh make_dirs
 #
@@ -31,6 +38,7 @@ trap error_exit EXIT
 ./lorax_build.sh install raxml
 ./lorax_build.sh install hmmer
 ./lorax_build.sh install redis
+./lorax_build.sh install nginx
 #
 # Do pip installs.
 #
@@ -39,7 +47,7 @@ export PATH="`./lorax_build.sh root`/bin:${PATH}"
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 pip install -U setuptools
-pip install -e git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0
+pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
 pip install lorax
 ./lorax_build.sh make_link
 #

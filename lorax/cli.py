@@ -23,6 +23,7 @@ import click
 from flask import current_app
 from flask.cli import FlaskGroup
 from jinja2 import Environment, PackageLoader
+import htpasswd
 #
 # Local imports.
 #
@@ -38,12 +39,11 @@ EMAIL = 'joelb@ncgr.org'
 COPYRIGHT = """Copyright (C) 2017, The National Center for Genome Resources.
 All rights reserved.
 """
-PROJECT_HOME = 'https://github.com/LegumeFederation/'+__name__
 #
 # CLI entry point.
 #
 @click.group(cls=FlaskGroup,
-             epilog=AUTHOR + ' <' + EMAIL + '>. ' + COPYRIGHT + PROJECT_HOME)
+             epilog=AUTHOR + ' <' + EMAIL + '>. ' + COPYRIGHT)
 def cli():
     pass
 
@@ -103,10 +103,10 @@ def config(var, value, vartype, verbose, delete):
                              % e.strerror
                 raise
         else:
-            r = 'does not exist'
+            config_file_status = 'does not exist'
             config_file_obj.__file__ = None
         if var is None:  # No variable specified, list them all.
-            print('The instance-specific config file is at %s %s.' % (
+            print('The instance-specific config file at %s %s.' % (
                 str(config_file_path),
                 config_file_status))
             print('Listing all %d defined configuration variables:'
@@ -131,7 +131,8 @@ def config(var, value, vartype, verbose, delete):
     else:  # Must be setting.
         var = var.upper()
         if var.startswith(__name__.upper()+'_'):
-            var = var[6:]
+            var = var[len(__name__)+1:]
+        old_value = None
         if var in current_app.config and vartype is None \
                 and not current_app.config[
                     var] is None:  # type defaults to current type
@@ -268,7 +269,38 @@ def copy_files(pkg_subdir, out_head, force, notemplate_exts=[]):
 def create_instance(force):
     """Configures instance files."""
     copy_files('etc', Path(current_app.config['ROOT'])/'etc', force)
+    copy_files('var', Path(current_app.config['VAR']), force)
     init_filesystem(current_app)
+
+
+@cli.command()
+@click.option('--force/--no-force',
+              help='Force overwrites of existing files',
+              default=False)
+def set_htpasswd(force):
+    """Sets the site password to SECRET_KEY."""
+    htpasswd_file = current_app.config['ROOT']+'/etc/nginx/htpasswd'
+    htpasswd_path = Path(htpasswd_file)
+    user = current_app.config['NAME']
+    password = current_app.config['SECRET_KEY']
+    print('Setting password for user %s to %s. '%(user, password))
+    if not htpasswd_path.exists():
+        print('Creating htpasswd file.')
+        htpasswd_path.touch()
+    with htpasswd.Basic(htpasswd_file) as userdb:
+        if password == '':
+            print('ERROR--must set SECRET_KEY first.')
+            sys.exit(1)
+        try:
+            userdb.add(user, password)
+        except htpasswd.basic.UserExists:
+            if force:
+                print('Updating site password for existing user %s.' %name)
+                userdb.change_password(user, password)
+            else:
+                print('ERROR--user %s already exists in htpasswd, use --force.')
+                sys.exit(1)
+
 
 
 @cli.command()
