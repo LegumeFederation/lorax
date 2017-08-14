@@ -4,19 +4,19 @@ platform=`uname`
 DOC="""Gets the correct build scripts for lorax.
 
 Usage:
-       bash top_level_build.sh
+       bash get_build_scripts.sh
 
 Platform:
-   `uname` must return one of three values, \"Linux\", \"Darwin\",
+   uname must return one of three values, \"Linux\", \"Darwin\",
    or \"*BSD\"; other values are not recognized.  This platform
    is \"$platform\".
 """
 platform=`uname`
 if [[ "$platform" == "Linux" ]]; then
    platform=linux
-elif [ "$platform" == *"BSD" ]; then
+elif [[ "$platform" == *"BSD" ]]; then
    platform=bsd
-elif [ "$platform" == "Darwin" ]; then
+elif [[ "$platform" == "Darwin" ]]; then
    platform=mac
 else
    echo "$DOC"
