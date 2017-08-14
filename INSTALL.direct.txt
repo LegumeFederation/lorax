@@ -7,7 +7,9 @@ The latter is recommended because it has pinned dependencies.
 
 Installation via lorax_build.sh
 -------------------------------
-Get a copy of the top-level build scripts by issuing the command:
+We strongly recommend that you do the installation in a clean directory
+as a non-privileged user. Get a copy of the top-level build scripts by
+issuing the command:
    curl -L -o get_build_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_build_scripts.sh
 
 Then issue the command "bash get_build_scripts.sh" to download the example

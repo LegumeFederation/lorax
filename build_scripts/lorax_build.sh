@@ -195,6 +195,7 @@ elif [ "$1" == "pip" ]; then
    pip install -U setuptools
    pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    pip install lorax
+   rm -rf src
 elif [ "$1" == "install" ]; then
   shift 1
   INSTALL_DOC="""Installs a binary package.

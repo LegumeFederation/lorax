@@ -110,7 +110,8 @@ class BuildCBinaryCommand(Command):
     if platform.system() == 'Darwin':
         logger.info('fixing OpenMP file path in MacOS executable')
         find_gomp_cmd = ['gcc', '-print-file-name=libgomp.1.dylib']
-        gomp_path  = Path(subprocess.check_output(find_gomp_cmd))
+        gomp_path_str = subprocess.check_output(find_gomp_cmd).decode('UTF-8')
+        gomp_path  = Path(gomp_path_str)
         if not gomp_path.exists():
             logger.error('libgcc must be in the virtual environment')
             raise SystemError("Unable to resolve path to libgomp.")
