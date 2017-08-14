@@ -60,7 +60,7 @@ class BuildCBinaryCommand(Command):
     if system == 'Linux':
         self.cc = 'gcc'
         self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' +\
-                  ' -O3 -march=native -DOPENMP -fopenmp'
+                  ' -O3 -march=native -DOPENMP -fopenmp -lm'
     elif system == 'Darwin':
         self.cc = 'gcc'
         self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' +\

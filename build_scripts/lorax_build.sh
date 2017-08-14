@@ -58,8 +58,7 @@ install_python() {
    rm Python-${1}.tar.gz
    pushd Python-${1}
    ./configure --prefix=${2} CC=${3}
-   gmake
-   gmake install
+   ${4} install
    popd
    rm -r Python-${1}
 }
@@ -71,7 +70,7 @@ install_raxml() {
    tar xf raxml_v${1}.tar.gz 
    rm raxml_v${1}.tar.gz 
    pushd standard-RAxML-${1}
-   gmake -f Makefile${model} CC="${3} -march=native"
+   ${4} -f Makefile${model} CC="${3} -march=native"
    cp raxmlHPC${binsuffix} ${2}/bin/raxmlHPC
    popd
    rm -r standard-RAxML-${1}
@@ -83,9 +82,8 @@ install_hmmer() {
    rm hmmer-${1}-linux-intel-x86_64.tar.gz 
    pushd hmmer-${1}-linux-intel-x86_64/
    ./configure --prefix=${2} CC=$3 CFLAGS='-O3 -march=native'
-   gmake
-   gmake install
-   gmake clean
+   ${4}
+   ${4} install
    popd
    rm -r hmmer-${1}-linux-intel-x86_64
 }
@@ -100,10 +98,9 @@ install_redis() {
    export PREFIX=${2}
    pushd redis-${1}
    pushd deps
-   gmake lua linenoise jemalloc hiredis
+   ${4} lua linenoise jemalloc hiredis
    popd
-   gmake
-   gmake install
+   ${4} install
    popd
    rm -r redis-${1}
 }
@@ -122,7 +119,6 @@ install_nginx() {
    --with-stream \
    --with-stream=dynamic \
    --with-pcre \
-   --with-pcre-jit \
    --with-cc=${3} \
    --with-http_ssl_module \
    --with-http_v2_module \
@@ -142,9 +138,7 @@ install_nginx() {
    --http-proxy-temp-path=${tmp}/nginx/proxy \
    --http-uwsgi-temp-path=${tmp}/nginx/uwsgi \
    --http-scgi-temp-path=${tmp}/nginx/scgi
-   gmake
-   gmake install
-   ${root}/bin/nginx -t
+   ${4} install
    rm -f ${root}/etc/nginx/* # remove generated etc files
    rm -rf ${root}/html # and html
    popd
@@ -220,7 +214,7 @@ Packages:
   commandlist="python raxml hmmer redis nginx"
   case $commandlist in
     *"$1"*)
-       install_$1 `get_value $1` `get_root` `get_value cc`
+       install_$1 `get_value $1` `get_root` `get_value cc` `get_value make`
        ;;
     $commandlist)
        trap - EXIT

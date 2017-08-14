@@ -312,4 +312,8 @@ def create_test_files(force):
                Path('.'),
                force,
                notemplate_exts=['hmm', 'faa','sh'])
+    copy_files('user_conf',
+               Path.home()/'.lorax',
+               force)
+
 

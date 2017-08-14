@@ -27,7 +27,7 @@ done
 #
 # Get environmental variables.
 #
-source lorax_envvars
+source ~/lorax/lorax_rc
 #
 if [ ! -f "$1" ] ; then
 	echo "Must specify a readable HMM file."

@@ -33,7 +33,7 @@ done
 #
 # Get environmental variables.
 #
-source lorax_envvars
+source ~/.lorax/lorax_rc
 #
 # Functions
 #
