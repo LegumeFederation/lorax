@@ -18,7 +18,8 @@ configuration.
 
 Direct Installation
 -------------------
-Besides the XCode tools, you will also need to install the PCRE and OpenSSL
+Besides the XCode tools, you will also need to install gcc (because the
+current Mac clang does not include OpenMP) as well as the PCRE and OpenSSL
 libraries.  The tested configuration was with PCRE-8.40 and OpenSSL-1.10.f.
 Both libraries were configured with CC=clang and installed to /usr/local.
 

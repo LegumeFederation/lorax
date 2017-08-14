@@ -46,10 +46,7 @@ log_dir="${var_dir}/log"
 # Do pip installs.
 #
 ./lorax_build.sh link_python
-export PATH="`./lorax_build.sh root`/bin:${PATH}"
-pip install -U setuptools
-pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
-pip install lorax
+./lorax_build.sh pip
 ./lorax_build.sh make_link
 #
 # Test to make sure it runs.

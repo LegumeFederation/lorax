@@ -17,7 +17,7 @@ trap error_exit EXIT
 root_dir=`./lorax_build.sh root`
 var_dir="${root_dir}/var"
 tmp_dir="${var_dir}/tmp"
-log_dir=${var_dir}/log"
+log_dir="${var_dir}/log"
 ./lorax_build.sh set var_dir ${var_dir}
 ./lorax_build.sh set tmp_dir ${tmp_dir}
 ./lorax_build.sh set log_dir ${log_dir}
@@ -46,12 +46,9 @@ log_dir=${var_dir}/log"
 # Do pip installs.
 #
 ./lorax_build.sh link_python
-export PATH="`./lorax_build.sh root`/bin:${PATH}"
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
-pip install -U setuptools
-pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
-pip install lorax
+./lorax_build.sh pip 
 ./lorax_build.sh make_link
 #
 # Test to make sure it runs.

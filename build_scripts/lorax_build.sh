@@ -19,6 +19,7 @@ Commands:
   make_dirs - Creates needed directories in ${pkg} root directory.
 link_python - Creates python and pip links.
     install - Installs a binary package.
+        pip - Do pip installations.
         set - set/print configuration variables.
 
 Variables (accessed by set command):
@@ -188,6 +189,12 @@ elif [ "$1" == "link_python" ]; then
       echo "creating pip link in ${root_bin}."
       ln -s pip${python_version%%.*} pip
    fi
+elif [ "$1" == "pip" ]; then
+   shift 1
+   export PATH="`get_root`/bin:${PATH}"
+   pip install -U setuptools
+   pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
+   pip install lorax
 elif [ "$1" == "install" ]; then
   shift 1
   INSTALL_DOC="""Installs a binary package.

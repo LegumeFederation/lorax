@@ -24,7 +24,7 @@ else
 fi
 echo "Getting build scripts for ${platform}."
 curl -L -o lorax_build.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_build.sh
-curl -L -o build_example.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scriptsbuild_example_${platform}.sh
+curl -L -o build_example.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/build_example_${platform}.sh
 chmod 755 lorax_build.sh build_example.sh
 echo "Review (and edit, if necessary) the instructions in build_example.sh."
 echo "Then issue the command \"./build_example.sh\" to build lorax."

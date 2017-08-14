@@ -108,12 +108,12 @@ class BuildCBinaryCommand(Command):
         logger.error(stderr_messages)
         raise SystemError("Unable to compile C binary.")
     if platform.system() == 'Darwin':
-        logger.info('fixing library file paths in MacOS executable')
-        gomp_name = 'libgomp.1.dylib'
-        gomp_path  = Path(sys.prefix)/'lib'/gomp_name
+        logger.info('fixing OpenMP file path in MacOS executable')
+        find_gomp_cmd = ['gcc', '-print-file-name=libgomp.1.dylib']
+        gomp_path  = Path(subprocess.check_output(find_gomp_cmd))
         if not gomp_path.exists():
             logger.error('libgcc must be in the virtual environment')
-            raise SystemError("Unable to resolve paths in MacOS executable")
+            raise SystemError("Unable to resolve path to libgomp.")
         subprocess.check_call(['install_name_tool',
                                '-change',
                                '@rpath/'+gomp_name,
