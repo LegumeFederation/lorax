@@ -16,8 +16,8 @@ trap error_exit EXIT
 ./lorax_build.sh set bin_dir ~/bin  # dir in PATH where lorax_env is symlinked
 ./lorax_build.sh set directory_version 0.94
 ./lorax_build.sh set var_dir "`./lorax_build.sh root`/var"
-./lorax_build.sh set tmp_dir "`./lorax_build.sh root`/var/tmp"
-./lorax_build.sh set log_dir "`./lorax_build.sh root`/var/log"
+./lorax_build.sh set tmp_dir "`./lorax_build.sh set var`/tmp"
+./lorax_build.sh set log_dir "`./lorax_build.sh set var`/log"
 ./lorax_build.sh set make make
 ./lorax_build.sh set cc gcc
 ./lorax_build.sh set python 3.6.2

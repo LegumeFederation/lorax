@@ -23,9 +23,16 @@ fi
 #
 # Installation-specific configurations.  Uncomment and edit as needed.
 #
-#${root}/bin/lorax_env lorax config
+#${root}/bin/lorax_env lorax config user www
 #
 # Save a copy of the configuration to a time-stamped file.
 #
 config_filename="config-`date '+%Y-%m-%d-%H-%M'`.txt"
 ${root}/bin/lorax_env lorax config > ${root}/${config_filename}
+#
+# Create the configured instance.
+#
+echo "Creating a configured instance at ${root}."
+${root}/bin/lorax_env lorax create_instance
+echo "To run the configured instance, issue the command:"
+echo "   ${root}/bin/lorax_env supervisord "
