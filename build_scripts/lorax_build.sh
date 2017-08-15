@@ -2,7 +2,8 @@
 # Build configuration system.
 set -e # exit on error
 error_exit() {
-   echo "ERROR--unexpected exit from build script."
+   echo "ERROR--unexpected exit from build script at line:"
+   echo "   $BASH_COMMAND"
 }
 trap error_exit EXIT
 script_name=`basename "${BASH_SOURCE}"`
@@ -14,13 +15,14 @@ Usage:
         $scriptname COMMAND [COMMAND_OPTIONS]
 
 Commands:
-       root - print the root directory.
-  make_link - links the ${pkg}_env file to bin_dir for convenience.
-  make_dirs - Creates needed directories in ${pkg} root directory.
-link_python - Creates python and pip links.
-    install - Installs a binary package.
+       root - Print the root directory.
+  make_link - Link the ${pkg}_env file to bin_dir for convenience.
+  make_dirs - Create needed directories in ${pkg} root directory.
+link_python - Create python and pip links.
+    install - Install a binary package.
         pip - Do pip installations.
-        set - set/print configuration variables.
+        set - Set/print configuration variables.
+      shell - Run a shell in installation environment.
 
 Variables (accessed by set command):
             top_dir - directory above the root directory.
@@ -190,12 +192,22 @@ elif [ "$1" == "link_python" ]; then
       ln -s pip${python_version%%.*} pip
    fi
 elif [ "$1" == "pip" ]; then
-   shift 1
-   export PATH="`get_root`/bin:${PATH}"
+   root="`get_root`"
+   export PATH="${root}/bin:${PATH}"
+   cd $root # src/ directory is left behind by git
    pip install -U setuptools
    pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
-   pip install lorax
-   rm -rf src
+   pip install -U lorax
+elif [ "$1" == "shell" ]; then
+   root="`get_root`"
+   export PATH="${root}/bin:${PATH}"
+   trap - EXIT
+   set +e
+   pushd $root
+   echo "Executing commands in ${root} with ${root}/bin in path, control-D to exit."
+   PS1="${script_name}> " bash
+   echo ""
+   popd
 elif [ "$1" == "install" ]; then
   shift 1
   INSTALL_DOC="""Installs a binary package.

@@ -82,8 +82,9 @@ for f in build_example.sh config_example.sh ; do
        if [ -e ${f}.old ]; then
          mv ${f}.old ${f}.save
          echo "Example file on which your edited ${my_f} was based has changed."
-         echo "Review the differences between ${f} and ${f}.save"
-         echo "and apply them to ${my_f}."
+         echo "Review the following differences between ${f} and ${f}.save"
+         echo "and apply them, if necessary to ${my_f}:"
+         diff -u ${f}.save ${f}
        else
          echo "${my_f} differs from the (unchanged) example file."
        fi

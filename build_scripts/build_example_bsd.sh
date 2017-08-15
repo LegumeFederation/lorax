@@ -5,7 +5,8 @@
 #
 set -e
 error_exit() {
-  echo "ERROR--unexpected exit from ${BASH_SOURCE}."
+  echo "ERROR--unexpected exit from ${BASH_SOURCE} at line"
+  echo "   $BASH_COMMAND"
 }
 trap error_exit EXIT
 #
