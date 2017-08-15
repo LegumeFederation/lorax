@@ -4,7 +4,10 @@ platform=`uname`
 DOC="""Gets build/configuration scripts for lorax.
 
 Usage:
-       bash get_build_scripts.sh
+       bash get_build_scripts.sh [-n]
+
+Options:
+       -n Do not check for self-updates.
 
 Platform:
    uname must return one of three values, \"Linux\", \"Darwin\",
@@ -12,15 +15,19 @@ Platform:
    is \"$platform\".
 """
 rawsite="https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts"
-printf "Checking for self-update..."
-curl -L -s -o get_build_scripts.sh.new ${rawsite}/get_build_scripts.sh
-if cmp -s get_build_scripts.sh get_build_scripts.sh.new ; then
-   rm get_build_scripts.sh.new
-   echo "not needed."
+if [ "$1" == "-n" ]; then
+   echo "Not checking for self-updates."
 else
-   echo "this file was updated.  Please rerun-it."
-   mv get_build_scripts.sh.new get_build_scripts.sh
-   exit 0
+   printf "Checking for self-update..."
+   curl -L -s -o get_build_scripts.sh.new ${rawsite}/get_build_scripts.sh
+   if cmp -s get_build_scripts.sh get_build_scripts.sh.new ; then
+      rm get_build_scripts.sh.new
+      echo "not needed."
+   else
+      echo "this file was updated.  Please rerun-it."
+      mv get_build_scripts.sh.new get_build_scripts.sh
+      exit 0
+   fi
 fi
 #
 # Now check for updates to other files, in an edit-aware way.
@@ -56,7 +63,7 @@ for f in lorax_build.sh build_example.sh config_example.sh ; do
    fi
 done
 #
-# If my_ files have changed versus example, warn but don't update.
+# If my_ files have changed versus example, warn but don't replace.
 #
 for f in build_example.sh config_example.sh ; do
   my_f="my_${f/_example/}"
@@ -77,6 +84,8 @@ for f in build_example.sh config_example.sh ; do
          echo "Example file on which your edited ${my_f} was based has changed."
          echo "Review the differences between ${f} and ${f}.save"
          echo "and apply them to ${my_f}."
+       else
+         echo "${my_f} differs from the (unchanged) example file."
        fi
     fi
   else

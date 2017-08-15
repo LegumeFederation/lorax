@@ -5,7 +5,7 @@
 #
 set -e
 error_exit() {
-  echo "The top-level build script encountered an error."
+  echo "ERROR--unexpected exit from ${BASH_SOURCE}."
 }
 trap error_exit EXIT
 #
