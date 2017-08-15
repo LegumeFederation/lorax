@@ -44,7 +44,6 @@ else
    echo "$DOC"
    exit 1
 fi
-echo "Getting build scripts for ${platform}."
 curl -L -s -o lorax_build.sh.new ${rawsite}/lorax_build.sh
 curl -L -s -o build_example.sh.new ${rawsite}/build_example_${platform}.sh
 curl -L -s -o config_example.sh.new ${rawsite}/config_example.sh
@@ -97,8 +96,20 @@ for f in build_example.sh config_example.sh ; do
   fi
 done
 rm -f lorax_build.sh.old build_example.sh.old config_example.sh.old
+pypi=`./lorax_build.sh pypi`
+version=`./lorax_build.sh version`
+if [ "$?" -eq 0 ]; then
+   if [ "$pypi" == "$version" ]; then
+      echo "The latest version of lorax (${pypi})is installed, no need for updates."
+   else
+      echo "You can update lorax to latest version (${pypi}) with"
+      echo "   ./lorax_build.sh pip"
+   fi
+else
+   echo "lorax has not yet been installed, latest version is ${pypi}."
+fi
 if [ "$updates" -eq 0 ]; then
-   echo "No files updated."
+   echo "No updated build/config files found for $platform platform."
 else
    echo "Review/edit the commands in my_build.sh and my_config.sh."
    echo "Then run them to build and configure lorax."

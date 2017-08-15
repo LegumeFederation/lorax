@@ -28,4 +28,4 @@ fi
 # Save a copy of the configuration to a time-stamped file.
 #
 config_filename="config-`date '+%Y-%m-%d-%H-%M'`.txt"
-${root}/bin/lorax_env lorax config > $config_filename
+${root}/bin/lorax_env lorax config > ${root}/${config_filename}

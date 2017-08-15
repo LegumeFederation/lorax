@@ -21,8 +21,10 @@ Commands:
 link_python - Create python and pip links.
     install - Install a binary package.
         pip - Do pip installations.
+       pypi - Get latest pypi version.
         set - Set/print configuration variables.
       shell - Run a shell in installation environment.
+    version - Get installed lorax version.
 
 Variables (accessed by set command):
             top_dir - directory above the root directory.
@@ -210,6 +212,44 @@ elif [ "$1" == "shell" ]; then
    bash
    popd 2&>/dev/null
    export PS1="$old_prompt"
+elif [ "$1" == "version" ]; then
+   set +e
+   trap - EXIT
+   version="Not installed"
+   root=`get_root`
+   if [ "$?" -eq 0 ]; then
+      version=`${root}/bin/lorax_env lorax config version`
+      if [ "$?" -eq 0 ]; then
+         echo "$version"
+      else
+         echo "${pkg} not installed"
+         exit 1
+      fi
+   else
+      echo "Build has not been configured."
+      exit 1
+   fi
+   echo $version
+elif [ "$1" == "pypi" ]; then
+  set +e
+  trap - EXIT
+  #
+  # The piped function below does version sorting using only awk.
+  #
+  pypi_latest="Unable to determine latest pypi version."
+  latest=`curl -L -s $simple_url |\
+          grep tar.gz |\
+          sed -e 's/.*lorax-//g' -e 's#.tar.gz</a><br/>##g'|\
+          awk -F. '{ printf("%03d%03d%03d\n", $1, $2, $3); }'|\
+          sort -g |\
+          awk '{printf("%d.%d.%d\n", substr($0,0,3),substr($0,4,3),substr($0,7,3))}'|\
+          tail -1`
+   if [ "$?" -eq 0 ]; then
+     echo "$latest"
+   else
+     echo "Unable to determine latest pypi version".
+     exit 1
+   fi
 elif [ "$1" == "install" ]; then
   shift 1
   INSTALL_DOC="""Installs a binary package.
@@ -296,3 +336,4 @@ else
   exit 1
 fi
 trap - EXIT
+exit 0
