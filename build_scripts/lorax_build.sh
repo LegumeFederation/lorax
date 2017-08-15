@@ -224,15 +224,15 @@ elif [ "$1" == "version" ]; then
          if [ "$?" -eq 0 ]; then
             echo "$version"
          else
-            echo "${pkg} not runnable."
+            echo "${pkg} is not runnable"
             exit 1
          fi
       else
-         echo "${pkg} not installed."
+         echo "${pkg} is not installed"
          exit 1
       fi
    else
-      echo "Build has not been configured."
+      echo "${pkg} build has not been configured"
       exit 1
    fi
 elif [ "$1" == "pypi" ]; then

@@ -106,7 +106,7 @@ if [ "$?" -eq 0 ]; then
       echo "   ./lorax_build.sh pip"
    fi
 else
-   echo "lorax has not yet been installed, latest version is ${pypi}."
+   echo "${version}, but latest version is ${pypi}."
 fi
 if [ "$updates" -eq 0 ]; then
    echo "No updated build/config files found for $platform platform."
