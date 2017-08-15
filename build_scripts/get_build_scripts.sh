@@ -71,7 +71,7 @@ for f in build_example.sh config_example.sh ; do
          cp ${f} ${my_f}
        fi
     else
-       if [ -e ${f}.old ];
+       if [ -e ${f}.old ]; then
          mv ${f}.old ${f}.save
          echo "Example file on which your edited ${my_f} was based has changed."
          echo "Review the differences between ${f} and ${f}.save"
