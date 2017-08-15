@@ -13,16 +13,11 @@ trap error_exit EXIT
 # Configure the build.
 #
 ./lorax_build.sh set top_dir /usr/local/www
-./lorax_build.sh set bin_dir ~/bin
+./lorax_build.sh set bin_dir ~/bin  # dir in PATH where lorax_env is symlinked
 ./lorax_build.sh set directory_version 0.94
-root_dir=`./lorax_build.sh root`
-var_dir="${root_dir}/var"
-tmp_dir="${var_dir}/tmp"
-log_dir="${var_dir}/log"
-./lorax_build.sh set var_dir ${var_dir}
-./lorax_build.sh set tmp_dir ${tmp_dir}
-./lorax_build.sh set log_dir ${log_dir}
-#
+./lorax_build.sh set var_dir "`./lorax_build.sh root`/var"
+./lorax_build.sh set tmp_dir "`./lorax_build.sh root`/var/tmp"
+./lorax_build.sh set log_dir "`./lorax_build.sh root`/var/log"
 ./lorax_build.sh set make gmake
 ./lorax_build.sh set cc clang
 ./lorax_build.sh set python 3.6.2
@@ -54,8 +49,8 @@ export LANG=en_US.UTF-8
 #
 # Test to make sure it runs.
 #
-echo "Testing that lorax runs".
-`./lorax_build.sh root`/bin/lorax_env lorax
+echo "Testing lorax installation."
+./lorax_build.sh version > ${root}/version
 echo "Installation was successful."
 echo "You should now proceed with configuring lorax."
 trap - EXIT

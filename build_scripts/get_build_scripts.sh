@@ -100,7 +100,7 @@ pypi=`./lorax_build.sh pypi`
 version=`./lorax_build.sh version`
 if [ "$?" -eq 0 ]; then
    if [ "$pypi" == "$version" ]; then
-      echo "The latest version of lorax (${pypi})is installed, no need for updates."
+      echo "The latest version of lorax (${pypi}) is installed, no need for updates."
    else
       echo "You can update lorax to latest version (${pypi}) with"
       echo "   ./lorax_build.sh pip"
