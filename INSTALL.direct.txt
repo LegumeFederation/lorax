@@ -13,9 +13,9 @@ issuing the command:
    curl -L -o get_build_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_build_scripts.sh
 
 Then issue the command "bash get_build_scripts.sh" to download the example
-build scripts.  Review and edit the build_example.sh script to reflect
-the directories you wish for your installation.  Then run ./build_example.sh
-to do the installation.
+build scripts.  Review and edit the my_build.sh script to reflect
+the directories you wish to use for your installation.  Then run ./my_build.sh
+to do the build.
 
 Next, follow the instructions in INSTALL.configure+run.txt.
 
@@ -24,9 +24,11 @@ Installation via Package Manager
 The following are the dependencies for installing and running lorax, with
 tested versions shown in parentheses:
 
-  C compiler:   clang (8.1.0 on MacOS and 3.4.1 on FreeBSD)
-                 or gcc (7.1.0 on linux).
-      python: 3.6.2, minimum of 3.4.0
+  C compiler: clang (8.1.0 on MacOS and 3.4.1 on FreeBSD)
+              gcc (7.1.0 on linux and 4.8.5 on MacOS).
+              Note that MacOS requires BOTH clang and gcc.
+         git: Any version supported by GitHub should work.
+      python: python 3 with numpy (3.6.2, minimum of 3.4.0)
        hmmer: 3.1b2
        raxml: 8.2.11
        redis: 4.0.1

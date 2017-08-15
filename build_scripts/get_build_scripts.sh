@@ -11,8 +11,9 @@ Platform:
    or \"*BSD\"; other values are not recognized.  This platform
    is \"$platform\".
 """
-printf "Checking for self-updates..."
-curl -L -s -o get_build_scripts.sh.new https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_build_scripts.sh
+rawsite="https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts"
+printf "Checking for self-update..."
+curl -L -s -o get_build_scripts.sh.new ${rawsite}/get_build_scripts.sh
 if cmp -s get_build_scripts.sh get_build_scripts.sh.new ; then
    rm get_build_scripts.sh.new
    echo "not needed."
@@ -36,9 +37,9 @@ else
    exit 1
 fi
 echo "Getting build scripts for ${platform}."
-curl -L -s -o lorax_build.sh.new https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_build.sh
-curl -L -s -o build_example.sh.new https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/build_example_${platform}.sh
-curl -L -s -o config_example.sh.new https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/config_example.sh
+curl -L -s -o lorax_build.sh.new ${rawsite}/lorax_build.sh
+curl -L -s -o build_example.sh.new ${rawsite}/build_example_${platform}.sh
+curl -L -s -o config_example.sh.new ${rawsite}/config_example.sh
 for f in lorax_build.sh build_example.sh config_example.sh ; do
    if [ -e ${f} ]; then
       if cmp -s ${f} ${f}.new; then
@@ -66,7 +67,7 @@ for f in build_example.sh config_example.sh ; do
   fi
   if [ -e ${my_f} ]; then
     if cmp -s ${cmp_f} ${my_f}; then
-       if [ -e ${f}.old; then
+       if [ -e ${f}.old ]; then
          # No changes from old example, copy current file to my_f.
          cp ${f} ${my_f}
        fi
