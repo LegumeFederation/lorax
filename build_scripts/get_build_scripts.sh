@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 platform=`uname`
-DOC="""Gets the correct build scripts for lorax.
+DOC="""Gets build/configuration scripts for lorax.
 
 Usage:
        bash get_build_scripts.sh
@@ -11,6 +11,18 @@ Platform:
    or \"*BSD\"; other values are not recognized.  This platform
    is \"$platform\".
 """
+echo "Checking for self-updates."
+curl -L -s -o get_build_scripts.sh.new https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_build_scripts.sh
+if cmp -s get_build_scripts.sh get_build_scripts.sh.new ; then
+   rm get_build_scripts.sh.new
+else
+   echo "This file has been updated.  Please rerun-it."
+   mv get_build_scripts.sh.new get_build_scripts.sh
+   exit 0
+fi
+#
+# Now check for updates to other files, in an edit-aware way.
+#
 platform=`uname`
 if [[ "$platform" == "Linux" ]]; then
    platform=linux
@@ -23,9 +35,54 @@ else
    exit 1
 fi
 echo "Getting build scripts for ${platform}."
-curl -L -o lorax_build.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_build.sh
-curl -L -o build_example.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/build_example_${platform}.sh
-chmod 755 lorax_build.sh build_example.sh
-echo "Review (and edit, if necessary) the instructions in build_example.sh."
-echo "Then issue the command \"./build_example.sh\" to build lorax."
+curl -L -s -o lorax_build.sh.new https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_build.sh
+curl -L -s -o build_example.sh.new https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/build_example_${platform}.sh
+curl -L -s -o config_example.sh.new https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/config_example.sh
+for f in lorax_build.sh build_example.sh config_example.sh ; do
+   if [ -e ${f} ]; then
+      if cmp -s ${f} ${f}.new; then
+         rm ${f}.new # no change
+      else
+        echo "$f has been updated."
+        mv ${f} ${f}.old
+        chmod 755 ${f}.new
+        mv ${f}.new ${f}
+      fi
+   else
+      chmod 755 ${f}.new
+      mv ${f}.new ${f}
+done
+#
+# If my_ files have changed versus example, warn but don't update.
+#
+for f in build_example.sh config_example.sh ; do
+  my_f="$my_{f/_example/}"
+  if [ -e ${f}.old ]; then
+     cmp_f="${f}.old" # look for changes against old file
+  else
+     cmp_f="$f"       # look for changes against current file
+  fi
+  if [ -e ${my_f} ]; then
+    if cmp -s ${cmp_f} ${my_f}; then
+       if [ -e ${f}.old
+         # No changes from old example, copy current file to my_f.
+         cp ${f} ${my_f}
+       fi
+    else
+       if [ -e ${f}.old ];
+         mv ${f}.old ${f}.save
+         echo "Example file on which your edited ${my_f} was based has changed."
+         echo "Review the differences between ${f} and ${f}.save"
+         echo "and apply them to ${my_f}."
+       fi
+    fi
+  else
+    cp ${f} ${my_f}
+  fi
+done
+rm -f lorax_build.sh.old build_example.sh.old config_example.sh.old
+echo "Review/edit the commands in my_build.sh and my_config.sh."
+echo "Then run them to build and configure lorax."
+echo "If you do make changes to these files, we recommend that you keep"
+echo "this directory to simplify updates."
 exit 0

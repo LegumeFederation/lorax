@@ -9,7 +9,7 @@
 #
 """lorax -- speaks for the (phylogenetic) trees."""
 #
-# Developers, install with
+# Developers, install with:
 #    pip install -r requirements.txt
 #    python setup.py develop
 #
@@ -24,11 +24,11 @@ import subprocess
 import sys
 from setuptools import setup, find_packages
 from setuptools.command import build_py, develop, install
+
 # restrict to python 3.4 or later
 if sys.version_info < (3, 4, 0, 'final', 0):
     raise SystemExit("This package requires python 3.4 or higher.")
 from pathlib import Path  # python 3.4
-
 
 NAME = 'lorax'
 C_NAME = 'FastTree'
@@ -45,157 +45,159 @@ DIR_MODE = 0o775
 
 
 class BuildCBinaryCommand(Command):
-  """Compile C binary with custom switches."""
-  description = 'Build ' + C_NAME + ' C binary'
-  user_options = [
-      # The format is (long option, short option, description).
-      ('cc=', None, 'path to c compiler'),
-      ('cflags=', None, 'CFLAGS for compiler in use')
-  ]
+    """Compile C binary with custom switches."""
+    description = 'Build ' + C_NAME + ' C binary'
+    user_options = [
+        # The format is (long option, short option, description).
+        ('cc=', None, 'path to c compiler'),
+        ('cflags=', None, 'CFLAGS for compiler in use')
+    ]
 
-  def initialize_options(self):
-    """Set default values for options."""
-    # Each user option must be listed here with their default value.
-    system = platform.system()
-    if system == 'Linux':
-        self.cc = 'gcc'
-        self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' +\
-                  ' -O3 -march=native -DOPENMP -fopenmp -lm'
-    elif system == 'Darwin':
-        self.cc = 'gcc'
-        self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' +\
-                  ' -O3 -march=native -DOPENMP -fopenmp -lm'
-    elif system.endswith('BSD'):
-        self.cc = 'clang'
-        self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' +\
-                  ' -O3 -march=native -lm'
-    else:
-        logger.warning('Unrecognized system, using conservative default CFLAGS')
-        self.cc = 'gcc'
-        self.cflags = '-DUSE_DOUBLE -lm'
+    def initialize_options(self):
+        """Set default values for options."""
+        # Each user option must be listed here with their default value.
+        system = platform.system()
+        if system == 'Linux':
+            self.cc = 'gcc'
+            self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' + \
+                          ' -O3 -march=native -DOPENMP -fopenmp -lm'
+        elif system == 'Darwin':
+            self.cc = 'gcc'
+            self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' + \
+                          ' -O3 -march=native -DOPENMP -fopenmp -lm'
+        elif system.endswith('BSD'):
+            self.cc = 'clang'
+            self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' + \
+                          ' -O3 -march=native -lm'
+        else:
+            logger.warning(
+                'Unrecognized system, using conservative default CFLAGS')
+            self.cc = 'gcc'
+            self.cflags = '-DUSE_DOUBLE -lm'
 
+    def finalize_options(self):
+        """Post-process options."""
+        assert shutil.which(self.cc) is not None, (
+            'C compiler %s is not found on path.' % self.cc)
+        self.cflag_list = self.cflags.split()
 
-  def finalize_options(self):
-    """Post-process options."""
-    assert shutil.which(self.cc) is not None, (
-          'C compiler %s is not found on path.' % self.cc)
-    self.cflag_list = self.cflags.split()
-
-
-  def run(self):
-    """Build C binary."""
-    # Check if build is disabled by environmental variable.
-    if NAME.upper()+'_NO_COMPILE' in environ and\
-            environ[NAME.upper()+'_NO_COMPILE'] == 'True':
-        logger.info('skipping compile of '+ C_NAME +' binary')
-        return
-    if (BUILD_PATH/BINARY_NAME).exists():
-        logger.info(C_NAME + ' binary already built')
-        return
-    logger.info('compiling ' + C_NAME + ' v' + C_VERSION + ' binary')
-    command = [shutil.which(self.cc)] +\
-              self.cflag_list + ['-o',
-              '../bin/'+BINARY_NAME,
-              C_NAME+'-' + C_VERSION + '.c']
-    logger.debug('  %s' % (' '.join(command)))
-    pipe = subprocess.Popen(command,
-                            cwd=NAME+'/' + C_NAME.lower(),
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
-    logger.debug(pipe.stdout.read().decode('UTF-8'))
-    stderr_messages = pipe.stderr.read().decode('UTF-8')
-    if stderr_messages != '':
-        logger.error(stderr_messages)
-        raise SystemError("Unable to compile C binary.")
-    if platform.system() == 'Darwin':
-        logger.info('fixing OpenMP file path in MacOS executable')
-        find_gomp_cmd = ['gcc', '-print-file-name=libgomp.1.dylib']
-        gomp_path_str = subprocess.check_output(find_gomp_cmd).decode('UTF-8')
-        gomp_path  = Path(gomp_path_str)
-        if not gomp_path.exists():
-            logger.error('libgcc must be in the virtual environment')
-            raise SystemError("Unable to resolve path to libgomp.")
-        subprocess.check_call(['install_name_tool',
-                               '-change',
-                               '@rpath/'+gomp_name,
-                               str(gomp_path),
-                               str(BUILD_PATH/BINARY_NAME)],
-                              )
+    def run(self):
+        """Build C binary."""
+        # Check if build is disabled by environmental variable.
+        if NAME.upper() + '_NO_COMPILE' in environ and \
+                        environ[NAME.upper() + '_NO_COMPILE'] == 'True':
+            logger.info('skipping compile of ' + C_NAME + ' binary')
+            return
+        if (BUILD_PATH / BINARY_NAME).exists():
+            logger.info(C_NAME + ' binary already built')
+            return
+        logger.info('compiling ' + C_NAME + ' v' + C_VERSION + ' binary')
+        command = [shutil.which(self.cc)] + \
+                  self.cflag_list + ['-o',
+                                     '../bin/' + BINARY_NAME,
+                                     C_NAME + '-' + C_VERSION + '.c']
+        logger.debug('  %s' % (' '.join(command)))
+        pipe = subprocess.Popen(command,
+                                cwd=NAME + '/' + C_NAME.lower(),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        logger.debug(pipe.stdout.read().decode('UTF-8'))
+        stderr_messages = pipe.stderr.read().decode('UTF-8')
+        if stderr_messages != '':
+            logger.error(stderr_messages)
+            raise SystemError("Unable to compile C binary.")
+        if platform.system() == 'Darwin':
+            logger.info('fixing OpenMP file path in MacOS executable')
+            gomp_name = 'libgomp.1.dylib'
+            find_gomp_cmd = ['gcc', '-print-file-name=' + gomp_name]
+            gomp_path_str = subprocess.check_output(find_gomp_cmd).decode(
+                'UTF-8')[:-1]
+            gomp_path = Path(gomp_path_str).resolve()
+            if not gomp_path.exists():
+                raise SystemError(
+                    "Unable to find OpenMP library %s." % gomp_name)
+            try:
+                subprocess.check_call(['install_name_tool',
+                                       '-change',
+                                       '@rpath/' + gomp_name,
+                                       str(gomp_path),
+                                       str(BUILD_PATH / BINARY_NAME)]
+                                      )
+            except subprocess.CalledProcessError:
+                raise SystemError(
+                    "Unable to install OpenMP path in FastTree binary.")
 
 
 class InstallBinariesCommand(Command):
-  """Install binaries to virtual environment bin directory."""
-  description = 'Copy binaries to install location'
-  user_options = [('bindir=', None, 'binaries directory')]
+    """Install binaries to virtual environment bin directory."""
+    description = 'Copy binaries to install location'
+    user_options = [('bindir=', None, 'binaries directory')]
 
+    def initialize_options(self):
+        """Set default values for options."""
+        if NAME.upper() + '_ROOT' in environ:
+            install_path = Path(environ[NAME.upper() + '_ROOT'])
+        else:
+            install_path = Path(sys.prefix)
+        self.bin_path = install_path / 'bin'
+        self.etc_path = install_path / 'etc'
 
-  def initialize_options(self):
-    """Set default values for options."""
-    if NAME.upper()+'_ROOT' in environ:
-        install_path = Path(environ[NAME.upper()+'_ROOT'])
-    else:
-        install_path = Path(sys.prefix)
-    self.bin_path = install_path/'bin'
-    self.etc_path = install_path/'etc'
+    def finalize_options(self):
+        """Post-process options."""
+        if not self.bin_path.exists():
+            logger.info(
+                'creating binary directory "%s"' % (str(self.bin_path)))
+            self.bin_path.mkdir(parents=True, mode=DIR_MODE)
+        if not self.etc_path.exists():
+            logger.info('creating etc directory "%s"' % (str(self.etc_path)))
+            self.etc_path.mkdir(parents=True, mode=DIR_MODE)
 
+    def create_config_file(self, file_name):
+        """Initializes config file with secret key."""
+        file_path = self.etc_path / file_name
+        if not file_path.exists():
+            with file_path.open(mode='w') as config_fh:
+                print('Creating instance config file at "%s".' % str(
+                    file_path))
+                alphabet = string.ascii_letters + string.digits
+                nchars = 0
+                password = ''
+                while nchars < PASSWORD_LENGTH:
+                    password += secrets.choice(alphabet)
+                    nchars += 1
+                print('SECRET_KEY = "%s" # set at install time' % (password),
+                      file=config_fh)
 
-  def finalize_options(self):
-    """Post-process options."""
-    if not self.bin_path.exists():
-        logger.info('creating binary directory "%s"' % (str(self.bin_path)))
-        self.bin_path.mkdir(parents=True, mode=DIR_MODE)
-    if not self.etc_path.exists():
-        logger.info('creating etc directory "%s"' % (str(self.etc_path)))
-        self.etc_path.mkdir(parents=True, mode=DIR_MODE)
-
-
-  def create_config_file(self, file_name):
-      """Initializes config file with secret key."""
-      file_path = self.etc_path / file_name
-      if not file_path.exists():
-          with file_path.open(mode='w') as config_fh:
-              print('Creating instance config file at "%s".' % str(
-                  file_path))
-              alphabet = string.ascii_lowercase + string.digits + string.ascii_uppercase
-              nchars = 0
-              password = ''
-              while nchars < PASSWORD_LENGTH:
-                  password += secrets.choice(alphabet)
-                  nchars += 1
-              print('SECRET_KEY = "%s" # set at install time' % (password),
-                    file=config_fh)
-
-
-  def run(self):
-    """Run command."""
-    # Check if build is disabled by environmental variable.
-    no_binaries = NAME.upper() + '_NO_BINARIES'
-    if no_binaries in environ and\
-            environ[no_binaries] == 'True':
-        logger.info('skipping install of binary files')
-    else:
-        logger.info('copying binary to %s' % (str(self.bin_path)))
-        shutil.copy2(str(BUILD_PATH/BINARY_NAME),
-                     str(self.bin_path/BINARY_NAME))
-        logger.info('copying environment script to %s' % (str(self.bin_path)))
-        shutil.copy2(str(BUILD_PATH/ENV_SCRIPT_INNAME),
-                     str(self.bin_path/ENV_SCRIPT_OUTNAME))
-        shutil.copy2(str(BUILD_PATH/RUN_SCRIPT_INNAME),
-                     str(self.bin_path/RUN_SCRIPT_OUTNAME))
-        my_python = self.bin_path/(NAME + '_python')
-        if not my_python.exists():
-            logger.info('creating '+ str(my_python) + ' link')
-            my_python.symlink_to(sys.executable)
-        self.create_config_file(NAME + '.conf')
-
+    def run(self):
+        """Run command."""
+        # Check if build is disabled by environmental variable.
+        no_binaries = NAME.upper() + '_NO_BINARIES'
+        if no_binaries in environ and \
+                        environ[no_binaries] == 'True':
+            logger.info('skipping install of binary files')
+        else:
+            logger.info('copying binary to %s' % (str(self.bin_path)))
+            shutil.copy2(str(BUILD_PATH / BINARY_NAME),
+                         str(self.bin_path / BINARY_NAME))
+            logger.info(
+                'copying environment script to %s' % (str(self.bin_path)))
+            shutil.copy2(str(BUILD_PATH / ENV_SCRIPT_INNAME),
+                         str(self.bin_path / ENV_SCRIPT_OUTNAME))
+            shutil.copy2(str(BUILD_PATH / RUN_SCRIPT_INNAME),
+                         str(self.bin_path / RUN_SCRIPT_OUTNAME))
+            my_python = self.bin_path / (NAME + '_python')
+            if not my_python.exists():
+                logger.info('creating ' + str(my_python) + ' link')
+                my_python.symlink_to(sys.executable)
+            self.create_config_file(NAME + '.conf')
 
 
 class BuildPyCommand(build_py.build_py):
-  """Build C binary as part of build."""
+    """Build C binary as part of build."""
 
-  def run(self):
-    self.run_command('build_cbinary')
-    build_py.build_py.run(self)
+    def run(self):
+        self.run_command('build_cbinary')
+        build_py.build_py.run(self)
 
 
 class DevelopCommand(develop.develop):
@@ -254,7 +256,7 @@ setup(
                     'setuptools-scm>1.5'
                     ],
     entry_points={
-        'console_scripts': [NAME +' = '+ NAME +'.cli:cli']
+        'console_scripts': [NAME + ' = ' + NAME + '.cli:cli']
     },
     cmdclass={
         'build_cbinary': BuildCBinaryCommand,
@@ -266,7 +268,7 @@ setup(
     use_scm_version={
         'version_scheme': 'guess-next-dev',
         'local_scheme': 'dirty-tag',
-        'write_to': NAME +'/version.py'
+        'write_to': NAME + '/version.py'
     },
     extras_require=extras_require,
     tests_require=tests_require,

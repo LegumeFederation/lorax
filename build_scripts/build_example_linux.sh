@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #  This script builds lorax and its binary dependencies.
 #  The example here is for a build on linux with AVX2 hardware.
