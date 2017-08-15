@@ -32,6 +32,7 @@ fi
 #
 # Now check for updates to other files, in an edit-aware way.
 #
+updates=0
 platform=`uname`
 if [[ "$platform" == "Linux" ]]; then
    platform=linux
@@ -52,12 +53,14 @@ for f in lorax_build.sh build_example.sh config_example.sh ; do
       if cmp -s ${f} ${f}.new; then
          rm ${f}.new # no change
       else
+        updates=1
         echo "$f has been updated."
         mv ${f} ${f}.old
         chmod 755 ${f}.new
         mv ${f}.new ${f}
       fi
    else
+      updates=1
       chmod 755 ${f}.new
       mv ${f}.new ${f}
    fi
@@ -94,8 +97,12 @@ for f in build_example.sh config_example.sh ; do
   fi
 done
 rm -f lorax_build.sh.old build_example.sh.old config_example.sh.old
-echo "Review/edit the commands in my_build.sh and my_config.sh."
-echo "Then run them to build and configure lorax."
-echo "If you do make changes to these files, we recommend that you keep"
-echo "this directory to simplify updates."
+if [ "$updates" -eq 0 ]; then
+   echo "No files updated."
+else
+   echo "Review/edit the commands in my_build.sh and my_config.sh."
+   echo "Then run them to build and configure lorax."
+   echo "If you do make changes to these files, we recommend that you keep"
+   echo "this directory to simplify updates."
+fi
 exit 0
