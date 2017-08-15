@@ -58,7 +58,7 @@ done
 # If my_ files have changed versus example, warn but don't update.
 #
 for f in build_example.sh config_example.sh ; do
-  my_f="$my_{f/_example/}"
+  my_f="my_${f/_example/}"
   if [ -e ${f}.old ]; then
      cmp_f="${f}.old" # look for changes against old file
   else
