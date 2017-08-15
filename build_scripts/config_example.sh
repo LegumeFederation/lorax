@@ -23,7 +23,7 @@ fi
 #
 # Installation-specific configurations.  Uncomment and edit as needed.
 #
-#${root}/bin/lorax_env lorax config 
+#${root}/bin/lorax_env lorax config
 #
 # Save a copy of the configuration to a time-stamped file.
 #

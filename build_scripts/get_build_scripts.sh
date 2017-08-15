@@ -11,7 +11,7 @@ Platform:
    or \"*BSD\"; other values are not recognized.  This platform
    is \"$platform\".
 """
-echo -e "Checking for self-updates..."
+printf "Checking for self-updates..."
 curl -L -s -o get_build_scripts.sh.new https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_build_scripts.sh
 if cmp -s get_build_scripts.sh get_build_scripts.sh.new ; then
    rm get_build_scripts.sh.new
@@ -66,7 +66,7 @@ for f in build_example.sh config_example.sh ; do
   fi
   if [ -e ${my_f} ]; then
     if cmp -s ${cmp_f} ${my_f}; then
-       if [ -e ${f}.old
+       if [ -e ${f}.old; then
          # No changes from old example, copy current file to my_f.
          cp ${f} ${my_f}
        fi
