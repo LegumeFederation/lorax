@@ -218,11 +218,17 @@ elif [ "$1" == "version" ]; then
    version="Not installed"
    root=`get_root`
    if [ "$?" -eq 0 ]; then
-      version=`${root}/bin/lorax_env lorax config version`
-      if [ "$?" -eq 0 ]; then
-         echo "$version"
+      lorax_env_path="${root}/bin/lorax_env"
+      if [ -e $lorax_env_path ]; then
+         version=`${lorax_env_path} lorax config version`
+         if [ "$?" -eq 0 ]; then
+            echo "$version"
+         else
+            echo "${pkg} not runnable."
+            exit 1
+         fi
       else
-         echo "${pkg} not installed"
+         echo "${pkg} not installed."
          exit 1
       fi
    else
