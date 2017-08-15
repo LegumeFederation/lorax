@@ -11,12 +11,13 @@ Platform:
    or \"*BSD\"; other values are not recognized.  This platform
    is \"$platform\".
 """
-echo "Checking for self-updates."
+echo -e "Checking for self-updates..."
 curl -L -s -o get_build_scripts.sh.new https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_build_scripts.sh
 if cmp -s get_build_scripts.sh get_build_scripts.sh.new ; then
    rm get_build_scripts.sh.new
+   echo "not needed."
 else
-   echo "This file has been updated.  Please rerun-it."
+   echo "this file was updated.  Please rerun-it."
    mv get_build_scripts.sh.new get_build_scripts.sh
    exit 0
 fi
@@ -51,6 +52,7 @@ for f in lorax_build.sh build_example.sh config_example.sh ; do
    else
       chmod 755 ${f}.new
       mv ${f}.new ${f}
+   fi
 done
 #
 # If my_ files have changed versus example, warn but don't update.
