@@ -55,7 +55,7 @@ environment binary directory.
 
 Next use pip to install dependencies:
 
-	pip install -U setuptools # may produce an error, don't worry
+	pip install -U setuptools
 	pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
 	pip install lorax
 

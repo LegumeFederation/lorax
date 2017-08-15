@@ -2,7 +2,7 @@
 # Build configuration system.
 set -e # exit on error
 error_exit() {
-   echo "ERROR--unexpected exit from build script at line:"
+   echo "ERROR--unexpected exit from lorax_build.sh script at line:"
    echo "   $BASH_COMMAND"
 }
 trap error_exit EXIT
@@ -203,11 +203,13 @@ elif [ "$1" == "shell" ]; then
    export PATH="${root}/bin:${PATH}"
    trap - EXIT
    set +e
-   pushd $root
+   old_prompt="$PS1"
+   pushd $root 2&>/dev/null
    echo "Executing commands in ${root} with ${root}/bin in path, control-D to exit."
-   PS1="${script_name}> " bash
-   echo ""
-   popd
+   export PS1="${script_name}> "
+   bash
+   popd 2&>/dev/null
+   export PS1="$old_prompt"
 elif [ "$1" == "install" ]; then
   shift 1
   INSTALL_DOC="""Installs a binary package.
