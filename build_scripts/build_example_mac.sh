@@ -48,7 +48,7 @@ trap error_exit EXIT
 # Test to make sure it runs.
 #
 echo "Testing lorax installation."
-./lorax_build.sh version > ${root}/version
+./lorax_build.sh version > `./lorax_build.sh root`/version
 echo "Installation was successful."
 echo "You should now proceed with configuring lorax."
 trap - EXIT
