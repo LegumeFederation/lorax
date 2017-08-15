@@ -229,14 +229,13 @@ elif [ "$1" == "version" ]; then
       echo "Build has not been configured."
       exit 1
    fi
-   echo $version
 elif [ "$1" == "pypi" ]; then
   set +e
   trap - EXIT
   #
   # The piped function below does version sorting using only awk.
   #
-  pypi_latest="Unable to determine latest pypi version."
+  simple_url="https://pypi.python.org/simple/${pkg}"
   latest=`curl -L -s $simple_url |\
           grep tar.gz |\
           sed -e 's/.*lorax-//g' -e 's#.tar.gz</a><br/>##g'|\
