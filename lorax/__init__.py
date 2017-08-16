@@ -96,18 +96,24 @@ if app.config['RQ_ASYNC']:
 #
 # Application data for optional environment dump.
 #
+
+
 def application_data():
     return {'maintainer': MAINTAINER,
             'git_repo': GIT_REPO}
+
+
 #
 # Create /healthcheck and /environment URLs.
 #
-health = HealthCheck(app,'/healthcheck')
+health = HealthCheck(app, '/healthcheck')
 envdump = EnvironmentDump(app, '/environment')
 envdump.add_section('application', application_data)
 #
 # Helper function defs start here.
 #
+
+
 def get_file(subpath, file_type='data', mode='U'):
     """Get a file, returning exceptions if they exist.
 
@@ -329,8 +335,8 @@ def convert_stockholm_to_fasta(out_path,
                                fasta):
     """Convert a Stockholm-format alignment file to FASTA.
 
-    :param cwd: 
-    :param err_path: 
+    :param cwd:
+    :param err_path:
     :param out_path: Path to which stdout was sent.
     :param status: Status object from subprocess.
     :param fasta: Path to FASTA file to be created.
@@ -352,8 +358,8 @@ def cleanup_tree(raw_path,
                  xml_path):
     """Ladderize output tree.
 
-    :param cwd: 
-    :param err_path: 
+    :param cwd:
+    :param err_path:
     :param clean_path:
     :param make_rooted:
     :param root_name:
@@ -640,7 +646,7 @@ def return_log():
 
     :return: text/plain response
     """
-    content = get_file(__name__+'_server.log',
+    content = get_file(__name__ + '_server.log',
                        file_type='log')
     return Response(content, mimetype=TEXT_MIMETYPE)
 

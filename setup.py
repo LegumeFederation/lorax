@@ -85,7 +85,7 @@ class BuildCBinaryCommand(Command):
         """Build C binary."""
         # Check if build is disabled by environmental variable.
         if NAME.upper() + '_NO_COMPILE' in environ and \
-                        environ[NAME.upper() + '_NO_COMPILE'] == 'True':
+                environ[NAME.upper() + '_NO_COMPILE'] == 'True':
             logger.info('skipping compile of ' + C_NAME + ' binary')
             return
         if (BUILD_PATH / BINARY_NAME).exists():
@@ -93,9 +93,9 @@ class BuildCBinaryCommand(Command):
             return
         logger.info('compiling ' + C_NAME + ' v' + C_VERSION + ' binary')
         command = [shutil.which(self.cc)] + \
-                  self.cflag_list + ['-o',
-                                     '../bin/' + BINARY_NAME,
-                                     C_NAME + '-' + C_VERSION + '.c']
+            self.cflag_list + ['-o',
+                               '../bin/' + BINARY_NAME,
+                               C_NAME + '-' + C_VERSION + '.c']
         logger.debug('  %s' % (' '.join(command)))
         pipe = subprocess.Popen(command,
                                 cwd=NAME + '/' + C_NAME.lower(),
@@ -173,7 +173,7 @@ class InstallBinariesCommand(Command):
         # Check if build is disabled by environmental variable.
         no_binaries = NAME.upper() + '_NO_BINARIES'
         if no_binaries in environ and \
-                        environ[no_binaries] == 'True':
+                environ[no_binaries] == 'True':
             logger.info('skipping install of binary files')
         else:
             logger.info('copying binary to %s' % (str(self.bin_path)))

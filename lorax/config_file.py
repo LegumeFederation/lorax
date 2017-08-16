@@ -20,7 +20,7 @@ values.
 Note that configuration variables are all-caps.
 
 Types are derived from python typing rules.
-'''""" # noqa
+'''"""  # noqa
 
 
 def generate_random_password(length=DEFAULT_PASSWORD_LENGTH,
@@ -32,13 +32,13 @@ def generate_random_password(length=DEFAULT_PASSWORD_LENGTH,
     if use_uppercase:
         alphabet += string.ascii_uppercase
     if use_punctuation:
-        alphabet += string.punctuation.replace('-','')
+        alphabet += string.punctuation.replace('-', '')
     nchars = 0
     password = ''
     while nchars < length:
         password += secrets.choice(alphabet)
         nchars += 1
-        if grouping and nchars < length and not nchars%grouping:
+        if grouping and nchars < length and not nchars % grouping:
             password += '-'
     return password
 
@@ -68,9 +68,9 @@ def create_config_file(file_path):
     """Initializes config file with secret key."""
     dir_path = file_path.parent
     if not dir_path.is_dir():
-        print('Creating application etc/ directory "%s".' %str(dir_path))
+        print('Creating application etc/ directory "%s".' % str(dir_path))
         dir_path.mkdir(mode=0o775,
-                        parents=True)
+                       parents=True)
     if not file_path.exists():
         with file_path.open(mode='w') as config_fh:
             print('Creating instance config file at "%s".' % str(
@@ -86,6 +86,6 @@ def create_config_file(file_path):
                                 '')
 
 
-if __name__ == '__main__': # for development and testing purposes only
+if __name__ == '__main__':  # for development and testing purposes only
     from pathlib import Path  # python > 3.4
     create_config_file(Path(sys.prefix), 'settings.conf')

@@ -24,7 +24,7 @@ import platform
 import sys
 from getpass import getuser
 from socket import getfqdn
-from pathlib import Path # python 3.4
+from pathlib import Path  # python 3.4
 #
 # Third-party imports.
 #
@@ -93,7 +93,7 @@ class BaseConfig(object):
     # Directory/file permissions.
     #
     PROCESS_UMASK = '007'
-    DIR_MODE = '770' # Note interaction with process umask
+    DIR_MODE = '770'  # Note interaction with process umask
     #
     # The DEBUG parameter has multiple implications:
     #           * access to python debugging via flask
@@ -121,7 +121,7 @@ class BaseConfig(object):
     #
     # Settings file name.
     #
-    SETTINGS = SERVICE_NAME +'.conf'
+    SETTINGS = SERVICE_NAME + '.conf'
     #
     # Number of threads used in queued commands.  0 = use as many as available.
     #
@@ -165,7 +165,7 @@ class BaseConfig(object):
     #
     # Binaries.
     #
-    FASTTREE_EXE = 'FastTree-'+SERVICE_NAME
+    FASTTREE_EXE = 'FastTree-' + SERVICE_NAME
     RAXML_EXE = 'raxmlHPC'
     #
     # Current run.
@@ -253,7 +253,7 @@ class DevelopmentConfig(BaseConfig):
     RQ_ASYNC = False
     ENVIRONMENT_DUMP = True
     # Running synchronous--no need to start queues.
-    SUPERVISORD_START_REDIS  = False
+    SUPERVISORD_START_REDIS = False
     SUPERVISORD_START_ALIGNMENT = False
     SUPERVISORD_START_TREEBUILDER = False
     # Use debug config settings
@@ -285,12 +285,13 @@ class AlignerConfig(BaseConfig):
 # the _CONFIGURATION environmental variable.
 #
 config_dict = {
-    'default': SERVICE_NAME +'.config.BaseConfig',
-    'development': SERVICE_NAME +'.config.DevelopmentConfig',
-    'serverOnly': SERVICE_NAME +'.config.ServerOnlyConfig',
-    'treebuilder': SERVICE_NAME +'.config.TreebuilderConfig',
-    'aligner': SERVICE_NAME +'.config.AlignerConfig'
+    'default': SERVICE_NAME + '.config.BaseConfig',
+    'development': SERVICE_NAME + '.config.DevelopmentConfig',
+    'serverOnly': SERVICE_NAME + '.config.ServerOnlyConfig',
+    'treebuilder': SERVICE_NAME + '.config.TreebuilderConfig',
+    'aligner': SERVICE_NAME + '.config.AlignerConfig'
 }
+
 
 def configure_app(app):
     """Configure the app, getting variables and setting up logging.
@@ -298,7 +299,7 @@ def configure_app(app):
     :param app:
     :return:
     """
-    config_name = os.getenv(SERVICE_NAME.upper()+'_MODE', 'default')
+    config_name = os.getenv(SERVICE_NAME.upper() + '_MODE', 'default')
     if config_name not in config_dict:
         print('ERROR -- mode "%s" not known.' % config_name,
               file=sys.stderr)
@@ -308,11 +309,11 @@ def configure_app(app):
     #
     # Do overrides from configuration, if it exists.
     #
-    app.instance_path = os.getenv(SERVICE_NAME.upper()+'_ROOT',
+    app.instance_path = os.getenv(SERVICE_NAME.upper() + '_ROOT',
                                   app.config['ROOT'])
-    pyfile_name = os.getenv(SERVICE_NAME.upper()+'_SETTINGS',
+    pyfile_name = os.getenv(SERVICE_NAME.upper() + '_SETTINGS',
                             app.config['SETTINGS'])
-    pyfile_path = Path(app.instance_path)/'etc'/pyfile_name
+    pyfile_path = Path(app.instance_path) / 'etc' / pyfile_name
     pyfile_dict = {}
     try:
         with pyfile_path.open(mode='rb') as config_file:
@@ -320,11 +321,11 @@ def configure_app(app):
                          'exec'),
                  pyfile_dict)
     except IOError:
-        print('Unable to load configuration file "%s".' %str(pyfile_path))
+        print('Unable to load configuration file "%s".' % str(pyfile_path))
     for internal_key in ['__doc__', '__builtins__']:
         if internal_key in pyfile_dict:
             del pyfile_dict[internal_key]
-    if 'VAR' in pyfile_dict: # VAR is hierarchical special case
+    if 'VAR' in pyfile_dict:  # VAR is hierarchical special case
         for subdir in ['tmp', 'log', 'data', 'userdata']:
             if not subdir.upper() in pyfile_dict:
                 pyfile_dict[subdir.upper()] = pyfile_dict['VAR'] + '/' + subdir
@@ -335,8 +336,8 @@ def configure_app(app):
     # Do overrides from environmental variables.
     #
     for my_envvar, envvar in [(i, i[6:])
-                                 for i in sorted(os.environ)
-                                 if i.startswith(SERVICE_NAME.upper() + '_')]:
+                              for i in sorted(os.environ)
+                              if i.startswith(SERVICE_NAME.upper() + '_')]:
         value = os.environ[my_envvar]
         if value == 'True':
             value = True
@@ -347,7 +348,7 @@ def configure_app(app):
                 value = int(value)
             except ValueError:
                 pass
-        if envvar not in PATHVARS: # paths already configured from envvars
+        if envvar not in PATHVARS:  # paths already configured from envvars
             app.config[envvar] = value
     #
     # Set version and platform (output only, not configurable).
@@ -363,9 +364,10 @@ def configure_app(app):
         app.config['RQ_REDIS_URL'] = "unix://@'" + \
                                      app.config['VAR'] + \
                                      '/run/redis.sock?db=0'
-        app.config['RQ_UNIXSOCKET'] = 'unixsocket %s/run/redis.sock' %(app.config['VAR'])
+        app.config['RQ_UNIXSOCKET'] = 'unixsocket %s/run/redis.sock' % (
+            app.config['VAR'])
     else:
-        app.config['RQ_REDIS_URL'] = 'redis://'+ \
+        app.config['RQ_REDIS_URL'] = 'redis://' + \
                                      app.config['RQ_REDIS_HOST'] + \
                                      ':' +\
                                      str(app.config['RQ_REDIS_PORT']) + \
@@ -382,8 +384,8 @@ def configure_app(app):
                                               '_VAR)s/run/supervisord.sock'
     else:
         app.config['SUPERVISORD_SERVERURL'] = 'http://' + \
-                app.config['SUPERVISORD_HOST'] + ':'+ \
-                str(app.config['SUPERVISORD_PORT'])
+            app.config['SUPERVISORD_HOST'] + ':' + \
+            str(app.config['SUPERVISORD_PORT'])
     #
     # Gunicorn socket type.
     #
@@ -394,21 +396,21 @@ def configure_app(app):
                                 app.config['VAR'] +\
                                 '/run/gunicorn.sock'
             app.config['GUNICORN_URL'] = 'unix://%(ENV_' +\
-                                SERVICE_NAME.upper() +\
-                                '_VAR)s/run/gunicorn.sock'
+                SERVICE_NAME.upper() +\
+                '_VAR)s/run/gunicorn.sock'
             app.config['CURL_ARGS'] = '--unix-socket ' + \
                                       app.config['VAR'] +\
-                                                 '/run/gunicorn.sock'
+                '/run/gunicorn.sock'
             app.config['CURL_URL'] = 'http::'
         else:
             app.config['URL'] = 'http://' + \
-                                app.config['HOST'] + ':'+ \
+                                app.config['HOST'] + ':' + \
                                 str(app.config['PORT'])
-            app.config['GUNICORN_URL'] = app.config['HOST'] + ':'+ \
-                                str(app.config['PORT'])
+            app.config['GUNICORN_URL'] = app.config['HOST'] + ':' + \
+                str(app.config['PORT'])
             app.config['CURL_URL'] = app.config['HOST'] + ':' +\
-                                     str(app.config['PORT'])
-    else: # serve gunicorn to nginx through a socket
+                str(app.config['PORT'])
+    else:  # serve gunicorn to nginx through a socket
         app.config['GUNICORN_UNIX_SOCKET'] = True
         app.config['GUNICORN_URL'] = 'unix://%(ENV_' + \
                                      SERVICE_NAME.upper() + \
@@ -418,8 +420,8 @@ def configure_app(app):
                                 app.config['VAR'] + \
                                 '/run/nginx.sock'
             app.config['NGINX_URL'] = 'unix://' + \
-                                         app.config['VAR'] + \
-                                         '/run/nginx.sock'
+                app.config['VAR'] + \
+                '/run/nginx.sock'
             app.config['CURL_ARGS'] = '--unix-socket ' + \
                                       app.config['VAR'] + \
                                       '/run/nginx.sock'
@@ -429,14 +431,14 @@ def configure_app(app):
                                 app.config['HOST'] + ':' + \
                                 str(app.config['PORT'])
             app.config['NGINX_URL'] = app.config['HOST'] + ':' + \
-                                         str(app.config['PORT'])
+                str(app.config['PORT'])
             app.config['CURL_URL'] = app.config['HOST'] + ':' + \
-                                     str(app.config['PORT'])
+                str(app.config['PORT'])
     #
     # Set queues to be started.
     #
     for queue in app.config['RQ_QUEUES']:
-        if app.config['SUPERVISORD_START_'+queue.upper()]:
+        if app.config['SUPERVISORD_START_' + queue.upper()]:
             app.config['START_QUEUES'].append(queue)
 
 
@@ -447,7 +449,7 @@ def print_config_var(app, var, config_file_obj):
     :param obj:
     :return:
     """
-    if __name__.upper()+'_' + var in os.environ:
+    if __name__.upper() + '_' + var in os.environ:
         source = ' # <- from environment'
     elif var in config_file_obj.__dict__:
         source = ' # <- from config file'

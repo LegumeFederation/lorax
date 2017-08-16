@@ -21,14 +21,15 @@ itsdangerous==0.24        # via flask
 jinja2==2.9.6             # via flask
 markupsafe==1.0           # via jinja2
 meld3==1.0.2
+numpy==1.13.1             # via biopython
 orderedmultidict==0.7.11  # via htpasswd
-prometheus_client==0.0.19
+prometheus-client==0.0.19
 python-dateutil==2.6.1    # via arrow, croniter
 raven[flask]==6.1.0
 redis==2.10.5             # via rq, rq-dashboard
 rq-dashboard==0.3.8
 rq-scheduler==0.7.0       # via flask-rq2
 rq==0.6.0                 # via flask-rq2, rq-dashboard, rq-scheduler
-six==1.10.0               # via python-dateutil
+six==1.10.0               # via orderedmultidict, python-dateutil
 superlance==1.0.0
 werkzeug==0.12.2          # via flask

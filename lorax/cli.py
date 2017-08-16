@@ -42,6 +42,8 @@ All rights reserved.
 #
 # CLI entry point.
 #
+
+
 @click.group(cls=FlaskGroup,
              epilog=AUTHOR + ' <' + EMAIL + '>. ' + COPYRIGHT)
 def cli():
@@ -51,7 +53,7 @@ def cli():
 @cli.command()
 def run():
     """Run a server directly."""
-    from  .logging import configure_logging
+    from .logging import configure_logging
     print(
         'Direct start, use of gunicorn is recommended for production.',
         file=sys.stderr)
@@ -77,16 +79,16 @@ def run():
 def config(var, value, vartype, verbose, delete):
     """Gets, sets, or deletes config variables."""
     config_file_path = Path(current_app.config['ROOT']) / 'etc' /\
-                        current_app.config['SETTINGS']
+        current_app.config['SETTINGS']
     if delete:
         if config_file_path.exists():
-            print('Deleting config file %s.' %(str(config_file_path)))
+            print('Deleting config file %s.' % (str(config_file_path)))
             config_file_path.unlink()
             create_config_file(config_file_path)
             sys.exit(0)
         else:
             print('ERROR--config file %s does not exist.'
-                  %(str(config_file_path)))
+                  % (str(config_file_path)))
             sys.exit(1)
     if value is None:  # No value specified, this is a get.
         config_file_obj = types.ModuleType('config')  # noqa
@@ -116,8 +118,8 @@ def config(var, value, vartype, verbose, delete):
             return
         else:
             var = var.upper()
-            if var.startswith(__name__.upper()+'_'):
-                var = var[len(__name__)+1:]
+            if var.startswith(__name__.upper() + '_'):
+                var = var[len(__name__) + 1:]
             if var in current_app.config:
                 if verbose:
                     print_config_var(current_app, var, config_file_obj)
@@ -130,8 +132,8 @@ def config(var, value, vartype, verbose, delete):
                 sys.exit(1)
     else:  # Must be setting.
         var = var.upper()
-        if var.startswith(__name__.upper()+'_'):
-            var = var[len(__name__)+1:]
+        if var.startswith(__name__.upper() + '_'):
+            var = var[len(__name__) + 1:]
         old_value = None
         if var in current_app.config and vartype is None \
                 and not current_app.config[
@@ -220,10 +222,10 @@ def copy_files(pkg_subdir, out_head, force, notemplate_exts=[]):
         else:
             out_subdir = '/'.join(list(split_dir)[1:])
         out_path = out_head / out_subdir
-        if not out_path.exists() and len(files)>0:
-            print('Creating "%s" directory' %str(out_path))
-            out_path.mkdir(mode=int(current_app.config['DIR_MODE'],8),
-            parents=True)
+        if not out_path.exists() and len(files) > 0:
+            print('Creating "%s" directory' % str(out_path))
+            out_path.mkdir(mode=int(current_app.config['DIR_MODE'], 8),
+                           parents=True)
         #
         # Initialize Jinja2 template engine on this directory.
         #
@@ -245,10 +247,11 @@ def copy_files(pkg_subdir, out_head, force, notemplate_exts=[]):
                 templated = 'from template'
                 template = template_env.get_template(filename)
                 data_string = template.render(current_app.config)
-            outfilename = filename.replace('server', current_app.config['NAME'])
+            outfilename = filename.replace(
+                'server', current_app.config['NAME'])
             file_path = out_path / outfilename
             if file_path.exists() and not force:
-                print('ERROR -- File %s already exists.' %str(file_path) +
+                print('ERROR -- File %s already exists.' % str(file_path) +
                       '  Use --force to overwrite.')
                 sys.exit(1)
             elif file_path.exists() and force:
@@ -257,9 +260,10 @@ def copy_files(pkg_subdir, out_head, force, notemplate_exts=[]):
                 operation = 'Creating'
             with file_path.open(mode='wt') as fh:
                 print('%s file "%s" %s.'
-                      %(operation, str(file_path), templated))
+                      % (operation, str(file_path), templated))
                 fh.write(data_string)
-            if filename.endswith('.sh') or filename == current_app.config['NAME']:
+            if filename.endswith(
+                    '.sh') or filename == current_app.config['NAME']:
                 file_path.chmod(0o755)
 
 
@@ -268,7 +272,7 @@ def copy_files(pkg_subdir, out_head, force, notemplate_exts=[]):
               default=False)
 def create_instance(force):
     """Configures instance files."""
-    copy_files('etc', Path(current_app.config['ROOT'])/'etc', force)
+    copy_files('etc', Path(current_app.config['ROOT']) / 'etc', force)
     copy_files('var', Path(current_app.config['VAR']), force)
     init_filesystem(current_app)
 
@@ -279,11 +283,11 @@ def create_instance(force):
               default=False)
 def set_htpasswd(force):
     """Sets the site password to SECRET_KEY."""
-    htpasswd_file = current_app.config['ROOT']+'/etc/nginx/htpasswd'
+    htpasswd_file = current_app.config['ROOT'] + '/etc/nginx/htpasswd'
     htpasswd_path = Path(htpasswd_file)
     user = current_app.config['NAME']
     password = current_app.config['SECRET_KEY']
-    print('Setting password for user %s to %s. '%(user, password))
+    print('Setting password for user %s to %s. ' % (user, password))
     if not htpasswd_path.exists():
         print('Creating htpasswd file.')
         htpasswd_path.touch()
@@ -295,12 +299,11 @@ def set_htpasswd(force):
             userdb.add(user, password)
         except htpasswd.basic.UserExists:
             if force:
-                print('Updating site password for existing user %s.' %name)
+                print('Updating site password for existing user %s.' % name)
                 userdb.change_password(user, password)
             else:
                 print('ERROR--user %s already exists in htpasswd, use --force.')
                 sys.exit(1)
-
 
 
 @cli.command()
@@ -311,9 +314,7 @@ def create_test_files(force):
     copy_files('test',
                Path('.'),
                force,
-               notemplate_exts=['hmm', 'faa','sh'])
+               notemplate_exts=['hmm', 'faa', 'sh'])
     copy_files('user_conf',
-               Path.home()/'.lorax',
+               Path.home() / '.lorax',
                force)
-
-
