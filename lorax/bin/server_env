@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Launch a command in its own proper environment without relying
 # on environmental variables being pre-defined.

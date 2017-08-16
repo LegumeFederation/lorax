@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # POST a FASTA file as sequence or alignment.
-DOC="
+FASTA_DOC="
 Usage:
       post_FASTA.sh  [-v] TYPE FASTA FAMILY TARGET [CODE]
              where
@@ -47,7 +47,7 @@ source ~/.lorax/lorax_rc
 # Parse arguments
 #
 if [ "$#" -lt 4 ]; then
-	echo "$DOC"
+	echo "$FASTA_DOC"
 	exit 1
 fi
 if [ "$1" == "peptide" ] ; then
@@ -56,17 +56,17 @@ elif [ "$1" == "DNA" ]; then
 	type="DNA"
 else
 	echo "TYPE must be either \"peptide\" or \"DNA\"."
-	echo "$DOC"
+	echo "$FASTA_DOC"
 	exit 1
 fi
 if [ ! -f "$2" ] ; then
 	echo "FASTA must specify a readable sequence file."
-	echo "$DOC"
+	echo "$FASTA_DOC"
 	exit 1
 fi
 if [ -z "$3" ] ; then
 	echo "Must give a FAMILY name."
-	echo "$DOC"
+	echo "$FASTA_DOC"
 	exit 1
 fi
 if [ "$4" == "sequences" ]; then
@@ -75,7 +75,7 @@ elif [ "$4" == "alignment" ]; then
 	target="alignment"
 else
 	echo "TARGET must be either \"sequences\" or \"alignment\"."
-	echo "$DOC"
+	echo "$FASTA_DOC"
 	exit 1
 fi
 if [ -z "${5}" ] ; then

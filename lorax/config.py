@@ -90,7 +90,7 @@ class BaseConfig(object):
     DATA = get_path('DATA', VAR + '/data/')
     USERDATA = get_path('DATA', VAR + '/userdata/')
     #
-    #
+    # Directory/file permissions.
     #
     PROCESS_UMASK = '007'
     DIR_MODE = '770' # Note interaction with process umask
@@ -191,7 +191,6 @@ class BaseConfig(object):
     #
     # nginx defs.
     #
-    NGINX_SERVER_NAME = 'localhost'
     system = platform.system()
     if system == 'Linux':
         NGINX_LISTEN_ARGS = 'deferred'
@@ -206,7 +205,6 @@ class BaseConfig(object):
         NGINX_LISTEN_ARGS = ''
         NGINX_EVENTS = ''
     NGINX_UNIX_SOCKET = False
-
     #
     # gunicorn defs--these will not be used in debugging mode.
     #
@@ -231,7 +229,6 @@ class BaseConfig(object):
     # Monitoring at sentry.io.
     #
     SENTRY_DSN = ''
-    #
     #
     # Logging formatter.  Fields that are defined are:
     #    asctime: Time with too much precision
@@ -285,7 +282,7 @@ class AlignerConfig(BaseConfig):
 
 #
 # Dictionary of configuration levels to be used with
-#  the _CONFIGURATION environmental variable.
+# the _CONFIGURATION environmental variable.
 #
 config_dict = {
     'default': SERVICE_NAME +'.config.BaseConfig',

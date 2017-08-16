@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Test all lorax targets.
 #
 # Usage:
@@ -114,19 +114,17 @@ poll_until_positive() {
    echo " done."
 }
 
-# GET a bad target throws a 404.
+
 echo "testing lorax server on ${LORAX_URL}"
 
+#
+# Test random non-tree targets.
+#
 test_GET /
-
 test_GET /status
-
 test_GET /healthcheck
-
 test_GET /badtarget 404
-
 test_GET /test_exception 500
-
 test_GET /trees/families.json
 
 # Post sequences.
@@ -141,54 +139,34 @@ test_GET /trees/families.json
 # Post an invalid HMM throws a 406.
 ./put_HMM.sh ${verbose_flag} aspartic_peptidases.faa prealigned 406
 
-# Post a valid HMM.
+# Align to an HMM.
 ./put_HMM.sh ${verbose_flag} 59026816.hmm aspartic_peptidases
-
-
 test_GET /trees/aspartic_peptidases/hmmalign
-
 poll_until_positive /trees/aspartic_peptidases/hmmalign/status
-
 test_GET /trees/aspartic_peptidases/alignment
-
 test_GET /trees/aspartic_peptidases/hmmalign/run_log.txt
 
+# Calculate a tree.
 test_GET /trees/aspartic_peptidases/FastTree
-
 poll_until_positive /trees/aspartic_peptidases/FastTree/status
-
 test_GET /trees/aspartic_peptidases/FastTree/tree.nwk
-
 test_GET /trees/aspartic_peptidases/FastTree/tree.xml
-
 test_GET /trees/aspartic_peptidases/FastTree/run_log.txt
 
 # Post superfamily to forbidden name.
 ./post_FASTA.sh ${verbose_flag}  peptide zeama.faa prealigned.FastTree sequences 403
 
-# Post superfamily.
+# Superfamily tests.
 ./post_FASTA.sh ${verbose_flag}  peptide zeama.faa aspartic_peptidases.myseqs sequences
-
-# Test superfamily.
 test_GET /trees/aspartic_peptidases.myseqs/hmmalign_FastTree
-
 poll_until_positive /trees/aspartic_peptidases.myseqs/FastTree/status
-
 test_GET /trees/aspartic_peptidases.myseqs/alignment
-
 test_GET /trees/aspartic_peptidases.myseqs/FastTree/tree.nwk
-
 test_GET /trees/aspartic_peptidases.myseqs/FastTree/tree.xml
-
 test_GET /trees/aspartic_peptidases.myseqs/FastTree/run_log.txt
-
 test_DELETE /trees/aspartic_paptidases.FastTree 403  # forbidden to remove subdirs this way
-
 test_DELETE /trees/aspartic_peptidases.myseqs
 
-#if [ "$_V" -eq 0 ]; then
-# rm -r data/*  # remove data if not verbose
-#fi
 trap - EXIT
 echo "lorax tests completed successfully."
 exit 0

@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # PUT an HMM into an existing family.
-DOC="
+HMM_DOC="
 Usage:
        put_HMM.sh  [-v] HMM FAMILY [CODE]
              where
@@ -42,17 +42,17 @@ fi
 # Parse arguments.
 #
 if [ "$#" -lt 2 ]; then
-	echo "$DOC"
+	echo "$HMM_DOC"
 	exit 1
 fi
 if [ ! -f "$1" ] ; then
 	echo "HMM must specify a readable HMM definition file."
-	echo "$DOC"
+	echo "$HMM_DOC"
 	exit 1
 fi
 if [ -z "$2" ] ; then
 	echo "Must specify a FAMILY name."
-	echo "$DOC"
+	echo "$HMM_DOC"
 	exit 1
 fi
 if [ -z "${3}" ] ; then

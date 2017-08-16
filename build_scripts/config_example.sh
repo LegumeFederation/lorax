@@ -39,7 +39,6 @@ fi
 #${root}/bin/lorax_env lorax config port 58927
 #${root}/bin/lorax_env lorax config sentry_dsn sentrydsnstring
 #${root}/bin/lorax_env lorax config crashmail_email user@example.com
-#${root}/bin/lorax_env lorax config nginx_server_name myhost.example.com
 #
 # Save a copy of the configuration to a time-stamped file.
 #

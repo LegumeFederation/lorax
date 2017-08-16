@@ -17,7 +17,7 @@ ${root}/bin/lorax_env supervisord
 #
 # Sleep for a while, then get the statuses.
 #
-sleep 10
+sleep 20
 ${root}/bin/lorax_env supervisorctl status
 echo "Hopefully you just saw a set of processes with status RUNNING!"
 sleep 5
