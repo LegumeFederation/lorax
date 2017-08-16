@@ -2,7 +2,7 @@
 # Build configuration system.
 set -e # exit on error
 error_exit() {
-   echo "ERROR--unexpected exit from lorax_build.sh script at line:"
+   echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
    echo "   $BASH_COMMAND"
 }
 trap error_exit EXIT

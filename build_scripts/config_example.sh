@@ -23,7 +23,16 @@ fi
 #
 # Installation-specific configurations.  Uncomment and edit as needed.
 #
+#${root}/bin/lorax_env lorax config secret_key mypasswd
 #${root}/bin/lorax_env lorax config user www
+#${root}/bin/lorax_env lorax config group www
+#${root}/bin/lorax_env lorax config data /path/to/data
+#${root}/bin/lorax_env lorax config userdata /path/to/userdata
+#${root}/bin/lorax_env lorax config host myhost.example.com
+#${root}/bin/lorax_env lorax config port 58927
+#${root}/bin/lorax_env lorax config sentry_dsn sentrydsnstring
+#${root}/bin/lorax_env lorax config crashmail_email user@example.com
+#${root}/bin/lorax_env lorax config nginx_server_name myhost.example.com
 #
 # Save a copy of the configuration to a time-stamped file.
 #
@@ -35,4 +44,4 @@ ${root}/bin/lorax_env lorax config > ${root}/${config_filename}
 echo "Creating a configured instance at ${root}."
 ${root}/bin/lorax_env lorax create_instance
 echo "To run the configured instance, issue the command:"
-echo "   ${root}/bin/lorax_env supervisord "
+echo "   lorax_env supervisord "

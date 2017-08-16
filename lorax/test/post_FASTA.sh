@@ -22,6 +22,11 @@ Options:
  environmental variables LORAX_CURL_ARGS and LORAX_CURL_URL
  must be defined.
 "
+set -e
+error_exit() {
+   echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+   echo "   $BASH_COMMAND"
+}
 #
 # Parse option (verbose flag)
 #
@@ -78,6 +83,7 @@ if [ -z "${5}" ] ; then
 else
    code="${5}"
 fi
+trap error_exit EXIT
 #
 # Issue the POST.
 #
@@ -92,12 +98,13 @@ if [ "${status}" -eq "${code}" ]; then
       echo ""
    fi
    rm "$tmpfile"
-   exit 0
 else
    echo "FATAL ERROR--POST of ${2} to ${full_target} returned HTTP code ${status}, expected ${code}."
    echo "Full response is:"
    cat ${tmpfile}
    echo ""
    rm "$tmpfile"
+   trap - EXIT
    exit 1
 fi
+trap - EXIT

@@ -374,6 +374,8 @@ def configure_app(app):
                                      str(app.config['RQ_REDIS_PORT']) + \
                                      '/0'
         app.config['RQ_UNIXSOCKET'] = ''
+    app.config['REDIS_HOST'] = app.config['RQ_REDIS_HOST']
+    app.config['REDIS_PORT'] = app.config['RQ_REDIS_PORT']
     #
     # Supervisord socket type.
     #
@@ -449,9 +451,9 @@ def print_config_var(app, var, config_file_obj):
     :return:
     """
     if __name__.upper()+'_' + var in os.environ:
-        source = ' <- from environment'
+        source = ' # <- from environment'
     elif var in config_file_obj.__dict__:
-        source = ' <- from config file'
+        source = ' # <- from config file'
     else:
         source = ''
     val = app.config[var]

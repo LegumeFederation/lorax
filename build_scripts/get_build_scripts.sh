@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 platform=`uname`
 DOC="""Gets build/configuration scripts for lorax.
 
@@ -15,6 +14,12 @@ Platform:
    is \"$platform\".
 """
 rawsite="https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts"
+error_exit() {
+   echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+   echo "   $BASH_COMMAND"
+}
+trap error_exit EXIT
+set -e
 if [ "$1" == "-n" ]; then
    echo "Not checking for self-updates."
 else
@@ -26,6 +31,7 @@ else
    else
       echo "this file was updated.  Please rerun-it."
       mv get_build_scripts.sh.new get_build_scripts.sh
+      trap - EXIT
       exit 0
    fi
 fi
@@ -42,6 +48,7 @@ elif [[ "$platform" == "Darwin" ]]; then
    platform=mac
 else
    echo "$DOC"
+   trap - EXIT
    exit 1
 fi
 curl -L -s -o lorax_build.sh.new ${rawsite}/lorax_build.sh
@@ -116,4 +123,5 @@ else
    echo "If you do make changes to these files, we recommend that you keep"
    echo "this directory to simplify updates."
 fi
+trap - EXIT
 exit 0

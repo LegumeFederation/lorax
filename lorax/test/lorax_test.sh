@@ -13,7 +13,8 @@
 #
 set -e # exit on errors
 error_exit() {
-  echo "ERROR-unexpected exit of test."
+   echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+   echo "   $BASH_COMMAND"
 }
 trap error_exit EXIT
 #
@@ -65,6 +66,7 @@ test_GET () {
       cat ${tmpfile}
       echo ""
       rm "$tmpfile"
+      trap - EXIT
       exit 1
    fi
 }
@@ -97,6 +99,7 @@ test_DELETE () {
       cat ${tmpfile}
       echo ""
       rm "$tmpfile"
+      trap - EXIT
       exit 1
    fi
 }
@@ -128,15 +131,9 @@ test_GET /trees/families.json
 
 # Post sequences.
 ./post_FASTA.sh ${verbose_flag}  peptide aspartic_peptidases.faa aspartic_peptidases sequences
-if [ "$?" -eq 1 ] ; then
-   exit 1
-fi
 
 # Post non-FASTA file throws a 406.
  ./post_FASTA.sh ${verbose_flag}  peptide 59026816.hmm bad_seqs sequences 406
-if [ "$?" -eq 1 ] ; then
-   exit 1
-fi
 
 # Post alignment.
 ./post_FASTA.sh ${verbose_flag}  peptide aspartic_peptidases_aligned.faa prealigned alignment
@@ -171,7 +168,6 @@ test_GET /trees/aspartic_peptidases/FastTree/run_log.txt
 
 # Post superfamily.
 ./post_FASTA.sh ${verbose_flag}  peptide zeama.faa aspartic_peptidases.myseqs sequences
-
 
 # Test superfamily.
 test_GET /trees/aspartic_peptidases.myseqs/hmmalign_FastTree

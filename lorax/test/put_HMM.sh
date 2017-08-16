@@ -15,6 +15,11 @@ Example:
 #
 # Parse option (verbose flag)
 #
+set -e
+error_exit() {
+   echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+   echo "   $BASH_COMMAND"
+}
 _V=0 
 while getopts "v" OPTION
 do
@@ -27,7 +32,7 @@ done
 #
 # Get environmental variables.
 #
-source ~/lorax/lorax_rc
+source ~/.lorax/lorax_rc
 #
 if [ ! -f "$1" ] ; then
 	echo "Must specify a readable HMM file."
@@ -55,6 +60,7 @@ if [ -z "${3}" ] ; then
 else
    code="${3}"
 fi
+trap error_exit EXIT
 #
 # Issue the PUT.
 #
@@ -69,12 +75,13 @@ if [ "${status}" -eq "${code}" ]; then
       echo ""
    fi
    rm "$tmpfile"
-   exit 0
 else
    echo "FATAL ERROR--PUT of ${1} to ${full_target} returned HTTP code ${status}, expected ${code}."
    echo "Full response is:"
    cat ${tmpfile}
    echo ""
    rm "$tmpfile"
+   trap - EXIT
    exit 1
 fi
+trap - EXIT

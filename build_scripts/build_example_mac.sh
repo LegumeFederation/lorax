@@ -13,7 +13,7 @@ trap error_exit EXIT
 # Configure the build.
 #
 ./lorax_build.sh set top_dir ~
-./lorax_build.sh set bin_dir ~/bin  # dir in PATH where lorax_env is symlinked
+./lorax_build.sh set bin_dir /usr/local/bin  # dir in PATH
 ./lorax_build.sh set directory_version 0.94
 ./lorax_build.sh set var_dir "`./lorax_build.sh root`/var"
 ./lorax_build.sh set tmp_dir "`./lorax_build.sh set var`/tmp"
