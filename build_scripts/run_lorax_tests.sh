@@ -18,7 +18,7 @@ ${root}/bin/lorax_env supervisord
 # Sleep for a while, then get the statuses.
 #
 sleep 10
-${root}/bin/orax_env supervisorctl status
+${root}/bin/lorax_env supervisorctl status
 echo "Hopefully you just saw a set of processes with status RUNNING!"
 sleep 5
 #
@@ -28,7 +28,7 @@ rm -rf test_lorax
 rm -f ~/.lorax/lorax_rc
 mkdir test_lorax
 pushd test_lorax
-echo "Getting a set of test files."
+echo "Getting a set of test files in test_lorax directory."
 ${root}/bin/lorax_env lorax create_test_files
 echo "Running test of lorax server."
 ./lorax_test.sh
