@@ -54,7 +54,8 @@ fi
 curl -L -s -o lorax_build.sh.new ${rawsite}/lorax_build.sh
 curl -L -s -o build_example.sh.new ${rawsite}/build_example_${platform}.sh
 curl -L -s -o config_example.sh.new ${rawsite}/config_example.sh
-for f in lorax_build.sh build_example.sh config_example.sh ; do
+curl -L -s -o run_lorax_tests.sh.new ${rawsite}/run_lorax_tests.sh
+for f in lorax_build.sh build_example.sh config_example.sh run_lorax_tests.sh ; do
    if [ -e ${f} ]; then
       if cmp -s ${f} ${f}.new; then
          rm ${f}.new # no change

@@ -3,6 +3,13 @@
 # Example of lorax configuration. Rename, uncomment, and change to
 # appropriate values for your installation.
 #
+set -e # exit on errors
+error_exit() {
+   echo "ERROR--unexpected exit from configuration script at line:"
+   echo "   $BASH_COMMAND"
+}
+trap error_exit EXIT
+#
 root="`./lorax_build.sh root`"
 var_dir="`./lorax_build.sh set var_dir`"
 log_dir="`./lorax_build.sh set log_dir`"
@@ -42,6 +49,11 @@ ${root}/bin/lorax_env lorax config > ${root}/${config_filename}
 # Create the configured instance.
 #
 echo "Creating a configured instance at ${root}."
-${root}/bin/lorax_env lorax create_instance
+${root}/bin/lorax_env lorax create_instance --force
+passwd="`${root}/bin/lorax_env lorax config secret_key`"
+echo "The configured password is \"${passwd}\";"
+echo "please write it down, because you will need it to access some services."
 echo "To run the configured instance, issue the command:"
 echo "   lorax_env supervisord "
+trap - EXIT
+exit 0
