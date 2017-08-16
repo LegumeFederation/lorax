@@ -13,7 +13,7 @@ trap error_exit EXIT
 #
 root="`./lorax_build.sh root`"
 echo "Running lorax processes."
-${root}/lorax_env supervisord
+${root}/bin/lorax_env supervisord
 #
 # Sleep for a while, then get the statuses.
 #
@@ -27,7 +27,7 @@ sleep 10
 rm -rf test_lorax
 rm -f ~/.lorax/lorax_rc
 pushd test_lorax
-${root}/lorax_env lorax_create_test_files
+${root}/bin/lorax_env lorax_create_test_files
 echo "Running test of lorax server."
 ./lorax_test.sh
 echo "Hopefully you just got the message  \"lorax tests completed successfully\" ."
@@ -37,6 +37,8 @@ popd
 # Clean up.
 #
 echo "Stopping lorax processes."
-${root}/lorax_env supervisorctl stop
+${root}/bin/lorax_env supervisorctl stop
+rm -r test_lorax
+echo "Tests completed successfully."
 trap - EXIT
 exit 0
