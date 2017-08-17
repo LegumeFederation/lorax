@@ -11,6 +11,7 @@ error_exit() {
 trap error_exit EXIT
 #
 root="`./lorax_build.sh root`"
+version="./lorax_build.sh set directory_version"
 var_dir="`./lorax_build.sh set var_dir`"
 log_dir="`./lorax_build.sh set log_dir`"
 tmp_dir="`./lorax_build.sh set tmp_dir`"
@@ -33,8 +34,8 @@ fi
 #${root}/bin/lorax_env lorax config secret_key mypasswd
 #${root}/bin/lorax_env lorax config user www
 #${root}/bin/lorax_env lorax config group www
-#${root}/bin/lorax_env lorax config data /path/to/data
-#${root}/bin/lorax_env lorax config userdata /path/to/userdata
+#${root}/bin/lorax_env lorax config data /usr/local/www/data/lorax/${version}
+#${root}/bin/lorax_env lorax config userdata /persist/lorax/${version}
 #${root}/bin/lorax_env lorax config host myhost.example.com
 #${root}/bin/lorax_env lorax config port 58927
 #${root}/bin/lorax_env lorax config sentry_dsn sentrydsnstring

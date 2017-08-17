@@ -105,6 +105,7 @@ for f in build_example.sh config_example.sh ; do
   fi
 done
 rm -f lorax_build.sh.old build_example.sh.old config_example.sh.old
+set +e
 pypi=`./lorax_build.sh pypi`
 version=`./lorax_build.sh version`
 if [ "$?" -eq 0 ]; then
