@@ -16,11 +16,10 @@
 #      {{NAME}}_userdata Home of user data files (different persistence).
 #      {{NAME}}_user     User to execute the {{NAME}}_env script as.
 #
-export {{NAME}}_root="{{ROOT}}"
-export {{NAME}}_var="{{VAR}}"
-export {{NAME}}_log="{{LOG}}"
-export {{NAME}}_tmp="{{TMP}}"
-export {{NAME}}_data="{{DATA}}"
-export {{NAME}}_userdata="{{USERDATA}}"
-export {{NAME}}_user="{{USER}}"
-
+{{NAME}}_root="{{ROOT}}"
+{{NAME}}_var="{{VAR}}"sssssssfdddddd
+{{NAME}}_tmp="{{TMP}}"
+{{NAME}}_data="{{DATA}}"
+{{NAME}}_userdata="{{USERDATA}}"
+{{NAME}}_user="{{USER}}"
+{{NAME}}_enable="YES"

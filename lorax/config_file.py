@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """Set configuration file from setup.py or server"""
-import secrets
 import string
 import sys
 from datetime import datetime
+if sys.version_info >= (3, 6, 0, 'final', 0):
+    from secrets import choice
+else:
+    from random import choice
 
 DEFAULT_PASSWORD_LENGTH = 12
 DEFAULT_GROUPING = 4
@@ -36,7 +39,7 @@ def generate_random_password(length=DEFAULT_PASSWORD_LENGTH,
     nchars = 0
     password = ''
     while nchars < length:
-        password += secrets.choice(alphabet)
+        password += choice(alphabet)
         nchars += 1
         if grouping and nchars < length and not nchars % grouping:
             password += '-'

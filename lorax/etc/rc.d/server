@@ -7,7 +7,7 @@
 . /etc/rc.subr
 
 name="{{NAME}}"
-rcvar="set_rcvar"
+rcvar="{{NAME}}_enable"
 start_cmd="{{NAME}}_start"
 stop_cmd="{{NAME}}_stop"
 

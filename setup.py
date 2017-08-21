@@ -17,17 +17,19 @@ from distutils.cmd import Command
 import distutils.log as logger
 from os import environ as environ
 import platform
-import secrets
 import shutil
 import string
 import subprocess
 import sys
 from setuptools import setup, find_packages
 from setuptools.command import build_py, develop, install
-
-# restrict to python 3.4 or later
+# Version restrictions and dependencies
 if sys.version_info < (3, 4, 0, 'final', 0):
     raise SystemExit("This package requires python 3.4 or higher.")
+elif sys.version_info >= (3, 6, 0, 'final', 0):
+    from secrets import choice
+else:
+    from random import choice
 from pathlib import Path  # python 3.4
 
 NAME = 'lorax'
@@ -163,7 +165,7 @@ class InstallBinariesCommand(Command):
                 nchars = 0
                 password = ''
                 while nchars < PASSWORD_LENGTH:
-                    password += secrets.choice(alphabet)
+                    password += choice(alphabet)
                     nchars += 1
                 print('SECRET_KEY = "%s" # set at install time' % (password),
                       file=config_fh)
