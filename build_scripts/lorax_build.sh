@@ -41,6 +41,13 @@ Variables (accessed by set command):
               nginx - The nginx version string.
 """
 # Helper functions.
+set_value() {
+   if [ ! -e ${confdir} ]; then
+      >&2 echo "Making ${confdir} directory."
+      mkdir -p ${confdir}
+   fi
+   echo "$2" > ${confdir}/${1}
+}
 get_value() {
   if [ -e ${confdir}/${1} ]; then
     cat ${confdir}/${1}
@@ -323,12 +330,7 @@ Usage:
       exit 1
     fi
   elif [ "$#" -eq 2 ]; then # set
-    if [ ! -e ${confdir} ]; then
-      trap - EXIT
-      >&2 echo "Making ${confdir} directory."
-      mkdir -p ${confdir}
-    fi
-    echo "$2" > ${confdir}/${1}
+    set_value $1 $2
   else
     trap - EXIT
     >&2 echo "$SET_DOC"
