@@ -11,7 +11,7 @@ error_exit() {
 trap error_exit EXIT
 #
 root="`./lorax_build.sh root`"
-version="./lorax_build.sh set directory_version"
+version="`./lorax_build.sh set directory_version`"
 var_dir="`./lorax_build.sh set var_dir`"
 log_dir="`./lorax_build.sh set log_dir`"
 tmp_dir="`./lorax_build.sh set tmp_dir`"
@@ -36,9 +36,10 @@ fi
 #${root}/bin/lorax_env lorax config group www
 #${root}/bin/lorax_env lorax config data /usr/local/www/data/lorax/${version}
 #${root}/bin/lorax_env lorax config userdata /persist/lorax/${version}
-#${root}/bin/lorax_env lorax config host myhost.example.com
+#${root}/bin/lorax_env lorax config host 127.0.0.1
+#${root}/bin/lorax_env lorax config server_name localhost
 #${root}/bin/lorax_env lorax config port 58927
-#${root}/bin/lorax_env lorax config sentry_dsn sentrydsnstring
+#${root}/bin/lorax_env lorax config sentry_dsn https://MYDSN@sentry.io/lorax
 #${root}/bin/lorax_env lorax config crashmail_email user@example.com
 #
 # Save a copy of the configuration to a time-stamped file.
@@ -50,10 +51,16 @@ ${root}/bin/lorax_env lorax config > ${root}/${config_filename}
 #
 echo "Creating a configured instance at ${root}."
 ${root}/bin/lorax_env lorax create_instance --force
+#
+# Set the password for restricted parts of the site.
+#
 passwd="`${root}/bin/lorax_env lorax config secret_key`"
-echo "The configured password is \"${passwd}\";"
+echo "Setting the http password to \"${passwd}\";"
 echo "please write it down, because you will need it to access some services."
+${root}/bin/lorax_env set_htpasswd --force
 echo "To run the configured instance, issue the command:"
 echo "   lorax_env supervisord "
+echo "To run the test suite, issue the command:"
+echo "   ./run_lorax_tests.sh"
 trap - EXIT
 exit 0

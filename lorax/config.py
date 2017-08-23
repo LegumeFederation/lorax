@@ -103,6 +103,7 @@ class BaseConfig(object):
     DEBUG = False
     PORT = 58927
     HOST = '127.0.0.1'
+    SERVER_NAME = 'localhost'
     #
     # Create a logfile.
     #
@@ -375,6 +376,7 @@ def configure_app(app):
         app.config['RQ_UNIXSOCKET'] = ''
     app.config['REDIS_HOST'] = app.config['RQ_REDIS_HOST']
     app.config['REDIS_PORT'] = app.config['RQ_REDIS_PORT']
+    app.config['REDIS_URL'] = app.config['RQ_REDIS_URL']
     #
     # Supervisord socket type.
     #
