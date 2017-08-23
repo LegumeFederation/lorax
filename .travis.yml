@@ -10,7 +10,7 @@ before_install:
    - ./lorax_build.sh set directory_version 0.94
    - ./lorax_build.sh set var_dir ${root_dir}/var
    - ./lorax_build.sh set tmp_dir ${root_dir}/var/tmp
-   - ./lorax_build.sh set log_dir ${root_dir/var/log"
+   - ./lorax_build.sh set log_dir ${root_dir/var/log
    - ./lorax_build.sh set make make
    - ./lorax_build.sh set cc gcc
    - ./lorax_build.sh set hmmer 3.1b2

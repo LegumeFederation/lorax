@@ -4,11 +4,23 @@ and phylogenetic trees for genes and gene families.  Under the hood, lorax uses
 alignments, `RQ`_ to queue long calculations, and `Flask`_ to serve up results.
 
 
-.. image:: https://img.shields.io/pypi/v/lorax.svg   :target:
-.. image:: https://img.shields.io/pypi/l/lorax.svg   :target:
-.. image:: https://img.shields.io/pypi/pyversions/lorax.svg   :target:
-.. image:: https://img.shields.io/pypi/status/lorax.svg   :target:
-.. image:: https://img.shields.io/github/commits-since/LegumeFederation/lorax/0.92.svg   :target:
+.. image:: https://img.shields.io/pypi/v/lorax.svg
+    :target: https://img.shields.io/pypi/v/lorax.svg
+
+.. image:: https://img.shields.io/pypi/l/lorax.svg
+    :target: https://img.shields.io/pypi/l/lorax.svg
+
+.. image:: https://img.shields.io/pypi/pyversions/lorax.svg
+    :target: https://img.shields.io/pypi/pyversions/lorax.svg
+
+.. image:: https://img.shields.io/pypi/status/lorax.svg
+    :target: https://img.shields.io/pypi/status/lorax.svg
+
+.. image:: https://img.shields.io/github/commits-since/LegumeFederation/lorax/0.92.svg
+    :target: https://img.shields.io/github/commits-since/LegumeFederation/lorax/0.92.svg
+
+.. image:: https://secure.travis-ci.org/joelb123/lorax.png
+    :target: http://travis-ci.org/joelb123/lorax
 
 :Homepage: `Lorax Homepage`_
 :Download: `lorax on PyPI`_
