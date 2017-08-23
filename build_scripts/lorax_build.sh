@@ -194,7 +194,9 @@ elif [ "$1" == "link_python" ]; then
    fi
 elif [ "$1" == "pip" ]; then
    root="`get_value root_dir`"
-   export PATH="${root}/bin:${PATH}"
+   if [[ ":$PATH:" != *"${root}:"* ]]; then
+      export PATH="${root}/bin:${PATH}"
+   fi
    cd $root # src/ directory is left behind by git
    pip install -U setuptools
    pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'

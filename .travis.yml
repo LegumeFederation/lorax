@@ -4,6 +4,8 @@ python:
 before_install:
    - curl -L -o get_build_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_build_scripts.sh
    - bash get_build_scripts.sh
+   - ./lorax_build.sh set root_dir `python -c 'import sys;print(sys.prefix)'`
+   - ./lorax_build.sh set directory_
 install:
    - ./lorax_build.sh pip
    - FastTree-lorax
