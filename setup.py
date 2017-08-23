@@ -52,7 +52,8 @@ class BuildCBinaryCommand(Command):
     user_options = [
         # The format is (long option, short option, description).
         ('cc=', None, 'path to c compiler'),
-        ('cflags=', None, 'CFLAGS for compiler in use')
+        ('cflags=', None, 'CFLAGS for compiler in use'),
+        ('libs=', None, 'Library options')
     ]
 
     def initialize_options(self):
@@ -62,26 +63,31 @@ class BuildCBinaryCommand(Command):
         if system == 'Linux':
             self.cc = 'gcc'
             self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' + \
-                          ' -O3 -march=native -DOPENMP -fopenmp -lm'
+                          ' -O3 -march=native -DOPENMP -fopenmp
+            self.libs = '-lm'
         elif system == 'Darwin':
             self.cc = 'gcc'
             self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' + \
-                          ' -O3 -march=native -DOPENMP -fopenmp -lm'
+                          ' -O3 -march=native -DOPENMP -fopenmp'
+            self.libs = '-lm'
         elif system.endswith('BSD'):
             self.cc = 'clang'
             self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' + \
-                          ' -O3 -march=native -lm'
+                          ' -O3 -march=native'
+            self.libs = '-lm'
         else:
             logger.warning(
                 'Unrecognized system, using conservative default CFLAGS')
             self.cc = 'gcc'
-            self.cflags = '-DUSE_DOUBLE -lm'
+            self.cflags = '-DUSE_DOUBLE'
+            self.libs = '-lm'
 
     def finalize_options(self):
         """Post-process options."""
         assert shutil.which(self.cc) is not None, (
             'C compiler %s is not found on path.' % self.cc)
         self.cflag_list = self.cflags.split()
+        self.lib_list = self.libs.split()
 
     def run(self):
         """Build C binary."""
@@ -97,7 +103,8 @@ class BuildCBinaryCommand(Command):
         command = [shutil.which(self.cc)] + \
             self.cflag_list + ['-o',
                                '../bin/' + BINARY_NAME,
-                               C_NAME + '-' + C_VERSION + '.c']
+                               C_NAME + '-' + C_VERSION + '.c'] + \
+            self.lib_list
         logger.info('  %s' % (' '.join(command)))
         pipe = subprocess.Popen(command,
                                 cwd=NAME + '/' + C_NAME.lower(),
