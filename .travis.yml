@@ -2,16 +2,17 @@ language: python
 python:
    - "3.5"
 before_install:
-   - echo in_before_install
    - curl -L -o get_build_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_build_scripts.sh
    - bash get_build_scripts.sh
 install:
-   - pip install -U setuptools
-   - pip install -r requirements.txt
-   - pip install .
+   - ./lorax_build.sh pip
+   - FastTree-lorax
 before_script:
    - lorax_env lorax create_instance
 script:
    - lorax_env lorax create_test_files
+   - lorax_env supervisord
+   - sleep 5
+   - echo "done"
 
 

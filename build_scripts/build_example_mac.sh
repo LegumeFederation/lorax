@@ -12,10 +12,10 @@ trap error_exit EXIT
 #
 # Configure the build.
 #
-./lorax_build.sh set top_dir ~
+./lorax_build.sh set top_dir ~/lorax-0.94
 ./lorax_build.sh set bin_dir /usr/local/bin  # dir in PATH
 ./lorax_build.sh set directory_version 0.94
-./lorax_build.sh set var_dir "`./lorax_build.sh root`/var"
+./lorax_build.sh set var_dir "`./lorax_build.sh set root_dir`/var"
 ./lorax_build.sh set tmp_dir "`./lorax_build.sh set var_dir`/tmp"
 ./lorax_build.sh set log_dir "`./lorax_build.sh set var_dir`/log"
 ./lorax_build.sh set make make
@@ -43,12 +43,12 @@ trap error_exit EXIT
 #
 ./lorax_build.sh link_python
 ./lorax_build.sh pip
-./lorax_build.sh make_link
+./lorax_build.sh link_lorax_env
 #
 # Test to make sure it runs.
 #
 echo "Testing lorax installation."
-./lorax_build.sh version > `./lorax_build.sh root`/version
+./lorax_build.sh version > `./lorax_build.sh set root_dir`/version
 echo "Installation was successful."
 echo "You should now proceed with configuring lorax."
 trap - EXIT

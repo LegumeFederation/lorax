@@ -12,7 +12,7 @@ trap error_exit EXIT
 #
 # Configure the build.
 #
-./lorax_build.sh set top_dir /usr/local/www
+./lorax_build.sh set root_dir /usr/local/www/lorax-0.94
 ./lorax_build.sh set bin_dir ~/bin  # dir in PATH where lorax_env is symlinked
 ./lorax_build.sh set directory_version 0.94
 ./lorax_build.sh set var_dir /var/lorax/0.94
@@ -45,12 +45,12 @@ trap error_exit EXIT
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 ./lorax_build.sh pip 
-./lorax_build.sh make_link
+./lorax_build.sh link_lorax_env
 #
 # Test to make sure it runs.
 #
 echo "Testing lorax installation."
-./lorax_build.sh version > `./lorax_build.sh root`/version
+./lorax_build.sh version > `./lorax_build.sh set root_dir`/version
 echo "Installation was successful."
 echo "You should now proceed with configuring lorax."
 trap - EXIT

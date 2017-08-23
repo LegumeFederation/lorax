@@ -15,19 +15,18 @@ Usage:
         $scriptname COMMAND [COMMAND_OPTIONS]
 
 Commands:
-       root - Print the root directory.
-  make_link - Link the ${pkg}_env file to bin_dir for convenience.
-  make_dirs - Create needed directories in ${pkg} root directory.
-link_python - Create python and pip links.
-    install - Install a binary package.
-        pip - Do pip installations.
-       pypi - Get latest pypi version.
-        set - Set/print configuration variables.
-      shell - Run a shell in installation environment.
-    version - Get installed lorax version.
+ link_lorax_env - Link the ${pkg}_env file to bin_dir for convenience.
+      make_dirs - Create needed directories in ${pkg} root directory.
+    link_python - Create python and pip links.
+        install - Install a binary package.
+            pip - Do pip installations.
+           pypi - Get latest pypi version.
+            set - Set/print configuration variables.
+          shell - Run a shell in installation environment.
+        version - Get installed lorax version.
 
 Variables (accessed by set command):
-            top_dir - directory above the root directory.
+           root_dir - Path to the root directory.
   directory_version - ${pkg} version for directory naming purposes.
             bin_dir - A writable directory in PATH for script links.
              python - The python version string.
@@ -56,11 +55,6 @@ get_value() {
     >&2 echo "ERROR--value for $1 variable not found."
     exit 1
   fi
-}
-get_root() {
-  top_dir=`get_value top_dir`
-  directory_version=`get_value directory_version`
-  echo "${top_dir}/${pkg}-${directory_version}"
 }
 # Installation functions.
 install_python() {
@@ -161,10 +155,8 @@ if [ "$#" -eq 0 ]; then
    trap - EXIT
    >&2 echo "$TOP_DOC"
    exit 1
-elif [ "$1" == "root" ]; then
-   get_root
-elif [ "$1" == "make_link" ]; then
-   root=`get_root`
+elif [ "$1" == "link_lorax_env" ]; then
+   root=`get_value root_dir`
    bin_dir=`get_value bin_dir`
    echo "linking ${pkg}_env to ${bin_dir}"
    if [ ! -e ${bin_dir} ]; then
@@ -176,7 +168,7 @@ elif [ "$1" == "make_link" ]; then
    fi
    ln -s  ${root}/bin/${pkg}_env ${bin_dir}
 elif [ "$1" == "make_dirs" ]; then
-   root=`get_root`
+   root=`get_value root_dir`
    var=`get_value var_dir`
    tmp=`get_value tmp_dir`
    log=`get_value log_dir`
@@ -188,7 +180,7 @@ elif [ "$1" == "make_dirs" ]; then
    mkdir -p ${tmp}/nginx
    mkdir -p ${log}/nginx
 elif [ "$1" == "link_python" ]; then
-   root=`get_root`
+   root=`get_value root_dir`
    root_bin="${root}/bin"
    python_version=`get_value python`
    cd $root_bin
@@ -201,14 +193,14 @@ elif [ "$1" == "link_python" ]; then
       ln -s pip${python_version%%.*} pip
    fi
 elif [ "$1" == "pip" ]; then
-   root="`get_root`"
+   root="`get_value root_dir`"
    export PATH="${root}/bin:${PATH}"
    cd $root # src/ directory is left behind by git
    pip install -U setuptools
    pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    pip install -U lorax
 elif [ "$1" == "shell" ]; then
-   root="`get_root`"
+   root="`get_value root_dir`"
    export PATH="${root}/bin:${PATH}"
    trap - EXIT
    set +e
@@ -223,7 +215,7 @@ elif [ "$1" == "version" ]; then
    set +e
    trap - EXIT
    version="Not installed"
-   root=`get_root`
+   root=`get_value root_dir`
    if [ "$?" -eq 0 ]; then
       lorax_env_path="${root}/bin/lorax_env"
       if [ -e $lorax_env_path ]; then
@@ -283,12 +275,12 @@ Packages:
       >&2 echo "$INSTALL_DOC"
       exit 1
   fi
-  root=`get_root`
+  root=`get_value root_dir`
   cc=`get_value cc`
   commandlist="python raxml hmmer redis nginx"
   case $commandlist in
     *"$1"*)
-       install_$1 `get_value $1` `get_root` `get_value cc` `get_value make`
+       install_$1 `get_value $1` `get_value root_dir` `get_value cc` `get_value make`
        ;;
     $commandlist)
        trap - EXIT

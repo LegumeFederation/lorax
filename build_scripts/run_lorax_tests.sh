@@ -11,7 +11,7 @@ trap error_exit EXIT
 #
 # Run lorax.
 #
-root="`./lorax_build.sh root`"
+root="`./lorax_build.sh set root`"
 echo "Running lorax processes."
 ${root}/bin/lorax_env supervisord
 #
