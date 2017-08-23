@@ -4,8 +4,19 @@ python:
 before_install:
    - curl -L -o get_build_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_build_scripts.sh
    - bash get_build_scripts.sh
-   - ./lorax_build.sh set root_dir `python -c 'import sys;print(sys.prefix)'`
-   - ./lorax_build.sh set directory_
+   - export root_dir=`python -c 'import sys;print(sys.prefix)'`
+   - echo "$root_dir"
+   - ./lorax_build.sh set root_dir $root_dir
+   - ./lorax_build.sh set directory_version 0.94
+   - ./lorax_build.sh set var_dir ${root_dir}/var
+   - ./lorax_build.sh set tmp_dir ${root_dir}/var/tmp
+   - ./lorax_build.sh set log_dir ${root_dir/var/log"
+   - ./lorax_build.sh set make make
+   - ./lorax_build.sh set cc gcc
+   - ./lorax_build.sh set hmmer 3.1b2
+   - ./lorax_build.sh set all
+   - ./lorax_build.sh make_dirs
+   - ./lorax_build.sh install hmmer
 install:
    - ./lorax_build.sh pip
    - FastTree-lorax
