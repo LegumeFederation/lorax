@@ -57,7 +57,7 @@ ${root}/bin/lorax_env lorax create_instance --force
 passwd="`${root}/bin/lorax_env lorax config secret_key`"
 echo "Setting the http password to \"${passwd}\";"
 echo "please write it down, because you will need it to access some services."
-${root}/bin/lorax_env set_htpasswd --force
+${root}/bin/lorax_env lorax set_htpasswd --force
 echo "To run the configured instance, issue the command:"
 echo "   lorax_env supervisord "
 echo "To run the test suite, issue the command:"

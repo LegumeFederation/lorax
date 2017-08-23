@@ -93,12 +93,12 @@ class BuildCBinaryCommand(Command):
         if (BUILD_PATH / BINARY_NAME).exists():
             logger.info(C_NAME + ' binary already built')
             return
-        logger.info('compiling ' + C_NAME + ' v' + C_VERSION + ' binary')
+        logger.info('compiling ' + C_NAME + ' v' + C_VERSION + ' binary using')
         command = [shutil.which(self.cc)] + \
             self.cflag_list + ['-o',
                                '../bin/' + BINARY_NAME,
                                C_NAME + '-' + C_VERSION + '.c']
-        logger.debug('  %s' % (' '.join(command)))
+        logger.info('  %s' % (' '.join(command)))
         pipe = subprocess.Popen(command,
                                 cwd=NAME + '/' + C_NAME.lower(),
                                 stdout=subprocess.PIPE,

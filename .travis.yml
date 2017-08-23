@@ -1,12 +1,12 @@
 language: python
 python:
-   - "3.6"
+   - "3.5"
 before_install:
+   - echo in_before_install
    - curl -L -o get_build_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_build_scripts.sh
    - bash get_build_scripts.sh
 install:
    - pip install -U setuptools
-   - pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    - pip install -r requirements.txt
    - pip install .
 before_script:
