@@ -15,6 +15,7 @@ before_install:
    - ./lorax_build.sh install hmmer
 install:
    - pip install -U setuptools
+  -  pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    - pip install .
    - FastTree-lorax
 before_script:
