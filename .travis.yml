@@ -17,15 +17,12 @@ install:
    - pip install -U setuptools
    - pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    - pip install .
-   - FastTree-lorax
 before_script:
    - lorax_env lorax create_instance
-   - lorax_env create_test_files
+   - lorax_env lorax create_test_files
 script:
    - lorax_env supervisord
    - sleep 5
    - lorax_env supervisorctl status
    - ./lorax_test.sh
    - echo "done"
-
-
