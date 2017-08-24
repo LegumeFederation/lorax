@@ -24,6 +24,7 @@ before_script:
 script:
    - lorax_env supervisord
    - sleep 10
+   - sleep 10
    - lorax_env supervisorctl status
    - ./lorax_test.sh
    - echo "done"
