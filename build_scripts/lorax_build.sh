@@ -9,12 +9,15 @@ trap error_exit EXIT
 script_name=`basename "${BASH_SOURCE}"`
 pkg="${script_name%_build.sh}"
 confdir=~/.${pkg}/build
+version="0.94"
+platform=`uname`
 TOP_DOC="""Builds and installs ${pkg} components.
 
 Usage:
         $scriptname COMMAND [COMMAND_OPTIONS]
 
 Commands:
+           init - Set system-specific defaults for the build.
  link_lorax_env - Link the ${pkg}_env file to bin_dir for convenience.
       make_dirs - Create needed directories in ${pkg} root directory.
     link_python - Create python and pip links.
@@ -155,6 +158,54 @@ if [ "$#" -eq 0 ]; then
    trap - EXIT
    >&2 echo "$TOP_DOC"
    exit 1
+elif [ "$1" == "init" ]; then
+   set_value root_dir ~/lorax-${version}
+   set_value directory_version ${version}
+   set_value var_dir "`get_value root_dir`/var"
+   set_value tmp_dir "`get_value var_dir`/tmp"
+   set_value log_dir "`get_value var_dir`/log"
+   set_value python 3.6.2
+   set_value hmmer 3.1b2
+   set_value raxml 8.2.11
+   set_value redis 4.0.1
+   set_value nginx 1.13.4
+   if [[ "$platform" == "Linux" ]]; then
+      echo "Platform is linux."
+      set_value bin_dir ~/bin
+      set_value platform linux
+      set_value make make
+      set_value cc gcc
+      set_value redis_cflags ""
+      set_value raxml_model .SSE3.PTHREADS.gcc
+      set_value raxml_binsuffix -PTHREADS-SSE3
+   elif [[ "$platform" == *"BSD" ]]; then
+      echo "Platform is bsd."
+      set_value platform bsd
+      set_value bin_dir ~/bin
+      set_value make gmake
+      set_value cc clang
+      set_value raxml_model .SSE3.PTHREADS.gcc
+      set_value raxml_binsuffix -PTHREADS-SSE3
+      set_value redis_cflags -DAF_LOCAL=AF_UNIX
+   elif [[ "$platform" == "Darwin" ]]; then
+      echo "Platform is mac.  You must have XCODE installed."
+      set_value platform mac
+      set_value bin_dir /usr/local/bin
+      set_value make make
+      set_value cc clang
+      set_value raxml_model .SSE3.PTHREADS.mac
+      set_value raxml_binsuffix -PTHREADS-SSE3
+      set_value redis_cflags ""
+   else
+      echo "WARNING--Unknown platform ${platform}, pretending it is linux."
+      set_value platform linux
+      set_value bin_dir ~/bin
+      set_value make make
+      set_value cc gcc
+      set_value redis_cflags ""
+      set_value raxml_model .AVX2.PTHREADS.gcc
+      set_value raxml_binsuffix -PTHREADS-AVX2
+   fi
 elif [ "$1" == "link_lorax_env" ]; then
    root=`get_value root_dir`
    bin_dir=`get_value bin_dir`
@@ -269,27 +320,32 @@ Packages:
        hmmer - HMMer alignment.
        redis - redis database.
        nginx - nginx web proxy server.
-
-     
 """
-  if [ "$#" -ne 1 ]; then #doc
-      trap - EXIT 
-      >&2 echo "$INSTALL_DOC"
-      exit 1
-  fi
   root=`get_value root_dir`
   cc=`get_value cc`
+  make=`get_value make`
   commandlist="python raxml hmmer redis nginx"
-  case $commandlist in
-    *"$1"*)
-       install_$1 `get_value $1` `get_value root_dir` `get_value cc` `get_value make`
-       ;;
-    $commandlist)
-       trap - EXIT
-       >&2 echo  "ERROR--unrecognized package $1"
-       exit 1
-       ;;
-  esac
+  if [ "$#" -eq 0 ]; then # install the whole list
+      for package in commandlist; do
+         version=`get_value $package`
+         if [ "$version" == "system" ]; then
+           echo "System version of $package will be used, skipping build."
+         else
+           install_$package ${version} ${root} ${cc} ${make}
+         fi
+      done
+  else
+     case $commandlist in
+        *"$1"*)
+           install_$1 `get_value $1` ${root} ${cc} ${make}
+        ;;
+        $commandlist)
+          trap - EXIT
+          >&2 echo  "ERROR--unrecognized package $1"
+          exit 1
+        ;;
+      esac
+   fi
 elif [ "$1" == "set" ]; then
   shift 1
   SET_DOC="""Sets/displays key/value pairs for the $pkg build system.
@@ -297,8 +353,8 @@ elif [ "$1" == "set" ]; then
 Usage:
    $scriptname set KEY [VALUE]
 
-   if KEY is "all", all values will be set.
-   
+Arguments:
+   if KEY is \"all\", all values will be set.
    If VALUE is present, the value will be set.
    If VALUE is absent, the current value will be displayed.
 """
@@ -313,11 +369,11 @@ Usage:
         echo -e "       key         \t       value"
         echo -e "-------------------\t------------------"
         for key in `ls ${confdir}`; do
-          value=`cat ${confdir}/${key}`
+          value=`get_value ${key}`
         printf '%-20s\t%s\n' ${key} ${value} 
       done
     elif [ -e ${confdir}/${1} ]; then
-      cat ${confdir}/${1}
+      echo `get_value $1`
     else
       trap - EXIT
       >&2 echo "${1} has not been set."

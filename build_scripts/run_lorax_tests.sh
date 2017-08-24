@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
+DOC="""
 #
-# Test lorax installation.
+# You are about to run a short test of the lorax installation.
+# This should take about 2 minutes on modest hardware.
+# Interrupt this script if you do not wish to test at this time.
 #
+"""
+echo "$DOC"
+sleep 2
 set -e # exit on errors
 error_exit() {
    echo "ERROR--unexpected exit from test script at line:"

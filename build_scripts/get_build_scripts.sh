@@ -40,20 +40,8 @@ fi
 # Now check for updates to other files, in an edit-aware way.
 #
 updates=0
-platform=`uname`
-if [[ "$platform" == "Linux" ]]; then
-   platform=linux
-elif [[ "$platform" == *"BSD" ]]; then
-   platform=bsd
-elif [[ "$platform" == "Darwin" ]]; then
-   platform=mac
-else
-   echo "$DOC"
-   trap - EXIT
-   exit 1
-fi
 curl -L -s -o lorax_build.sh.new ${rawsite}/lorax_build.sh
-curl -L -s -o build_example.sh.new ${rawsite}/build_example_${platform}.sh
+curl -L -s -o build_example.sh.new ${rawsite}/build_example.sh
 curl -L -s -o config_example.sh.new ${rawsite}/config_example.sh
 curl -L -s -o run_lorax_tests.sh.new ${rawsite}/run_lorax_tests.sh
 for f in lorax_build.sh build_example.sh config_example.sh run_lorax_tests.sh ; do

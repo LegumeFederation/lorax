@@ -114,7 +114,8 @@ class BuildCBinaryCommand(Command):
         stderr_messages = pipe.stderr.read().decode('UTF-8')
         if stderr_messages != '':
             logger.error(stderr_messages)
-            raise SystemError("Unable to compile C binary.")
+            raise SystemError("Unable to compile C binary with command %s.",
+                              command)
         if platform.system() == 'Darwin':
             logger.info('fixing OpenMP file path in MacOS executable')
             gomp_name = 'libgomp.1.dylib'

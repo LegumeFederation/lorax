@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
+DOC="""
 #
-# Example of lorax configuration. Rename, uncomment, and change to
-# appropriate values for your installation.
+#  This script configures lorax and creates an instance ready to run
+#  on localhost at the default lorax port. You should interrupt and edit this
+#  script if one or more of the following is true:
+#     * you wish to use a non-default path for DATA or USERDATA
+#     * you wish to deploy lorax at a real IP address or non-default port
+#     * you wish to enable monitoring services (crashmail, sentry)
 #
+"""
+echo "$DOC"
+sleep 2
 set -e # exit on errors
 error_exit() {
    echo "ERROR--unexpected exit from configuration script at line:"
@@ -29,7 +37,8 @@ if [ "$tmp_dir" != "${var_dir}/tmp" ]; then
    ${root}/bin/lorax_env lorax config tmp $tmp_dir
 fi
 #
-# Installation-specific configurations.  Uncomment and edit as needed.
+# Installation-specific configurations with some interesting non-default
+# values.  Uncomment and edit as needed.
 #
 #${root}/bin/lorax_env lorax config secret_key mypasswd
 #${root}/bin/lorax_env lorax config user www
