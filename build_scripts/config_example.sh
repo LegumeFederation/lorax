@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
-DOC="""
-#
-#  This script configures lorax and creates an instance ready to run
-#  on localhost at the default lorax port. You should interrupt and edit this
-#  script if one or more of the following is true:
-#     * you wish to use a non-default path for DATA or USERDATA
-#     * you wish to deploy lorax at a real IP address or non-default port
-#     * you wish to enable monitoring services (crashmail, sentry)
-#
+DOC="""This script configures lorax and creates an instance ready to run.
+You should stop and edit this script if you wish to:
+      * serve at a public IP or non-default port
+      * use a non-default path for DATA or USERDATA
+      * enable monitoring services (crashmail, sentry)
 """
-echo "$DOC"
-sleep 2
+if [ "$1" != "-y" ]; then
+   echo "$DOC"
+   read -p "Do you want to continue? <(y)> " prompt
+   if [ -z "$response" ; then
+      if [ $response != "y" ]; then
+         exit 1
+      fi
+   fi
+fi
 set -e # exit on errors
 error_exit() {
    echo "ERROR--unexpected exit from configuration script at line:"

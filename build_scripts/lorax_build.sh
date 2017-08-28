@@ -267,8 +267,12 @@ elif [ "$1" == "shell" ]; then
 elif [ "$1" == "version" ]; then
    set +e
    trap - EXIT
-   version="Not installed"
-   root=`get_value root_dir`
+   if [ -e ${confdir}/root_dir ]; then
+    root=`cat ${confdir}/${1}`
+  else
+    >&2 echo "${pkg} build has not been configured."
+    exit 1
+  fi
    if [ "$?" -eq 0 ]; then
       lorax_env_path="${root}/bin/lorax_env"
       if [ -e $lorax_env_path ]; then
@@ -326,7 +330,7 @@ Packages:
   make=`get_value make`
   commandlist="python raxml hmmer redis nginx"
   if [ "$#" -eq 0 ]; then # install the whole list
-      for package in commandlist; do
+      for package in $commandlist; do
          version=`get_value $package`
          if [ "$version" == "system" ]; then
            echo "System version of $package will be used, skipping build."

@@ -245,12 +245,7 @@ tests_require = [
     'pytest>=2.8.0'
 ]
 
-extras_require = {
-    'docs': ['Sphinx>=1.4.2'
-             ],
-    'tests': tests_require,
-
-}
+extras_require = dict(docs=['Sphinx>=1.4.2'], tests=tests_require)
 
 extras_require['all'] = []
 for reqs in extras_require.values():

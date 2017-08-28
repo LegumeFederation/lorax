@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
-DOC="""
-#
-#  This script downloads, builds, and installs lorax and its binary dependencies.
-#  You should interrupt and edit this script if you wish to install
-#  lorax to non-default locations or if you intend to use RAxML and you
-#  want to take advantage of AVX or AVX2 hardware.
-#
+DOC="""This script downloads, builds, and installs lorax and its dependencies.
+You should stop and edit this script if you wish to:
+   * install lorax to non-default locations
+   * use RAxML and your system has AVX or AVX2 hardware
 """
-echo "$DOC"
-sleep 2
+if [ "$1" != "-y" ]; then
+   echo "$DOC"
+   read -p "Do you want to continue? <(y)> " prompt
+   if [ -z "$response" ; then
+      if [ $response != "y" ]; then
+         exit 1
+      fi
+   fi
+fi
 set -e
 error_exit() {
   echo "ERROR--unexpected exit from ${BASH_SOURCE} at line"
