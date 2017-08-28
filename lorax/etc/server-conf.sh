@@ -2,11 +2,11 @@
 # before the server is started if those values are not defaults.
 # The values are:
 #
-#      {{NAME.upper()}}_MODE     Global configuration value selector.
-#      {{NAME.upper()}}_SETTINGS Name of configuration file.
-#      {{NAME.upper()}}_VAR      Home of the redis/ and run/ directories.
-#      {{NAME.upper()}}_LOG      Home of the logfiles.
-#      {{NAME.upper()}}_TMP      Home of the tmp files.
+#    {{NAME.upper()}}_MODE       Global configuration value selector.
+#    {{NAME.upper()}}_SETTINGS   Name of configuration file.
+#    {{NAME.upper()}}_VAR        Home of the redis/ and run/ directories.
+#    {{NAME.upper()}}_LOG        Home of the logfiles.
+#    {{NAME.upper()}}_TMP        Home of the tmp files.
 #
 #  All other non-default values are set by the configuration file after the
 #  server has started.

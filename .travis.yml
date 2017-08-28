@@ -23,9 +23,7 @@ before_script:
    - lorax_env lorax create_test_files
 script:
    - lorax_env supervisord
-   - sleep 10
-   - sleep 10
+   - while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
    - lorax_env supervisorctl status
-   - cat ${root_dir}/var/log/nginx/*
-   - ./lorax_test.sh
+   - lorax_env supervisorctl shutdown
    - echo "done"

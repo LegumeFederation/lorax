@@ -41,6 +41,7 @@ Variables (accessed by set command):
               redis - The redis version string.
        redis_cflags - CFLAGS for use in building redis.
               nginx - The nginx version string.
+            version - Installed version.
 """
 # Helper functions.
 set_value() {
@@ -252,6 +253,10 @@ elif [ "$1" == "pip" ]; then
    pip install -U setuptools
    pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    pip install -U lorax
+   lorax_env_path="${root}/bin/lorax_env"
+   lorax_version="`${lorax_env_path} lorax config version`"
+   set_value version $lorax_version
+   echo "lorax version $lorax_version is now installed."
 elif [ "$1" == "shell" ]; then
    root="`get_value root_dir`"
    export PATH="${root}/bin:${PATH}"
@@ -268,28 +273,17 @@ elif [ "$1" == "version" ]; then
    set +e
    trap - EXIT
    if [ -e ${confdir}/root_dir ]; then
-    root=`cat ${confdir}/${1}`
-  else
-    >&2 echo "${pkg} build has not been configured."
-    exit 1
-  fi
-   if [ "$?" -eq 0 ]; then
+    root=`cat ${confdir}/root_dir`
       lorax_env_path="${root}/bin/lorax_env"
       if [ -e $lorax_env_path ]; then
-         version=`${lorax_env_path} lorax config version`
-         if [ "$?" -eq 0 ]; then
-            echo "$version"
-         else
-            echo "${pkg} is not runnable"
-            exit 1
-         fi
+         echo "`${lorax_env_path} lorax config version`"
       else
-         echo "${pkg} is not installed"
-         exit 1
+         >&2 echo "${pkg} package not installed"
+         exit 0
       fi
-   else
-      echo "${pkg} build has not been configured"
-      exit 1
+  else
+    >&2 echo "${pkg} build not configured"
+    exit 0
    fi
 elif [ "$1" == "pypi" ]; then
   set +e

@@ -6,9 +6,9 @@ You should stop and edit this script if you wish to:
 """
 if [ "$1" != "-y" ]; then
    echo "$DOC"
-   read -p "Do you want to continue? <(y)> " prompt
-   if [ -z "$response" ; then
-      if [ $response != "y" ]; then
+   read -p "Do you want to continue? <(y)> " response
+   if [ ! -z "$response" ]; then
+      if [ "$response" != "y" ]; then
          exit 1
       fi
    fi

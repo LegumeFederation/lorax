@@ -7,9 +7,9 @@ You should stop and edit this script if you wish to:
 """
 if [ "$1" != "-y" ]; then
    echo "$DOC"
-   read -p "Do you want to continue? <(y)> " prompt
-   if [ -z "$response" ; then
-      if [ $response != "y" ]; then
+   read -p "Do you want to continue? <(y)> " response
+   if [ ! -z "$response" ]; then
+      if [ "$response" != "y" ]; then
          exit 1
       fi
    fi
@@ -21,7 +21,7 @@ error_exit() {
 }
 trap error_exit EXIT
 #
-root="`./lorax_build.sh root`"
+root="`./lorax_build.sh set root_dir`"
 version="`./lorax_build.sh set directory_version`"
 var_dir="`./lorax_build.sh set var_dir`"
 log_dir="`./lorax_build.sh set log_dir`"

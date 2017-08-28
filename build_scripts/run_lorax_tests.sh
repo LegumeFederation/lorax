@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
-DOC="""
-#
-# You are about to run a short test of the lorax installation.
-# This should take about 2 minutes on modest hardware.
-# Interrupt this script if you do not wish to test at this time.
-#
+DOC="""You are about to run a short test of the lorax installation.
+This should take about 2 minutes on modest hardware.
+Interrupt this script if you do not wish to test at this time.
 """
-echo "$DOC"
-sleep 2
+if [ "$1" != "-y" ]; then
+   echo "$DOC"
+   read -p "Do you want to continue? <(y)> " response
+   if [ ! -z "$response" ]; then
+      if [ "$response" != "y" ]; then
+         exit 1
+      fi
+   fi
+fi
 set -e # exit on errors
 error_exit() {
    echo "ERROR--unexpected exit from test script at line:"
@@ -17,16 +21,15 @@ trap error_exit EXIT
 #
 # Run lorax.
 #
-root="`./lorax_build.sh set root`"
+root="`./lorax_build.sh set root_dir`"
 echo "Running lorax processes."
 ${root}/bin/lorax_env supervisord
 #
-# Sleep for a while, then get the statuses.
+# Wait until nothing is STARTING.
 #
-sleep 10
+while ${root}/bin/lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
 ${root}/bin/lorax_env supervisorctl status
-echo "Hopefully you just saw a set of processes with status RUNNING!"
-sleep 5
+echo "All processes should have status RUNNING."
 #
 # Create the test directory and cd to it.
 #
@@ -39,8 +42,6 @@ ${root}/bin/lorax_env lorax create_test_files
 echo "Running test of lorax server."
 ./lorax_test.sh
 echo ""
-echo "Hopefully you just got the message  \"lorax tests completed successfully\" ."
-sleep 5
 popd
 #
 # Clean up.
