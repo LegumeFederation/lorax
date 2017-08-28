@@ -94,26 +94,19 @@ for f in build_example.sh config_example.sh ; do
   fi
 done
 rm -f lorax_build.sh.old build_example.sh.old config_example.sh.old run_lorax_tests.sh.old
-set +e
 pypi=`./lorax_build.sh pypi`
 version=`./lorax_build.sh version`
-if [ "$?" -eq 0 ]; then
-   if [ "$pypi" == "$version" ]; then
+if [ "version" == "lorax build not configured" ]; then
+   echo "Next run \"./my_build.sh\" to build and configure lorax."
+elif [ "$updates" -eq 1 ]; then
+   echo "Update build/configuration files found, please re-build using"
+   echo "    ./my_build.sh"
+elif [ "$pypi" == "$version" ]; then
       echo "The latest version of lorax (${pypi}) is installed, no need for updates."
-   else
-      echo "You can update from installed version (${version})to latest (${pypi}) with"
+else
+      echo "You can update from installed version (${version}) to latest (${pypi}) with"
       echo "   ./lorax_build.sh pip"
-   fi
-else
-   echo "${version}, but latest version is ${pypi}."
-fi
-if [ "$updates" -eq 0 ]; then
-   echo "No updated build/config files found for $platform platform."
-else
-   echo "Review/edit the commands in my_build.sh and my_config.sh."
-   echo "Then run them to build and configure lorax."
-   echo "If you do make changes to these files, we recommend that you keep"
-   echo "this directory to simplify updates."
+      echo "Then proceed with configuration via ./my_config.sh"
 fi
 trap - EXIT
 exit 0

@@ -17,4 +17,4 @@ export {{NAME.upper()}}_CURL_ARGS="{{CURL_ARGS}}"
 {% endif %}
 export {{NAME.upper()}}_URL="{{URL}}"
 export {{NAME.upper()}}_CURL_URL="{{CURL_URL}}"
-export {{NAME.uppser()}}_SECRET_KEY="{{SECRET_KEY}}"
+export {{NAME.upper()}}_SECRET_KEY="{{SECRET_KEY}}"
