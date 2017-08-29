@@ -438,10 +438,10 @@ def configure_app(app):
             app.config['CURL_URL'] = app.config['HOST'] + ':' + \
                 str(app.config['PORT'])
     #
-    # SERVER_HOST variable--if you get 404's from lorax, it's probably
+    # SERVER_NAME variable--if you get 404's from lorax, it's probably
     # because this wasn't set properly.
     #
-    app.config['SERVER_HOST'] = app.config['NGINX_SERVER_NAME'] + ':' +\
+    app.config['SERVER_NAME'] = app.config['NGINX_SERVER_NAME'] + ':' +\
                                 str(app.config['PORT'])
     #
     # Set queues to be started.
