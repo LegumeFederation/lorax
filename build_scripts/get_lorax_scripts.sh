@@ -26,7 +26,7 @@ if [ "$1" == "-n" ]; then
 else
    printf "Checking for self-update..."
    curl -L -s -o get_${pkg}_scripts.sh.new ${rawsite}/get_${pkg}scripts.sh
-   chmod 755 get_${pkg}scripts.sh.new_
+   chmod 755 get_${pkg}scripts.sh.new
    if cmp -s get_${pkg}_scripts.sh get_${pkg}_scripts.sh.new ; then
       rm get_${pkg}_scripts.sh.new
       echo "not needed."
