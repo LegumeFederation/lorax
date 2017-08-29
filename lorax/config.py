@@ -442,7 +442,7 @@ def configure_app(app):
     # because this wasn't set properly.
     #
     app.config['SERVER_HOST'] = app.config['NGINX_SERVER_NAME'] + ':' +\
-                                app.config['PORT']
+                                str(app.config['PORT'])
     #
     # Set queues to be started.
     #
