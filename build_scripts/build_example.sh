@@ -90,5 +90,6 @@ echo "Doing python installs."
 echo "Testing lorax binary."
 ./lorax_build.sh version > `./lorax_build.sh set root_dir`/version
 echo "Installation was successful."
-echo "You should now proceed with configuring lorax."
+echo "You should now proceed with configuring lorax via the command"
+echo "   ./my_config.sh"
 trap - EXIT
