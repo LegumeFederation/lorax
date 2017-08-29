@@ -10,10 +10,12 @@ before_install:
    - ./lorax_build.sh set var_dir ${root_dir}/var
    - ./lorax_build.sh set tmp_dir ${root_dir}/var/tmp
    - ./lorax_build.sh set log_dir ${root_dir}/var/log
+   - ./lorax_build.sh set python system
+   - ./lorax_build.sh set raxml system
+   - ./lorax_build.sh set redis system
    - ./lorax_build.sh set all
    - ./lorax_build.sh make_dirs
-   - ./lorax_build.sh install hmmer
-   - ./lorax_build.sh install nginx
+   - ./lorax_build.sh install
 install:
    - pip install -U setuptools
    - pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'

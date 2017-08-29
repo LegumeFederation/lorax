@@ -129,7 +129,7 @@ class BuildCBinaryCommand(Command):
             try:
                 subprocess.check_call(['install_name_tool',
                                        '-change',
-                                       '@rpath/' + gomp_name,
+                                       '@rpath/./' + gomp_name,
                                        str(gomp_path),
                                        str(BUILD_PATH / BINARY_NAME)]
                                       )
