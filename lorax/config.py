@@ -102,7 +102,7 @@ class BaseConfig(object):
     #
     DEBUG = False
     PORT = 58927
-    HOST = '127.0.0.1'
+    HOST = 'localhost'
     SERVER_NAME = ''
     #
     # Create a logfile.
@@ -180,7 +180,7 @@ class BaseConfig(object):
     #
     SUPERVISORD_UNIX_SOCKET = True
     SUPERVISORD_PORT = 58928
-    SUPERVISORD_HOST = '127.0.0.1'
+    SUPERVISORD_HOST = 'localhost'
     SUPERVISORD_USER = SERVICE_NAME
     SUPERVISORD_START_REDIS = True
     SUPERVISORD_START_SERVER = True
@@ -362,7 +362,7 @@ def configure_app(app):
     #
     if app.config['REDIS_UNIX_SOCKET']:
         app.config['RQ_REDIS_PORT'] = 0
-        app.config['RQ_REDIS_HOST'] = '127.0.0.1'
+        app.config['RQ_REDIS_HOST'] = 'localhost'
         app.config['RQ_REDIS_URL'] = "unix://@'" + \
                                      app.config['VAR'] + \
                                      '/run/redis.sock?db=0'
@@ -437,6 +437,12 @@ def configure_app(app):
                 str(app.config['PORT'])
             app.config['CURL_URL'] = app.config['HOST'] + ':' + \
                 str(app.config['PORT'])
+    #
+    # SERVER_HOST variable--if you get 404's from lorax, it's probably
+    # because this wasn't set properly.
+    #
+    app.config['SERVER_HOST'] = app.config['NGINX_HOST'] + ':' +\
+                                app.config['PORT']
     #
     # Set queues to be started.
     #
