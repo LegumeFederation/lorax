@@ -215,8 +215,8 @@ elif [ "$1" == "link_lorax_env" ]; then
      echo "Creating binary directory at ${bin_dir}"
      echo "Make sure it is on your PATH."
      mkdir ${bin_dir}
-   elif [ -e ${bin_dir}/${pkg}_env ]; then
-     rm ${bin_dir}/${pkg}_env
+   elif [ -h ${bin_dir}/${pkg}_env ]; then
+     rm -f ${bin_dir}/${pkg}_env
    fi
    ln -s  ${root}/bin/${pkg}_env ${bin_dir}
 elif [ "$1" == "make_dirs" ]; then
