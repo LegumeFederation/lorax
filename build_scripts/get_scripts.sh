@@ -3,7 +3,7 @@ platform=`uname`
 DOC="""Gets build/configuration scripts for lorax.
 
 Usage:
-       bash get_build_scripts.sh [-n]
+       bash get_scripts.sh [-n]
 
 Options:
        -n Do not check for self-updates.
@@ -24,14 +24,14 @@ if [ "$1" == "-n" ]; then
    echo "Not checking for self-updates."
 else
    printf "Checking for self-update..."
-   curl -L -s -o get_build_scripts.sh.new ${rawsite}/get_build_scripts.sh
-   chmod 755 get_build_scripts.sh.new
-   if cmp -s get_build_scripts.sh get_build_scripts.sh.new ; then
-      rm get_build_scripts.sh.new
+   curl -L -s -o get_scripts.sh.new ${rawsite}/get_scripts.sh
+   chmod 755 get_scripts.sh.new
+   if cmp -s get_scripts.sh get_scripts.sh.new ; then
+      rm get_scripts.sh.new
       echo "not needed."
    else
       echo "this file was updated.  Please rerun-it."
-      mv get_build_scripts.sh.new get_build_scripts.sh
+      mv get_scripts.sh.new get_scripts.sh
       trap - EXIT
       exit 0
    fi
