@@ -441,7 +441,7 @@ def configure_app(app):
     # SERVER_HOST variable--if you get 404's from lorax, it's probably
     # because this wasn't set properly.
     #
-    app.config['SERVER_HOST'] = app.config['NGINX_HOST'] + ':' +\
+    app.config['SERVER_HOST'] = app.config['NGINX_SERVER_NAME'] + ':' +\
                                 app.config['PORT']
     #
     # Set queues to be started.
