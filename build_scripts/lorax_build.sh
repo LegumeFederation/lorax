@@ -8,7 +8,7 @@ error_exit() {
 trap error_exit EXIT
 script_name=`basename "${BASH_SOURCE}"`
 pkg="${script_name%_build.sh}"
-confdir=~/.${pkg}/build
+confdir=~/.${pkg}/configuration
 version="0.94"
 platform=`uname`
 TOP_DOC="""Builds and installs ${pkg} components.
@@ -225,8 +225,8 @@ elif [ "$1" == "make_dirs" ]; then
    tmp=`get_value tmp_dir`
    log=`get_value log_dir`
    echo "Creating directories in ${root}."
-   mkdir -p ${root}/{bin,build_configuration}
-   cp -R ${confdir}/ ${root}/build_configuration
+   mkdir -p ${root}/{bin,configuration}
+   cp -R ${confdir}/ ${root}/configuration
    mkdir -p ${root}/etc/nginx
    mkdir -p ${var}/run/nginx
    mkdir -p ${tmp}/nginx

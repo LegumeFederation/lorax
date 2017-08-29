@@ -5,17 +5,20 @@ You may choose to install dependencies yourself (typically using your
 distribution's package manager) or via the lorax_build.sh build script.
 The latter is recommended because it has pinned dependencies.
 
-Installation via lorax_build.sh
--------------------------------
+Installation via lorax_scripts.sh
+---------------------------------
 We strongly recommend that you do the installation in a clean directory
-as a non-privileged user. Get a copy of the top-level build scripts by
-issuing the command:
-   curl -L -o lorax_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_scripts.sh
+as a non-privileged user. The suggested location for that directory is
+~/.lorax/build.  If you agree with this choice, you can start your installation
+by issuing the following commands:
 
-Then issue the command "bash lorax_scripts.sh" to download the example
-build scripts.  Review and edit the my_build.sh script to reflect
-the directories you wish to use for your installation.  Then run ./my_build.sh
-to do the build.
+    mkdir -p ~/.lorax/build
+    cd ~/.lorax/build
+    curl -L -o lorax_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_scripts.sh
+    bash lorax_scripts.sh
+
+Review and edit the my_build.sh script to reflect the directories you wish to
+use for your installation.  Then run ./my_build.sh to do the build.
 
 Next, follow the instructions in INSTALL.configure+run.txt.
 
