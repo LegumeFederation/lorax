@@ -18,7 +18,7 @@ Usage:
 
 Commands:
            init - Set system-specific defaults for the build.
- link_lorax_env - Link the ${pkg}_env file to bin_dir for convenience.
+       link_env - Link the ${pkg}_env file to bin_dir for convenience.
       make_dirs - Create needed directories in ${pkg} root directory.
     link_python - Create python and pip links.
         install - Install a binary package.
@@ -26,7 +26,7 @@ Commands:
            pypi - Get latest pypi version.
             set - Set/print configuration variables.
           shell - Run a shell in installation environment.
-        version - Get installed lorax version.
+        version - Get installed ${pkg} version.
 
 Variables (accessed by set command):
            root_dir - Path to the root directory.
@@ -160,7 +160,7 @@ if [ "$#" -eq 0 ]; then
    >&2 echo "$TOP_DOC"
    exit 1
 elif [ "$1" == "init" ]; then
-   set_value root_dir ~/lorax-${version}
+   set_value root_dir ~/${pkg}-${version}
    set_value directory_version ${version}
    set_value var_dir "`get_value root_dir`/var"
    set_value tmp_dir "`get_value var_dir`/tmp"
@@ -207,7 +207,7 @@ elif [ "$1" == "init" ]; then
       set_value raxml_model .AVX2.PTHREADS.gcc
       set_value raxml_binsuffix -PTHREADS-AVX2
    fi
-elif [ "$1" == "link_lorax_env" ]; then
+elif [ "$1" == "link_env" ]; then
    root=`get_value root_dir`
    bin_dir=`get_value bin_dir`
    echo "linking ${pkg}_env to ${bin_dir}"
@@ -252,11 +252,11 @@ elif [ "$1" == "pip" ]; then
    cd $root # src/ directory is left behind by git
    pip install -U setuptools
    pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
-   pip install -U lorax
-   lorax_env_path="${root}/bin/lorax_env"
-   lorax_version="`${lorax_env_path} lorax config version`"
-   set_value version $lorax_version
-   echo "lorax version $lorax_version is now installed."
+   pip install -U ${pkg}
+   pkg_env_path="${root}/bin/${pkg}_env"
+   pkg_version="`${pkg_env_path} ${pkg} config version`"
+   set_value version $pkg_version
+   echo "${pkg} version $pkg_version is now installed."
 elif [ "$1" == "shell" ]; then
    root="`get_value root_dir`"
    export PATH="${root}/bin:${PATH}"
@@ -274,9 +274,9 @@ elif [ "$1" == "version" ]; then
    trap - EXIT
    if [ -e ${confdir}/root_dir ]; then
     root=`cat ${confdir}/root_dir`
-      lorax_env_path="${root}/bin/lorax_env"
-      if [ -e $lorax_env_path ]; then
-         echo "`${lorax_env_path} lorax config version`"
+      pkg_env_path="${root}/bin/${pkg}_env"
+      if [ -e $pkg_env_path ]; then
+         echo "`${pkg_env_path} ${pkg} config version`"
       else
          >&2 echo "${pkg} package not installed"
          exit 0

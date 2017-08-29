@@ -83,7 +83,7 @@ fi
 echo "Doing python installs."
 ./lorax_build.sh link_python    # python and pip links
 ./lorax_build.sh pip            # Do installs for lorax and dependencies
-./lorax_build.sh link_lorax_env # put lorax_env in PATH
+./lorax_build.sh link_env       # put lorax_env in PATH
 #
 # Test to make sure it runs.
 #
