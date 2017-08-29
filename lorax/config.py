@@ -103,7 +103,7 @@ class BaseConfig(object):
     DEBUG = False
     PORT = 58927
     HOST = '127.0.0.1'
-    SERVER_NAME = 'localhost'
+    SERVER_NAME = ''
     #
     # Create a logfile.
     #
@@ -192,6 +192,7 @@ class BaseConfig(object):
     #
     # nginx defs.
     #
+    NGINX_SERVER_NAME = 'localhost'
     system = platform.system()
     if system == 'Linux':
         NGINX_LISTEN_ARGS = 'deferred'
@@ -403,7 +404,7 @@ def configure_app(app):
             app.config['CURL_ARGS'] = '--unix-socket ' + \
                                       app.config['VAR'] +\
                 '/run/gunicorn.sock'
-            app.config['CURL_URL'] = 'http::'
+            app.config['CURL_URL'] = 'http://localhost/'
         else:
             app.config['URL'] = 'http://' + \
                                 app.config['HOST'] + ':' + \
@@ -427,7 +428,7 @@ def configure_app(app):
             app.config['CURL_ARGS'] = '--unix-socket ' + \
                                       app.config['VAR'] + \
                                       '/run/nginx.sock'
-            app.config['CURL_URL'] = 'http::'
+            app.config['CURL_URL'] = 'http://localhost/'
         else:
             app.config['URL'] = 'http://' + \
                                 app.config['HOST'] + ':' + \

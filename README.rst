@@ -13,8 +13,8 @@ alignments, `RQ`_ to queue long calculations, and `Flask`_ to serve up results.
 .. image:: https://img.shields.io/github/commits-since/LegumeFederation/lorax/0.92.svg
    :target: https://github.com/LegumeFederation/lorax
 
-.. image:: https://secure.travis-ci.org/joelb123/lorax.png
-   :target:  http://travis-ci.org/joelb123/lorax
+.. image:: https://secure.travis-ci.org/LegumeFederation/lorax.png
+   :target:  http://travis-ci.org/LegumeFederation/lorax
 
 :Homepage: `Lorax GitHub`_
 :Download: `Lorax PyPI`_

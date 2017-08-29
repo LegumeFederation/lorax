@@ -9,12 +9,9 @@
 #      {{NAME.upper()}}_CURL_URL   URL string for curl.
 #      {{NAME.upper()}}_SECRET_KEY Password for some operations.
 #
-{% if not GUNICORN_UNIX_SOCKET %}
 export {{NAME.upper()}}_PORT="{{PORT}}"
 export {{NAME.upper()}}_HOST="{{HOST}}"
-{% else %}
 export {{NAME.upper()}}_CURL_ARGS="{{CURL_ARGS}}"
-{% endif %}
 export {{NAME.upper()}}_URL="{{URL}}"
 export {{NAME.upper()}}_CURL_URL="{{CURL_URL}}"
 export {{NAME.upper()}}_SECRET_KEY="{{SECRET_KEY}}"
