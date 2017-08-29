@@ -32,7 +32,8 @@ shell="{{NAME}}_shell"
 
 {{NAME}}_stop()
 {
- ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl shutdown
+ ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl stop lorax
+} ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl shutdown
 }
 
 {{NAME}}_status()

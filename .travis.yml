@@ -26,5 +26,6 @@ script:
    - while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
    - lorax_env supervisorctl status
    - ./lorax_test.sh
+   - lorax_env supervisorctl stop lorax
    - lorax_env supervisorctl shutdown
    - echo "done"

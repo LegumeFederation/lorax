@@ -121,7 +121,6 @@ echo "Testing lorax server on ${LORAX_URL}."
 test_GET /status
 test_GET /healthcheck
 test_GET /badtarget 404
-#test_GET /test_exception 500
 test_GET /trees/families.json
 # Post sequences.
 ./post_FASTA.sh ${verbose_flag}  peptide aspartic_peptidases.faa aspartic_peptidases sequences

@@ -44,9 +44,11 @@ echo "Running test of lorax server."
 echo ""
 popd
 #
-# Clean up.
+# Clean up.  Note that lorax process doesn't stop properly from
+# shutdown alone.
 #
 echo "Stopping lorax processes."
+${root}/bin/lorax_env stop lorax
 ${root}/bin/lorax_env supervisorctl shutdown
 rm -r test_lorax
 echo "Tests completed successfully."
