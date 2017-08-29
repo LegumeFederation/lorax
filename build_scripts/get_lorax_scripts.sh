@@ -14,7 +14,7 @@ Platform:
    or \"*BSD\"; other values are not recognized.  This platform
    is \"$platform\".
 """
-rawsite="https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts"
+rawsite="https://raw.githubusercontent.com/LegumeFederation/${pkg}/master/build_scripts"
 error_exit() {
    echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
    echo "   $BASH_COMMAND"
@@ -25,8 +25,8 @@ if [ "$1" == "-n" ]; then
    echo "Not checking for self-updates."
 else
    printf "Checking for self-update..."
-   curl -L -s -o get_${pkg}_scripts.sh.new ${rawsite}/get_${pkg}scripts.sh
-   chmod 755 get_${pkg}scripts.sh.new
+   curl -L -s -o get_${pkg}_scripts.sh.new ${rawsite}/get_${pkg}_scripts.sh
+   chmod 755 get_${pkg}_scripts.sh.new
    if cmp -s get_${pkg}_scripts.sh get_${pkg}_scripts.sh.new ; then
       rm get_${pkg}_scripts.sh.new
       echo "not needed."
