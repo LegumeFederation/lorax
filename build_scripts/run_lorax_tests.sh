@@ -33,10 +33,10 @@ echo "All processes should have status RUNNING."
 #
 # Create the test directory and cd to it.
 #
-rm -rf test_lorax
+rm -rf test
 rm -f ~/.lorax/lorax_rc
-mkdir test_lorax
-pushd test_lorax
+mkdir test
+pushd test
 echo "Getting a set of test files in test_lorax directory."
 ${root}/bin/lorax_env lorax create_test_files
 echo "Running test of lorax server."
@@ -48,9 +48,9 @@ popd
 # shutdown alone.
 #
 echo "Stopping lorax processes."
-${root}/bin/lorax_env stop lorax
+${root}/bin/lorax_env supervisorctl stop lorax
 ${root}/bin/lorax_env supervisorctl shutdown
-rm -r test_lorax
+rm -r test
 echo "Tests completed successfully."
 trap - EXIT
 exit 0
