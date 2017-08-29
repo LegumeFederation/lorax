@@ -33,7 +33,6 @@ ${root}/bin/lorax_env supervisord
 #
 while ${root}/bin/lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
 ${root}/bin/lorax_env supervisorctl status
-echo "All processes should have status RUNNING."
 #
 # Create the test directory and cd to it.
 #
