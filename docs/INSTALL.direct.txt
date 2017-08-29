@@ -10,9 +10,9 @@ Installation via lorax_build.sh
 We strongly recommend that you do the installation in a clean directory
 as a non-privileged user. Get a copy of the top-level build scripts by
 issuing the command:
-   curl -L -o get_lorax_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_lorax_scripts.sh
+   curl -L -o lorax_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_scripts.sh
 
-Then issue the command "bash get_lorax_scripts.sh" to download the example
+Then issue the command "bash lorax_scripts.sh" to download the example
 build scripts.  Review and edit the my_build.sh script to reflect
 the directories you wish to use for your installation.  Then run ./my_build.sh
 to do the build.

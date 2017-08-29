@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-pkg="lorax"
+script_name=`basename "${BASH_SOURCE}"`
+pkg="${script_name%_scripts.sh}"
 platform=`uname`
 DOC="""Gets build/configuration scripts for ${pkg}.
 
 Usage:
-       bash get_${pkg}_scripts.sh [-n]
+       bash ${pkg}_scripts.sh [-n]
 
 Options:
        -n Do not check for self-updates.
@@ -25,14 +26,14 @@ if [ "$1" == "-n" ]; then
    echo "Not checking for self-updates."
 else
    printf "Checking for self-update..."
-   curl -L -s -o get_${pkg}_scripts.sh.new ${rawsite}/get_${pkg}_scripts.sh
-   chmod 755 get_${pkg}_scripts.sh.new
-   if cmp -s get_${pkg}_scripts.sh get_${pkg}_scripts.sh.new ; then
-      rm get_${pkg}_scripts.sh.new
+   curl -L -s -o ${pkg}_scripts.sh.new ${rawsite}/${pkg}_scripts.sh
+   chmod 755 ${pkg}_scripts.sh.new
+   if cmp -s ${pkg}_scripts.sh ${pkg}_scripts.sh.new ; then
+      rm ${pkg}_scripts.sh.new
       echo "not needed."
    else
       echo "this file was updated.  Please rerun-it."
-      mv get_${pkg}_scripts.sh.new get_${pkg}_scripts.sh
+      mv ${pkg}_scripts.sh.new ${pkg}_scripts.sh
       trap - EXIT
       exit 0
    fi
@@ -44,8 +45,8 @@ updates=0
 curl -L -s -o ${pkg}_build.sh.new ${rawsite}/${pkg}_build.sh
 curl -L -s -o build_example.sh.new ${rawsite}/build_example.sh
 curl -L -s -o config_example.sh.new ${rawsite}/config_example.sh
-curl -L -s -o run_${pkg}_tests.sh.new ${rawsite}/run_${pkg}_tests.sh
-for f in ${pkg}_build.sh build_example.sh config_example.sh run_${pkg}_tests.sh ; do
+curl -L -s -o ${pkg}_test.sh.new ${rawsite}/${pkg}_test.sh
+for f in ${pkg}_build.sh build_example.sh config_example.sh ${pkg}_test.sh ; do
    if [ -e ${f} ]; then
       if cmp -s ${f} ${f}.new; then
          rm ${f}.new # no change
@@ -94,7 +95,7 @@ for f in build_example.sh config_example.sh ; do
     cp ${f} ${my_f}
   fi
 done
-rm -f ${pkg}_build.sh.old build_example.sh.old config_example.sh.old run_${pkg}_tests.sh.old
+rm -f ${pkg}_build.sh.old build_example.sh.old config_example.sh.old ${pkg}_test.sh.old
 pypi=`./${pkg}_build.sh pypi`
 version=`./${pkg}_build.sh version`
 if [ "version" == "${pkg} build not configured" ]; then

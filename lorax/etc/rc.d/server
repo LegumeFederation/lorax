@@ -32,7 +32,7 @@ shell="{{NAME}}_shell"
 
 {{NAME}}_stop()
 {
-  ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl stop lorax
+  ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl stop lorax alignment treebuilding nginx
   ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl shutdown
 }
 

@@ -71,6 +71,6 @@ echo "Setting the http password to \"${passwd}\";"
 echo "please write it down, because you will need it to access some services."
 ${root}/bin/lorax_env lorax set_htpasswd --force
 echo "To run the test suite, issue the command:"
-echo "   ./run_lorax_tests.sh"
+echo "   ./lorax_test.sh"
 trap - EXIT
 exit 0

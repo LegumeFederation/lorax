@@ -2,8 +2,8 @@ language: python
 python:
    - "3.5"
 before_install:
-   - curl -L -o get_lorax_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/get_lorax_scripts.sh
-   - bash get_lorax_scripts.sh
+   - curl -L -o lorax_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_scripts.sh
+   - bash lorax_scripts.sh
    - ./lorax_build.sh init
    - export root_dir=`python -c 'import sys;print(sys.prefix)'`
    - ./lorax_build.sh set root_dir $root_dir
@@ -27,7 +27,7 @@ script:
    - lorax_env supervisord
    - while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
    - lorax_env supervisorctl status
-   - ./lorax_test.sh
+   - ./test_targets.sh
    - lorax_env supervisorctl stop lorax
    - lorax_env supervisorctl shutdown
    - echo "done"

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-DOC="""You are about to run a short test of the lorax installation.
-This should take about 2 minutes on modest hardware.
+script_name=`basename "${BASH_SOURCE}"`
+pkg="${script_name%_test.sh}"
+testdir=~/.${pkg}/test
+DOC="""You are about to run a short test of the lorax installation
+in the ${testdir} directory.
+Testing should take about 2 minutes on modest hardware.
 Interrupt this script if you do not wish to test at this time.
 """
 if [ "$1" != "-y" ]; then
@@ -33,24 +37,21 @@ echo "All processes should have status RUNNING."
 #
 # Create the test directory and cd to it.
 #
-rm -rf test
-rm -f ~/.lorax/lorax_rc
-mkdir test
-pushd test
-echo "Getting a set of test files in test_lorax directory."
-${root}/bin/lorax_env lorax create_test_files
+mkdir -p ${testdir}
+pushd ${testdir}
+echo "Getting a set of test files in the ${test_dir} directory."
+${root}/bin/lorax_env lorax create_test_files --force
 echo "Running test of lorax server."
-./lorax_test.sh
+./test_targets.sh
 echo ""
 popd
 #
 # Clean up.  Note that lorax process doesn't stop properly from
-# shutdown alone.
+# shutdown alone across all platforms.
 #
 echo "Stopping lorax processes."
-${root}/bin/lorax_env supervisorctl stop lorax
+${root}/bin/lorax_env supervisorctl stop lorax alignment treebuilding nginx
 ${root}/bin/lorax_env supervisorctl shutdown
-rm -r test
 echo "Tests completed successfully."
 trap - EXIT
 exit 0

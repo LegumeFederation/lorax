@@ -160,7 +160,7 @@ if [ "$#" -eq 0 ]; then
    >&2 echo "$TOP_DOC"
    exit 1
 elif [ "$1" == "init" ]; then
-   set_value root_dir ~/${pkg}-${version}
+   set_value root_dir ~/.${pkg}/${version}
    set_value directory_version ${version}
    set_value var_dir "`get_value root_dir`/var"
    set_value tmp_dir "`get_value var_dir`/tmp"
