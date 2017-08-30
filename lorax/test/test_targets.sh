@@ -60,7 +60,7 @@ test_GET () {
       fi
       rm "$tmpfile"
    else
-      echo "FATAL ERROR--GET ${1} returned HTTP code ${status}, expected ${2}."
+      echo "FATAL ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
       echo "Full response is:"
       cat ${tmpfile}
       echo ""
@@ -93,7 +93,7 @@ test_DELETE () {
       fi
       rm "$tmpfile"
    else
-      echo "FATAL ERROR--GET ${1} returned HTTP code ${status}, expected ${2}."
+      echo "FATAL ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
       echo "Full response is:"
       cat ${tmpfile}
       echo ""
@@ -114,7 +114,7 @@ poll_until_positive() {
 #
 # Start testing.
 #
-echo "Testing lorax server on ${LORAX_URL}."
+echo "Testing lorax server on ${LORAX_CURL_URL}."
 #
 # Test random non-tree targets.
 #

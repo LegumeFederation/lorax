@@ -299,7 +299,7 @@ def set_htpasswd(force):
             userdb.add(user, password)
         except htpasswd.basic.UserExists:
             if force:
-                print('Updating site password for existing user %s.' % name)
+                print('Updating site password for existing user %s.' % user)
                 userdb.change_password(user, password)
             else:
                 print('ERROR--user %s already exists in htpasswd, use --force.')

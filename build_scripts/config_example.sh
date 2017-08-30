@@ -36,7 +36,7 @@ if [ "$log_dir" != "${var_dir}/log" ]; then
    ${root}/bin/lorax_env lorax config log $log_dir
 fi
 if [ "$tmp_dir" != "${var_dir}/tmp" ]; then
-   echo "Configuring non-default log directory ${tmp_dir}."
+   echo "Configuring non-default tmp directory ${tmp_dir}."
    ${root}/bin/lorax_env lorax config tmp $tmp_dir
 fi
 #
@@ -56,8 +56,8 @@ fi
 #
 # Save a copy of the configuration to a time-stamped file.
 #
-config_filename="config-`date '+%Y-%m-%d-%H-%M'`.txt"
-${root}/bin/lorax_env lorax config > ${root}/${config_filename}
+config_filename="lorax_config-`date '+%Y-%m-%d-%H-%M'`.txt"
+${root}/bin/lorax_env lorax config > ${root}/configuration/${config_filename}
 #
 # Create the configured instance.
 #

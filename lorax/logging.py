@@ -1,19 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Define, override, and handle onfiguration variables.
-
-Definitions in this file are selected by the MYAPP_CONFIGURATION environmental
-variable.  This variable may take on the following values:
-    * default
-    * development
-    * testing
-    * production
-
-
-These definitions may be overridden via two ways:
-  1) a python file pointed to by the environmental variable MYAPP_SETTINGS.
-  2) an environmental variable that starts with "MYAPP_".  If its value is
-     "True" or "False", then it will be interpreted as a logical value.
-     If its value can be parsed as an integer, then it will be.
+"""Set up logging.
 """
 #
 # Library imports.

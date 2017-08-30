@@ -3,18 +3,20 @@
 
 Definitions in this file are selected by the MYAPP_CONFIGURATION environmental
 variable.  This variable may take on the following values:
-    * default: starts everything in production environment
-    * development: starts in debug environment (not secure)
-    * serverOnly: same as default, but without queues
-    * treebuilder: starts treebuilder queue only
-    * aligner: start aligner queue only
+
+* default: starts everything in production environment
+* development: starts in debug environment (not secure)
+* serverOnly: same as default, but without queues
+* treebuilder: starts treebuilder queue only
+* aligner: start aligner queue only
 
 
 These definitions may be overridden via two ways:
-  1) a python file pointed to by the environmental variable MYAPP_SETTINGS.
-  2) an environmental variable that starts with "MYAPP_".  If its value is
-     "True" or "False", then it will be interpreted as a logical value.
-     If its value can be parsed as an integer, then it will be.
+
+1. A python file pointed to by the environmental variable MYAPP_SETTINGS.
+2. An environmental variable that starts with MYAPP_.  If its value is
+   "True" or "False", then it will be interpreted as a logical value.
+   If its value can be parsed as an integer, then it will be.
 """
 #
 # Library imports.
@@ -404,7 +406,7 @@ def configure_app(app):
             app.config['CURL_ARGS'] = '--unix-socket ' + \
                                       app.config['VAR'] +\
                 '/run/gunicorn.sock'
-            app.config['CURL_URL'] = 'http://localhost/'
+            app.config['CURL_URL'] = 'http://localhost'
         else:
             app.config['URL'] = 'http://' + \
                                 app.config['HOST'] + ':' + \
@@ -428,7 +430,8 @@ def configure_app(app):
             app.config['CURL_ARGS'] = '--unix-socket ' + \
                                       app.config['VAR'] + \
                                       '/run/nginx.sock'
-            app.config['CURL_URL'] = 'http://localhost/'
+            app.config['CURL_URL'] = 'http://' +\
+                app.config['NGINX_SERVER_NAME']
         else:
             app.config['URL'] = 'http://' + \
                                 app.config['HOST'] + ':' + \
