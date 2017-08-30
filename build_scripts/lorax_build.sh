@@ -226,7 +226,7 @@ elif [ "$1" == "make_dirs" ]; then
    log=`get_value log_dir`
    echo "Creating directories in ${root}."
    mkdir -p ${root}/{bin,configuration}
-   cp -R ${confdir}/ ${root}
+   cp -R ${confdir}/ ${root}/configuration
    mkdir -p ${root}/etc/nginx
    mkdir -p ${var}/run/nginx
    mkdir -p ${tmp}/nginx
