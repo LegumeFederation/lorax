@@ -4,7 +4,7 @@ python:
 before_install:
    - curl -L -o lorax_tool.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool.sh
    - chmod 755 lorax_tool.sh
-   - lorax_tool.sh download
+   - ./lorax_tool.sh download
    - ./lorax_tool.sh init
    - export root_dir=`python -c 'import sys;print(sys.prefix)'`
    - ./lorax_tool.sh set root_dir $root_dir

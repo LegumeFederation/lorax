@@ -12,7 +12,7 @@ To test lorax, issue the commands::
     mkdir test_lorax # could be any name, will be deleted later
     cd test_lorax
     /path/to/lorax_env lorax create_test_files
-    ./lorax_test.sh
+    ./test_targets.sh
 
 If the installation went properly, the last command should finish with
 "lorax test completed successfully."

@@ -14,8 +14,9 @@ by issuing the following commands::
 
     mkdir -p ~/.lorax/build
     cd ~/.lorax/build
-    curl -L -o lorax_scripts.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_scripts.sh
-    bash lorax_scripts.sh
+    curl -L -o lorax_tool.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool.sh
+    chmod 755 lorax_tool.sh
+    ./lorax_tool.sh download
 
 Review and edit the ``my_build.sh`` script to reflect the directories you wish to
 use for your installation.  Then run ``./my_build.sh`` to do the build.
