@@ -302,11 +302,12 @@ You may run this command with a \"-y\" argument to skip this question.
          fi
       fi
    fi
+   root="`get_value root_dir`"
    version="`get_value directory_version`"
    var_dir="`get_value var_dir`"
    log_dir="`get_value log_dir`"
    tmp_dir="`get_value tmp_dir`"
-   if [ "$var_dir" != "${root_dir}/var" ]; then
+   if [ "$var_dir" != "${root}/var" ]; then
       echo "Configuring non-default var directory ${var_dir}."
       ${root}/bin/lorax_env lorax config var $var_dir
    fi
@@ -321,7 +322,7 @@ You may run this command with a \"-y\" argument to skip this question.
    source my_config.sh
    # Save a copy of the configuration to a time-stamped file.
    config_filename="lorax_config-`date '+%Y-%m-%d-%H-%M'`.txt"
-   ${root}/bin/lorax_env lorax config > ${root_dir}/config/${config_filename}
+   ${root}/bin/lorax_env lorax config > ${root}/config/${config_filename}
    # Create the configured instance.
    echo "Creating a configured instance at ${root}."
    ${root}/bin/lorax_env lorax create_instance --force
@@ -412,10 +413,10 @@ Options:
    pypi=`pypi`
    version=`version`
    if [ "version" == "${pkg} build not configured" ]; then
-      echo "Next run \"./my_build.sh\" to build and configure lorax."
+      echo "Next run \"./${script_name} build\" to build and configure ${pkg}."
    elif [ "$updates" -eq 1 ]; then
       echo "Update build/configuration files found, please re-build using"
-      echo "    ./my_build.sh"
+      echo "    ./${script_name} build"
    elif [ "$pypi" == "$version" ]; then
       echo "The latest version of ${pkg} (${pypi}) is installed, no need for updates."
    else
@@ -618,7 +619,7 @@ shell() {
    export PS1="$old_prompt"
 }
 testify() {
-   TEST_DOC="""You are about to run a short test of the lorax installation
+   TEST_DOC="""You are about to run a short test of the ${pkg} installation
 in the ${test_dir} directory.
 Testing should take about 2 minutes on modest hardware.
 Interrupt this script if you do not wish to test at this time.
@@ -634,8 +635,7 @@ Interrupt this script if you do not wish to test at this time.
       fi
    fi
    set -e
-   # Run lorax.
-   root="`./lorax_build.sh set root_dir`"
+   root="`get_value root_dir`"
    echo "Running lorax processes."
    ${root}/bin/lorax_env supervisord
    # Wait until nothing is STARTING.
