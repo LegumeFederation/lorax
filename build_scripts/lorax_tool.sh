@@ -1,25 +1,31 @@
 #!/bin/bash
 # Build configuration system.
 set -e # exit on error
-error_exit() {
-   echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
-   echo "   $BASH_COMMAND"
-}
-trap error_exit EXIT
 script_name=`basename "${BASH_SOURCE}"`
 pkg="${script_name%_tool.sh}"
-if [ -z "$BUILD_CONFIG_DIR" ]; then
-   confdir=~/.${pkg}/config
+PKG=`echo ${pkg} | tr /a-z/ /A-Z/`
+PKG_BUILD_DIR="${PKG}_BUILD_DIR"
+PKG_TEST_DIR="${PKG}_TEST_DIR"
+if [ -z "${!PKG_BUILD_DIR}" ]; then
+   build_dir=~/.${pkg}
 else
-   confdir="$LORAX_BUILD_CONFIG_DIR"
+   build_dir="${!PKG_BUILD_DIR}"
 fi
-if [ -z "$TEST_DIR" ]; then
-   testdir=~/.${pkg}/test
+confdir=${build_dir}/config
+if [ -z "${!PKG_TEST_DIR}" ]; then
+   test_dir=${build_dir}/test
 else
-   testdir="$TEST_DIR"
+   test_dir="${!PKG_TEST_DIR}"
 fi
 version="0.94"
 platform=`uname`
+error_exit() {
+   echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+   echo "   $BASH_COMMAND"
+   echo "Build directory is \"${build_dir}\"."
+   echo "Test directory is \"${test_dir}\"."
+}
+trap error_exit EXIT
 TOP_DOC="""Builds and installs ${pkg} components.
 
 Usage:
@@ -55,10 +61,13 @@ Variables (accessed by \"config\" command):
             version - Installed version.
 
 Environmental variables:
-       BUILD_CONFIG_DIR - The location of the build, configuration, and test
-                          files.  If not set, these go in ~/.${pkg}/config.
-               TEST_DIR - The location of the test directory.  If not set,
-                          they go in ~/.${pkg}/test.
+       ${PKG}_BUILD_DIR - The location of the build, configuration, and test
+                          files.  If not set, they go in ~/.${pkg}/.
+                          The current setting is \"${build_dir}\".
+        ${PKG}_TEST_DIR - The location of the test directory.  If not set,
+                          they go in ${PKG}_BUILD_DIR/test.
+                          The current setting is
+                          \"${test_dir}\".
 
 Platforms supported:
    uname must return one of three values, \"Linux\", \"Darwin\",
@@ -509,7 +518,7 @@ shell() {
 }
 testify() {
    TEST_DOC="""You are about to run a short test of the lorax installation
-in the ${testdir} directory.
+in the ${test_dir} directory.
 Testing should take about 2 minutes on modest hardware.
 Interrupt this script if you do not wish to test at this time.
 """
@@ -533,8 +542,8 @@ Interrupt this script if you do not wish to test at this time.
    # Print status.
    ${root}/bin/lorax_env supervisorctl status
    # Create the test directory and cd to it.
-   mkdir -p ${testdir}
-   pushd ${testdir}
+   mkdir -p ${test_dir}
+   pushd ${test_dir}
    echo "Getting a set of test files in the ${test_dir} directory."
    ${root}/bin/lorax_env lorax create_test_files --force
    echo "Running test of lorax server."

@@ -31,7 +31,8 @@ before_script:
    - lorax_env lorax set_htpasswd
    - lorax_env lorax test_logging
 script:
-   - lorax_env LORAX_COVERAGE=1 supervisord
+   - export LORAX_COVERAGE=1
+   - lorax_env supervisord
    - while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
    - lorax_env supervisorctl status
    - lorax_env lorax rq info
