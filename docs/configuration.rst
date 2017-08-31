@@ -34,6 +34,11 @@ the value of LORAX_ROOT you chose at install time::
 
 You will now get a ``lorax_env>`` prompt and you are ready to configure.
 
+If you did a direct installation using the ``lorax_tool`` script, you should
+review and edit the ``my_config.sh`` script to reflect the settings you wish
+to use
+use for your installation.  Then run ``./lorax_tool configure_pkg`` to do the build.
+
 configuration variables.  If you wish to change any of them, do it before
 issuing the "configure_instance" command, which will write the startup
 configurations which include such things as port numbers and which processes

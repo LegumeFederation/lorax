@@ -2,7 +2,7 @@
 # Build configuration system.
 set -e # exit on error
 script_name=`basename "${BASH_SOURCE}"`
-pkg="${script_name%_tool.sh}"
+pkg="${script_name%_tool}"
 PKG=`echo ${pkg} | tr /a-z/ /A-Z/`
 PKG_BUILD_DIR="${PKG}_BUILD_DIR"
 PKG_TEST_DIR="${PKG}_TEST_DIR"
@@ -32,7 +32,9 @@ Usage:
         $script_name COMMAND [COMMAND_OPTIONS]
 
 Commands:
-         config - Set/print configuration variables.
+          build - metacommand to build all configured binary packages.
+         config - Set/print build-time configuration variables.
+  configure_pkg - metacommand to configure the ${pkg} instance.
        download - Downloads self and other scripts.
            init - Set system-specific defaults for the build.
         install - Install one or all binary packages.
@@ -192,6 +194,53 @@ install_nginx() {
 #
 # Command functions begin here.
 #
+build() {
+   BUILD_DOC="""This command downloads, builds, and installs ${pkg} and its dependencies.
+It sources the \"my_build.sh\" script after initializaiton to allow customization.
+You should stop and edit my_build.sh if you wish to:
+   * install lorax to non-default locations
+   * use RAxML and your system has AVX or AVX2 hardware
+
+You may run this command with a \"-y\" argument to skip this question.
+"""
+   if [ "$1" != "-y" ]; then
+      echo "$DOC"
+      read -p "Do you want to continue? <(y)> " response
+      if [ ! -z "$response" ]; then
+         if [ "$response" != "y" ]; then
+            trap - EXIT
+            exit 1
+         fi
+      fi
+   fi
+   # Configure the build.
+   init
+   source my_build.sh
+   set_value all
+   make_dirs
+   # Build the binaries.
+   echo "Doing C/C++ binary installs."
+   install
+   # The following exports are needed for the freshly-built python to run
+   # on BSD (and probably harmless on others).
+   if [ -z "$LC_ALL" ]; then
+      export LC_ALL=en_US.UTF-8
+   fi
+   if [ -z "$LANG" ]; then
+      export LANG=en_US.UTF-8
+   fi
+   # Do pip installs.
+   echo "Doing python installs."
+   link_python    # python and pip links
+   pip_install    # Do installs for lorax and dependencies
+   link_env       # put lorax_env in PATH
+   # Test to make sure it runs.
+   echo "Testing lorax binary."
+   version > ${root_dir}/version
+   echo "Installation was successful."
+   echo "You should now proceed with configuring lorax via the command"
+   echo "   lorax_tool configure_pkg"
+}
 config() {
   CONFIG_DOC="""Sets/displays key/value pairs for the $pkg build system.
 
@@ -233,6 +282,57 @@ Arguments:
     exit 1
   fi
 }
+configure_pkg() {
+   CONFIGURE_DOC="""This command configures ${pkg} and creates an instance ready to run.
+It sources the \"my_config.sh\" script after initializaiton to allow customization.
+You should stop and edit my_config.sh if you wish to:
+      * serve at a public IP or non-default port
+      * use a non-default path for DATA or USERDATA
+      * enable monitoring services (crashmail, sentry)
+
+You may run this command with a \"-y\" argument to skip this question.
+"""
+   if [ "$1" != "-y" ]; then
+      echo "$CONFIGURE_DOC"
+      read -p "Do you want to continue? <(y)> " response
+      if [ ! -z "$response" ]; then
+         if [ "$response" != "y" ]; then
+            trap - EXIT
+            exit 1
+         fi
+      fi
+   fi
+   version="`get_value directory_version`"
+   var_dir="`get_value var_dir`"
+   log_dir="`get_value log_dir`"
+   tmp_dir="`get_value tmp_dir`"
+   if [ "$var_dir" != "${root_dir}/var" ]; then
+      echo "Configuring non-default var directory ${var_dir}."
+      ${root}/bin/lorax_env lorax config var $var_dir
+   fi
+   if [ "$log_dir" != "${var_dir}/log" ]; then
+      echo "Configuring non-default log directory ${log_dir}."
+      ${root}/bin/lorax_env lorax config log $log_dir
+   fi
+   if [ "$tmp_dir" != "${var_dir}/tmp" ]; then
+      echo "Configuring non-default tmp directory ${tmp_dir}."
+      ${root}/bin/lorax_env lorax config tmp $tmp_dir
+   fi
+   source my_config.sh
+   # Save a copy of the configuration to a time-stamped file.
+   config_filename="lorax_config-`date '+%Y-%m-%d-%H-%M'`.txt"
+   ${root}/bin/lorax_env lorax config > ${root_dir}/config/${config_filename}
+   # Create the configured instance.
+   echo "Creating a configured instance at ${root}."
+   ${root}/bin/lorax_env lorax create_instance --force
+   # Set the password for restricted parts of the site.
+   passwd="`${root}/bin/lorax_env lorax config secret_key`"
+   echo "Setting the http password to \"${passwd}\";"
+   echo "please write it down, because you will need it to access some services."
+   ${root}/bin/lorax_env lorax set_htpasswd --force
+   echo "To run the test suite, issue the command:"
+   echo "   ./${script_name} testify"
+}
 download() {
 DOWNLOAD_DOC="""Gets/updates build/configuration scripts for ${pkg}.
 
@@ -245,14 +345,15 @@ Options:
       echo "Not checking for self-updates."
    else
       printf "Checking for self-update..."
-      curl -L -s -o ${pkg}_tool.sh.new ${rawsite}/${pkg}_tool.sh
-      chmod 755 ${pkg}_tool.sh.new
-      if cmp -s ${pkg}_tool.sh ${pkg}_tool.sh.new ; then
-         rm ${pkg}_tool.sh.new
+      curl -L -s -o ${pkg}_tool.new ${rawsite}/${pkg}_tool
+      chmod 755 ${pkg}_tool.new
+      if cmp -s ${pkg}_tool ${pkg}_tool.new ; then
+         rm ${pkg}_tool.new
          echo "not needed."
       else
-         echo "this file was updated.  Please rebuild everything."
-         mv ${pkg}_tool.sh.new ${pkg}_tool.sh
+         echo "this file was updated.  Please run this command again,"
+         echo " then rebuild everything."
+         mv ${pkg}_tool.new ${pkg}_tool
          trap - EXIT
          exit 0
       fi
@@ -319,7 +420,7 @@ Options:
       echo "The latest version of ${pkg} (${pypi}) is installed, no need for updates."
    else
       echo "You can update from installed version (${version}) to latest (${pypi}) with"
-      echo "   ./${pkg}_tool.sh pip_install"
+      echo "   ./${script_name} pip_install"
    fi
 }
 init() {
@@ -588,8 +689,14 @@ fi
 command="$1"
 shift 1
 case $command in
+"build")
+  build $@
+  ;;
 "config")
   config $@
+  ;;
+"configure_pkg")
+  configure_pkg $@
   ;;
 "download")
   download $@

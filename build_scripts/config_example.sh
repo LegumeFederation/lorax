@@ -1,47 +1,11 @@
-#!/usr/bin/env bash
-DOC="""This script configures lorax and creates an instance ready to run.
-You should stop and edit this script if you wish to:
-      * serve at a public IP or non-default port
-      * use a non-default path for DATA or USERDATA
-      * enable monitoring services (crashmail, sentry)
-"""
-if [ "$1" != "-y" ]; then
-   echo "$DOC"
-   read -p "Do you want to continue? <(y)> " response
-   if [ ! -z "$response" ]; then
-      if [ "$response" != "y" ]; then
-         exit 1
-      fi
-   fi
-fi
-set -e # exit on errors
-error_exit() {
-   echo "ERROR--unexpected exit from configuration script at line:"
-   echo "   $BASH_COMMAND"
-}
-trap error_exit EXIT
 #
-root="`./lorax_tool.sh config root_dir`"
-version="`./lorax_tool.sh config directory_version`"
-var_dir="`./lorax_tool.sh config var_dir`"
-log_dir="`./lorax_tool.sh config log_dir`"
-tmp_dir="`./lorax_tool.sh config tmp_dir`"
+# This file is sourced after lorax_tool configure_pkg does initializations,
+# including picking up non-default values from the build configuration for
+# root_dir, var_dir, tmp_dir, and log_dir.
 #
-if [ "$var_dir" != "${root}/var" ]; then
-   echo "Configuring non-default var directory ${var_dir}."
-   ${root}/bin/lorax_env lorax config var $var_dir
-fi
-if [ "$log_dir" != "${var_dir}/log" ]; then
-   echo "Configuring non-default log directory ${log_dir}."
-   ${root}/bin/lorax_env lorax config log $log_dir
-fi
-if [ "$tmp_dir" != "${var_dir}/tmp" ]; then
-   echo "Configuring non-default tmp directory ${tmp_dir}."
-   ${root}/bin/lorax_env lorax config tmp $tmp_dir
-fi
-#
-# Installation-specific configurations with some interesting non-default
-# values.  Uncomment and edit as needed.
+# The customizations below are the main ones needed to configure a
+# server at non-default locations.  Uncomment and edit as needed.
+# Values shown are not defaults, but rather example values.
 #
 #${root}/bin/lorax_env lorax config secret_key mypasswd
 #${root}/bin/lorax_env lorax config user www
@@ -49,28 +13,7 @@ fi
 #${root}/bin/lorax_env lorax config data /usr/local/www/data/lorax/${version}
 #${root}/bin/lorax_env lorax config userdata /persist/lorax/${version}
 #${root}/bin/lorax_env lorax config host 127.0.0.1
-#${root}/bin/lorax_env lorax config nginx_server_name localhost
+#${root}/bin/lorax_env lorax config nginx_server_name mywebsite.org
 #${root}/bin/lorax_env lorax config port 58927
 #${root}/bin/lorax_env lorax config sentry_dsn https://MYDSN@sentry.io/lorax
 #${root}/bin/lorax_env lorax config crashmail_email user@example.com
-#
-# Save a copy of the configuration to a time-stamped file.
-#
-config_filename="lorax_config-`date '+%Y-%m-%d-%H-%M'`.txt"
-${root}/bin/lorax_env lorax config > ${root}/config/${config_filename}
-#
-# Create the configured instance.
-#
-echo "Creating a configured instance at ${root}."
-${root}/bin/lorax_env lorax create_instance --force
-#
-# Set the password for restricted parts of the site.
-#
-passwd="`${root}/bin/lorax_env lorax config secret_key`"
-echo "Setting the http password to \"${passwd}\";"
-echo "please write it down, because you will need it to access some services."
-${root}/bin/lorax_env lorax set_htpasswd --force
-echo "To run the test suite, issue the command:"
-echo "   ./lorax_tool.sh testify"
-trap - EXIT
-exit 0

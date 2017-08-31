@@ -2,21 +2,21 @@ language: python
 python:
    - "3.5"
 before_install:
-   - curl -L -o lorax_tool.sh https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool.sh
-   - chmod 755 lorax_tool.sh
-   - ./lorax_tool.sh download
-   - ./lorax_tool.sh init
+   - curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool
+   - chmod 755 lorax_tool
+   - ./lorax_tool download
+   - ./lorax_tool init
    - export root_dir=`python -c 'import sys;print(sys.prefix)'`
-   - ./lorax_tool.sh config root_dir $root_dir
-   - ./lorax_tool.sh config var_dir ${root_dir}/var
-   - ./lorax_tool.sh config tmp_dir ${root_dir}/var/tmp
-   - ./lorax_tool.sh config log_dir ${root_dir}/var/log
-   - ./lorax_tool.sh config python system
-   - ./lorax_tool.sh config raxml system
-   - ./lorax_tool.sh config redis system
-   - ./lorax_tool.sh config all
-   - ./lorax_tool.sh make_dirs
-   - ./lorax_tool.sh install
+   - ./lorax_tool config root_dir $root_dir
+   - ./lorax_tool config var_dir ${root_dir}/var
+   - ./lorax_tool config tmp_dir ${root_dir}/var/tmp
+   - ./lorax_tool config log_dir ${root_dir}/var/log
+   - ./lorax_tool config python system
+   - ./lorax_tool config raxml system
+   - ./lorax_tool config redis system
+   - ./lorax_tool config all
+   - ./lorax_tool make_dirs
+   - ./lorax_tool install
 install:
    - pip install -U setuptools
    - pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
