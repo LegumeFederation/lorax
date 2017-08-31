@@ -8,13 +8,17 @@ error_exit() {
 trap error_exit EXIT
 script_name=`basename "${BASH_SOURCE}"`
 pkg="${script_name%_build.sh}"
-confdir=~/.${pkg}/configuration
+if [ -z "$BUILD_CONFIG_DIR" ]; then
+   confdir=~/.${pkg}/configuration
+else
+   confdir="$LORAX_BUILD_CONFIG_DIR"
+fi
 version="0.94"
 platform=`uname`
 TOP_DOC="""Builds and installs ${pkg} components.
 
 Usage:
-        $scriptname COMMAND [COMMAND_OPTIONS]
+        $script_name COMMAND [COMMAND_OPTIONS]
 
 Commands:
            init - Set system-specific defaults for the build.
@@ -35,13 +39,17 @@ Variables (accessed by set command):
              python - The python version string.
                  cc - The C compiler to use.
               raxml - The raxml version string.
-        raxml_model - The RAxML compiler model suffix (e.g., ".SSE3.PTHREADS.gcc").
-    raxml_binsuffix - The suffix to the binary produced (e.g., "-PTHREADS-SSE3").
+        raxml_model - The RAxML compiler model suffix (e.g., \".SSE3.PTHREADS.gcc\").
+    raxml_binsuffix - The suffix to the binary produced (e.g., \"-PTHREADS-SSE3\").
               hmmer - The HMMer version string.
               redis - The redis version string.
        redis_cflags - CFLAGS for use in building redis.
               nginx - The nginx version string.
             version - Installed version.
+
+Environmental variables:
+       BUILD_CONFIG_DIR - The location of the build, configuration, and test
+                          files.  If not set, these go in ~/.${pkg}.
 """
 # Helper functions.
 set_value() {
@@ -160,7 +168,7 @@ if [ "$#" -eq 0 ]; then
    >&2 echo "$TOP_DOC"
    exit 1
 elif [ "$1" == "init" ]; then
-   set_value root_dir ~/.${pkg}/${version}
+   set_value root_dir ${confdir}/${version}
    set_value directory_version ${version}
    set_value var_dir "`get_value root_dir`/var"
    set_value tmp_dir "`get_value var_dir`/tmp"

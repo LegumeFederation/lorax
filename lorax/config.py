@@ -105,7 +105,6 @@ class BaseConfig(object):
     DEBUG = False
     PORT = 58927
     HOST = 'localhost'
-    SERVER_NAME = ''
     #
     # Create a logfile.
     #
@@ -440,12 +439,6 @@ def configure_app(app):
                 str(app.config['PORT'])
             app.config['CURL_URL'] = app.config['HOST'] + ':' + \
                 str(app.config['PORT'])
-    #
-    # SERVER_NAME variable--if you get 404's from lorax, it's probably
-    # because this wasn't set properly.
-    #
-    app.config['SERVER_NAME'] = app.config['NGINX_SERVER_NAME'] + ':' +\
-                                str(app.config['PORT'])
     #
     # Set queues to be started.
     #

@@ -10,6 +10,7 @@ if package_name.upper()+'_COVERAGE' in os.environ:
     import atexit
     import coverage
 
+    print('Starting coverage', file=sys.stderr)
     cov = coverage.coverage()
     cov.start()
 
