@@ -20,14 +20,23 @@ install:
    - pip install -U setuptools
    - pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    - pip install .
+   - pip install coveralls
 before_script:
+   - lorax_env lorax config secret_key
+   - lorax_env lorax config secret_key blah
+   - lorax_env lorax config
    - lorax_env lorax create_instance
    - lorax_env lorax create_test_files
+   - lorax_env lorax set_htpasswd
+   - lorax_env lorax test_logging
 script:
+   - export LORAX_COVERAGE=1
    - lorax_env supervisord
    - while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
    - lorax_env supervisorctl status
+   - lorax_env lorax rq info
    - ./test_targets.sh
    - lorax_env supervisorctl stop lorax
    - lorax_env supervisorctl shutdown
-   - echo "done"
+after_success:
+   - coveralls

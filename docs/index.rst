@@ -31,7 +31,7 @@ RAxML         `RAxML <http://sco.h-its.org/exelixis/web/software/raxml/index.htm
 Sections
 --------
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: See the following sections for details:
 
    goals
@@ -43,7 +43,7 @@ Sections
    running
    urls
    monitoring
-   modules
+   lorax
 
 
 Indices and tables

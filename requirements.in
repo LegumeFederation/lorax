@@ -9,3 +9,4 @@ superlance
 healthcheck
 htpasswd
 prometheus_client
+coverage
