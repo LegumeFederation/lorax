@@ -21,11 +21,11 @@ error_exit() {
 }
 trap error_exit EXIT
 #
-root="`./lorax_build.sh set root_dir`"
-version="`./lorax_build.sh set directory_version`"
-var_dir="`./lorax_build.sh set var_dir`"
-log_dir="`./lorax_build.sh set log_dir`"
-tmp_dir="`./lorax_build.sh set tmp_dir`"
+root="`./lorax_tool.sh set root_dir`"
+version="`./lorax_tool.sh set directory_version`"
+var_dir="`./lorax_tool.sh set var_dir`"
+log_dir="`./lorax_tool.sh set log_dir`"
+tmp_dir="`./lorax_tool.sh set tmp_dir`"
 #
 if [ "$var_dir" != "${root}/var" ]; then
    echo "Configuring non-default var directory ${var_dir}."
@@ -57,7 +57,7 @@ fi
 # Save a copy of the configuration to a time-stamped file.
 #
 config_filename="lorax_config-`date '+%Y-%m-%d-%H-%M'`.txt"
-${root}/bin/lorax_env lorax config > ${root}/configuration/${config_filename}
+${root}/bin/lorax_env lorax config > ${root}/config/${config_filename}
 #
 # Create the configured instance.
 #
@@ -71,6 +71,6 @@ echo "Setting the http password to \"${passwd}\";"
 echo "please write it down, because you will need it to access some services."
 ${root}/bin/lorax_env lorax set_htpasswd --force
 echo "To run the test suite, issue the command:"
-echo "   ./lorax_test.sh"
+echo "   ./lorax_tool.sh testify"
 trap - EXIT
 exit 0
