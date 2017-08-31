@@ -28,38 +28,38 @@ trap error_exit EXIT
 # Note that if you are building nginx, some of these set compile-time-only
 # defaults which cannot be overridden.
 #
-#./lorax_tool.sh set directory_version 0.94
-#./lorax_tool.sh set root_dir ~/lorax-`./lorax_tool.sh set directory_version`
-#./lorax_tool.sh set var_dir "`./lorax_tool.sh set root_dir`/var"
-#./lorax_tool.sh set tmp_dir "`./lorax_tool.sh set var_dir`/tmp"
-#./lorax_tool.sh set log_dir "`./lorax_tool.sh set var_dir`/log"
+#./lorax_tool.sh config directory_version 0.94
+#./lorax_tool.sh config root_dir ~/lorax-`./lorax_tool.sh config directory_version`
+#./lorax_tool.sh config var_dir "`./lorax_tool.sh config root_dir`/var"
+#./lorax_tool.sh config tmp_dir "`./lorax_tool.sh config var_dir`/tmp"
+#./lorax_tool.sh config log_dir "`./lorax_tool.sh config var_dir`/log"
 #
 # Version numbers of packages.  Setting these to "system" will cause them
 # not to be built.
 #
-#./lorax_tool.sh set python 3.6.2
-#./lorax_tool.sh set hmmer 3.1b2
-#./lorax_tool.sh set raxml 8.2.11
-#./lorax_tool.sh set redis 4.0.1
-#./lorax_tool.sh set nginx 1.13.4
+#./lorax_tool.sh config python 3.6.2
+#./lorax_tool.sh config hmmer 3.1b2
+#./lorax_tool.sh config raxml 8.2.11
+#./lorax_tool.sh config redis 4.0.1
+#./lorax_tool.sh config nginx 1.13.4
 #
 # The following defaults are platform-specific.  Linux defaults are shown.
 #
-#./lorax_tool.sh set platform linux
-#./lorax_tool.sh set bin_dir ~/bin  # dir in PATH where lorax_env is symlinked
-#./lorax_tool.sh set make make
-#./lorax_tool.sh set cc gcc
-#./lorax_tool.sh set redis_cflags ""
+#./lorax_tool.sh config platform linux
+#./lorax_tool.sh config bin_dir ~/bin  # dir in PATH where lorax_env is symlinked
+#./lorax_tool.sh config make make
+#./lorax_tool.sh config cc gcc
+#./lorax_tool.sh config redis_cflags ""
 #
 # The following defaults are hardware-specific for the RAxML build.
 # If you have both hardware and compiler support, you may wish to substitute
 # "SSE3" with either "AVX" or "AVX2".  Note that clang on BSD uses the gcc
 # model, but mac has its own model.
 #
-#./lorax_tool.sh set raxml_model .SSE3.PTHREADS.gcc
-#./lorax_tool.sh set raxml_binsuffix -PTHREADS-SSE3
+#./lorax_tool.sh config raxml_model .SSE3.PTHREADS.gcc
+#./lorax_tool.sh config raxml_binsuffix -PTHREADS-SSE3
 #
-./lorax_tool.sh set all
+./lorax_tool.sh config all
 ./lorax_tool.sh make_dirs
 #
 # Build the binaries.  If you give this without an argument, all binaries
@@ -88,7 +88,7 @@ echo "Doing python installs."
 # Test to make sure it runs.
 #
 echo "Testing lorax binary."
-./lorax_tool.sh version > `./lorax_tool.sh set root_dir`/version
+./lorax_tool.sh version > `./lorax_tool.sh config root_dir`/version
 echo "Installation was successful."
 echo "You should now proceed with configuring lorax via the command"
 echo "   ./my_config.sh"

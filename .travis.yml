@@ -7,14 +7,14 @@ before_install:
    - ./lorax_tool.sh download
    - ./lorax_tool.sh init
    - export root_dir=`python -c 'import sys;print(sys.prefix)'`
-   - ./lorax_tool.sh set root_dir $root_dir
-   - ./lorax_tool.sh set var_dir ${root_dir}/var
-   - ./lorax_tool.sh set tmp_dir ${root_dir}/var/tmp
-   - ./lorax_tool.sh set log_dir ${root_dir}/var/log
-   - ./lorax_tool.sh set python system
-   - ./lorax_tool.sh set raxml system
-   - ./lorax_tool.sh set redis system
-   - ./lorax_tool.sh set all
+   - ./lorax_tool.sh config root_dir $root_dir
+   - ./lorax_tool.sh config var_dir ${root_dir}/var
+   - ./lorax_tool.sh config tmp_dir ${root_dir}/var/tmp
+   - ./lorax_tool.sh config log_dir ${root_dir}/var/log
+   - ./lorax_tool.sh config python system
+   - ./lorax_tool.sh config raxml system
+   - ./lorax_tool.sh config redis system
+   - ./lorax_tool.sh config all
    - ./lorax_tool.sh make_dirs
    - ./lorax_tool.sh install
 install:

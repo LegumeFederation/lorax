@@ -21,11 +21,11 @@ error_exit() {
 }
 trap error_exit EXIT
 #
-root="`./lorax_tool.sh set root_dir`"
-version="`./lorax_tool.sh set directory_version`"
-var_dir="`./lorax_tool.sh set var_dir`"
-log_dir="`./lorax_tool.sh set log_dir`"
-tmp_dir="`./lorax_tool.sh set tmp_dir`"
+root="`./lorax_tool.sh config root_dir`"
+version="`./lorax_tool.sh config directory_version`"
+var_dir="`./lorax_tool.sh config var_dir`"
+log_dir="`./lorax_tool.sh config log_dir`"
+tmp_dir="`./lorax_tool.sh config tmp_dir`"
 #
 if [ "$var_dir" != "${root}/var" ]; then
    echo "Configuring non-default var directory ${var_dir}."
