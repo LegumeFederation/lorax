@@ -299,8 +299,8 @@ Options:
      fi
    done
    rm -f $build_example.sh.old config_example.sh.old
-   pypi=`get_value pypi`
-   version=`get_value version`
+   pypi=`pypi`
+   version=`version`
    if [ "version" == "${pkg} build not configured" ]; then
       echo "Next run \"./my_build.sh\" to build and configure lorax."
    elif [ "$updates" -eq 1 ]; then
