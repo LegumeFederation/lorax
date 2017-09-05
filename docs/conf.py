@@ -20,7 +20,6 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-from lorax.version import version as __version__
 
 # -- General configuration ------------------------------------------------
 
@@ -52,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'lorax'
-copyright = '2017, Joel Berendzen'
+copyright = '2017, The National Center for Genome Resources.'
 author = 'Joel Berendzen'
 
 # The version info for the project you're documenting, acts as replacement for
