@@ -334,7 +334,7 @@ You may run this command with a \"-y\" argument to skip this question.
    fi
    # Save a copy of the configuration to a time-stamped file.
    config_filename="lorax_config-`date '+%Y-%m-%d-%H-%M'`.txt"
-   ${root}/bin/lorax_env lorax config > ${root}/config/${config_filename}
+   ${root}/bin/lorax_env lorax config > ${confdir}/${config_filename}
    # Create the configured instance.
    echo "Creating a configured instance at ${root}." >&1
    ${root}/bin/lorax_env lorax create_instance --force
