@@ -14,7 +14,7 @@ fi
 build_root_dir="`dirname $build_dir`"
 confdir=${build_dir}/config
 if [ -z "${!PKG_TEST_DIR}" ]; then
-   test_dir=${build_dir}/test
+   test_dir=${build_root_dir}/test
 else
    test_dir="${!PKG_TEST_DIR}"
 fi
