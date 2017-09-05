@@ -3,7 +3,6 @@ import importlib
 import os
 import sys
 
-
 package_name = os.path.basename(__file__).split('_')[0]
 
 if package_name.upper()+'_COVERAGE' in os.environ:
@@ -34,6 +33,23 @@ except ModuleNotFoundError:
 
 init_filesystem(app)
 configure_logging(app)
+
+if app.config['COVERAGE']:
+    import atexit
+    import coverage
+
+    coverage_config = app.config['ROOT'] + '/etc/coverage.conf'
+    print('Starting coverage, config file is %s.' %coverage_config)
+    cov = coverage.coverage(config_file=coverage_config,
+                            auto_data=True)
+    cov.start()
+
+    def save_coverage():
+        print('Saving coverage', file=sys.stderr)
+        cov.stop()
+        cov.save()
+
+    atexit.register(save_coverage)
 
 if __name__ == '__main__':
     app.run()

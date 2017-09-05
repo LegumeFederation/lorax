@@ -121,6 +121,10 @@ class BaseConfig(object):
     #
     TESTING = False
     #
+    # Coverage (via Travis and coveralls).
+    #
+    COVERAGE = False
+    #
     # Settings file name.
     #
     SETTINGS = SERVICE_NAME + '.conf'

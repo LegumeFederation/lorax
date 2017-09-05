@@ -20,11 +20,12 @@ before_install:
 install:
    - pip install -U setuptools
    - pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
-   - pip install .
+   - pip install -e . --use-mirrors
    - pip install coveralls
 before_script:
    - lorax_env lorax config secret_key
    - lorax_env lorax config secret_key blah
+   - lorax_env lorax config coverage True
    - lorax_env lorax config
    - lorax_env lorax create_instance
    - lorax_env lorax create_test_files
@@ -40,4 +41,5 @@ script:
    - lorax_env supervisorctl stop lorax
    - lorax_env supervisorctl shutdown
 after_success:
-   - coveralls
+   - ls -l ${root_dir}/var/run/lorax_coverage.dat
+   - coveralls --rc-file=${root_dir}/etc/coverage.conf

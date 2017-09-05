@@ -610,6 +610,23 @@ pip_install() {
    set_value version $pkg_version
    echo "${pkg} version $pkg_version is now installed." >&1
 }
+pip_upgrade() {
+   #
+   # Upgrade an existing installation.
+   #
+   root="`get_value root_dir`"
+   if [[ ":$PATH:" != *"${root}:"* ]]; then
+      export PATH="${root}/bin:${PATH}"
+   fi
+   cd $root # src/ directory is left behind by git
+   pip install -U setuptools
+   pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
+   pip install -U ${pkg}
+   pkg_env_path="${root}/bin/${pkg}_env"
+   pkg_version="`${pkg_env_path} ${pkg} config version`"
+   set_value version $pkg_version
+   echo "${pkg} version $pkg_version is now installed." >&1
+}
 pypi() {
   #
   # Get the current pypi package version.
