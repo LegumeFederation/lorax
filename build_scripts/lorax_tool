@@ -1,9 +1,9 @@
 #!/bin/bash
 # Build configuration system.
 set -e # exit on error
-script_name=`basename "${BASH_SOURCE}"`
+script_name="`basename "${BASH_SOURCE}"`"
 pkg="${script_name%_tool}"
-PKG=`echo ${pkg} | tr /a-z/ /A-Z/`
+PKG="`echo ${pkg} | tr /a-z/ /A-Z/`"
 PKG_BUILD_DIR="${PKG}_BUILD_DIR"
 PKG_TEST_DIR="${PKG}_TEST_DIR"
 if [ -z "${!PKG_BUILD_DIR}" ]; then
@@ -18,7 +18,7 @@ else
    test_dir="${!PKG_TEST_DIR}"
 fi
 version="0.94"
-platform=`uname`
+platform="`uname`"
 error_exit() {
    echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
    echo "   $BASH_COMMAND"
@@ -111,8 +111,8 @@ install_python() {
    rm -r Python-${1}
 }
 install_raxml() {
-   model=`get_value raxml_model`
-   binsuffix=`get_value raxml_binsuffix`
+   model="`get_value raxml_model`"
+   binsuffix="`get_value raxml_binsuffix`"
    echo "Installing RAxML version $1 to $2 using ${model} model."
    curl -L -o raxml_v${1}.tar.gz https://github.com/stamatak/standard-RAxML/archive/v${1}.tar.gz
    tar xf raxml_v${1}.tar.gz 
@@ -136,7 +136,7 @@ install_hmmer() {
    rm -r hmmer-${1}-linux-intel-x86_64
 }
 install_redis() {
-   redis_cflags=`get_value redis_cflags` # -DAF_LOCAL=1
+   redis_cflags="`get_value redis_cflags`" # -DAF_LOCAL=1
    echo "Installing redis $1 to ${2}."
    curl -L -o redis-${1}.tar.gz  http://download.redis.io/releases/redis-${1}.tar.gz
    tar xf redis-${1}.tar.gz
@@ -153,9 +153,9 @@ install_redis() {
    rm -r redis-${1}
 }
 install_nginx() {
-   var=`get_value var_dir`
-   tmp=`get_value tmp_dir`
-   log=`get_value log_dir`
+   var="`get_value var_dir`"
+   tmp="`get_value tmp_dir`"
+   log="`get_value log_dir`"
    echo "Installing nginx $1 to ${2}."
    curl -L -o nginx-${1}.tar.gz http://nginx.org/download/nginx-${1}.tar.gz
    tar xf nginx-${1}.tar.gz
@@ -270,7 +270,7 @@ Arguments:
         echo -e "       key         \t       value" >&1
         echo -e "-------------------\t------------------" >&1
         for key in `ls ${confdir}`; do
-          value=`get_value ${key}`
+          value="`get_value ${key}`"
         printf '%-20s\t%s\n' ${key} ${value} >&1
       done
     elif [ -e ${confdir}/${1} ]; then
@@ -528,13 +528,13 @@ Packages:
        redis - redis database.
        nginx - nginx web proxy server.
 """
-  root=`get_value root_dir`
-  cc=`get_value cc`
-  make=`get_value make`
+  root="`get_value root_dir`"
+  cc="`get_value cc`"
+  make="`get_value make`"
   commandlist="python raxml hmmer redis nginx"
   if [ "$#" -eq 0 ]; then # install the whole list
       for package in $commandlist; do
-         version=`get_value $package`
+         version="`get_value $package`"
          if [ "$version" == "system" ]; then
            echo "System version of $package will be used, skipping build." >&2
          else
@@ -558,8 +558,8 @@ link_env() {
    #
    # Link the _env script to $bin_dir.
    #
-   root=`get_value root_dir`
-   bin_dir=`get_value bin_dir`
+   root="`get_value root_dir`"
+   bin_dir="`get_value bin_dir`"
    echo "linking ${pkg}_env to ${bin_dir}" >&1
    if [ ! -e ${bin_dir} ]; then
      echo "Creating binary directory at ${bin_dir}" >&1
@@ -582,9 +582,9 @@ make_dirs() {
    mkdir -p "`get_value log_dir`/nginx"
 }
 link_python() {
-   root=`get_value root_dir`
+   root="`get_value root_dir`"
    root_bin="${root}/bin"
-   python_version=`get_value python`
+   python_version="`get_value python`"
    cd $root_bin
    if [ ! -e python ]; then
       echo "creating python ${python_version} link in ${root_bin}." >&1
@@ -622,13 +622,13 @@ pypi() {
   # The piped function below does version sorting using only awk.
   #
   simple_url="https://pypi.python.org/simple/${pkg}"
-  latest=`curl -L -s $simple_url |\
+  latest="`curl -L -s $simple_url |\
           grep tar.gz |\
           sed -e 's/.*lorax-//g' -e 's#.tar.gz</a><br/>##g'|\
           awk -F. '{ printf("%03d%03d%03d\n", $1, $2, $3); }'|\
           sort -g |\
           awk '{printf("%d.%d.%d\n", substr($0,0,3),substr($0,4,3),substr($0,7,3))}'|\
-          tail -1`
+          tail -1`"
    if [ "$?" -eq 0 ]; then
      echo "$latest"
    else
@@ -697,7 +697,6 @@ update() {
    # Updates self.
    #
    rawsite="https://raw.githubusercontent.com/LegumeFederation/${pkg}/master/build_scripts"
-   updated=0
    printf "Checking for self-update..."
    curl -L -s -o ${pkg}_tool.new ${rawsite}/${pkg}_tool
    chmod 755 ${pkg}_tool.new
@@ -705,20 +704,18 @@ update() {
       rm ${pkg}_tool.new
       echo "not needed." >&1
    else
-      updated=1
       mv ${pkg}_tool.new ${pkg}_tool
-   fi
-   pypi=`pypi`
-   version=`version`
-   if [ "version" == "${pkg} build not configured" ]; then
-      echo "Next run \"./${script_name} build\" to build and configure ${pkg}." >&1
-   elif [ "$updated" -eq 1 ]; then
-      echo "This script was updated. Please re-build ${pkg} using" >&1
+            echo "This script was updated. Please re-build ${pkg} using" >&1
       if [ -e my_build.sh ] ; then
          echo "   ./${script_name} create_scripts" >&1
          echo "and" >&1
       fi
       echo "    ./${script_name} build" >&1
+   fi
+   pypi="`pypi`"
+   version="`version`"
+   if [ "${version}" == "${pkg} build not configured" ]; then
+      echo "Next run \"./${script_name} build\" to build and configure ${pkg}." >&1
    elif [ "$pypi" == "$version" ]; then
       echo "The latest version of ${pkg} (${pypi}) is installed, no need for updates." >&1
    else
@@ -733,7 +730,7 @@ version() {
    set +e
    trap - EXIT
    if [ -e ${confdir}/root_dir ]; then
-    root=`cat ${confdir}/root_dir`
+    root="`cat ${confdir}/root_dir`"
       pkg_env_path="${root}/bin/${pkg}_env"
       if [ -e $pkg_env_path ]; then
          echo "`${pkg_env_path} ${pkg} config version`"
