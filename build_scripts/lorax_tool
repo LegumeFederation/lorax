@@ -216,7 +216,7 @@ You may run this command with a \"-y\" argument to skip this question.
    fi
    # Configure the build.
    init
-   if [ -e my_build.sh]; then
+   if [ -e my_build.sh ]; then
       echo "Sourcing build specifics in my_build.sh."
       source my_build.sh
    else
@@ -326,7 +326,7 @@ You may run this command with a \"-y\" argument to skip this question.
       echo "Configuring non-default tmp directory ${tmp_dir}." >&1
       ${root}/bin/lorax_env lorax config tmp $tmp_dir
    fi
-   if [ -e my_config.sh]; then
+   if [ -e my_config.sh ]; then
       echo "Sourcing configuration specifics in my_config.sh."
       source my_config.sh
    else
@@ -574,17 +574,12 @@ make_dirs() {
    #
    # Make required installation directories.
    #
-   root=`get_value root_dir`
-   var=`get_value var_dir`
-   tmp=`get_value tmp_dir`
-   log=`get_value log_dir`
-   echo "Creating directories in ${root}." >&1
    mkdir -p ${root}/{bin,configuration}
    cp -R ${confdir}/ ${root}/configuration
-   mkdir -p ${root}/etc/nginx
-   mkdir -p ${var}/run/nginx
-   mkdir -p ${tmp}/nginx
-   mkdir -p ${log}/nginx
+   mkdir -p "`get_value root_dir`/etc/nginx"
+   mkdir -p "`get_value var_dir`/run/nginx"
+   mkdir -p "`get_value tmp_dir`/nginx"
+   mkdir -p "`get_value log_dir`/nginx"
 }
 link_python() {
    root=`get_value root_dir`
