@@ -7,10 +7,11 @@ PKG="`echo ${pkg} | tr /a-z/ /A-Z/`"
 PKG_BUILD_DIR="${PKG}_BUILD_DIR"
 PKG_TEST_DIR="${PKG}_TEST_DIR"
 if [ -z "${!PKG_BUILD_DIR}" ]; then
-   build_dir=~/.${pkg}
+   build_dir=~/.${pkg}/build
 else
    build_dir="${!PKG_BUILD_DIR}"
 fi
+build_root_dir="`dirname $build_dir`"
 confdir=${build_dir}/config
 if [ -z "${!PKG_TEST_DIR}" ]; then
    test_dir=${build_dir}/test
@@ -467,7 +468,7 @@ init() {
    #
    #  Initialize build parameters.
    #
-   set_value root_dir ${confdir}/${version}
+   set_value root_dir ${build_root_dir}/${version}
    set_value directory_version ${version}
    set_value var_dir "`get_value root_dir`/var"
    set_value tmp_dir "`get_value var_dir`/tmp"
