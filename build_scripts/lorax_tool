@@ -714,7 +714,7 @@ update() {
       echo "Next run \"./${script_name} build\" to build and configure ${pkg}." >&1
    elif [ "$updated" -eq 1 ]; then
       echo "This script was updated. Please re-build ${pkg} using" >&1
-      if [ -e my_build.sh] ; then
+      if [ -e my_build.sh ] ; then
          echo "   ./${script_name} create_scripts" >&1
          echo "and" >&1
       fi
