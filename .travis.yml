@@ -23,14 +23,15 @@ install:
    - pip install -e .
    - pip install coveralls
 before_script:
-   - lorax_env lorax config secret_key
-   - lorax_env lorax config secret_key blah
-   - lorax_env lorax config coverage True
-   - lorax_env lorax config
-   - lorax_env lorax create_instance
-   - lorax_env lorax create_test_files
-   - lorax_env lorax set_htpasswd
-   - lorax_env lorax test_logging
+   - alias lorax_cover="lorax_env coverage run --rcfile=${root_dir}/etc/coverage.conf "
+   - lorax_cover lorax config secret_key
+   - lorax_cover lorax config secret_key blah
+   - lorax_cover lorax config coverage True
+   - lorax_cover lorax config
+   - lorax_cover lorax create_instance
+   - lorax_cover lorax create_test_files
+   - lorax_cover lorax set_htpasswd
+   - lorax_cover lorax test_logging
 script:
    - lorax_env supervisord
    - while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
