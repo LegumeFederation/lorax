@@ -23,11 +23,11 @@ install:
    - pip install -e .
    - pip install coveralls
 before_script:
+   - lorax_env lorax create_instance
    - lorax_env coverage run --rcfile=${root_dir}/etc/coverage.conf lorax config secret_key
    - lorax_env coverage run --rcfile=${root_dir}/etc/coverage.conf lorax config secret_key blah
    - lorax_env coverage run --rcfile=${root_dir}/etc/coverage.conf lorax config coverage True
    - lorax_env coverage run --rcfile=${root_dir}/etc/coverage.conf lorax config
-   - lorax_env coverage run --rcfile=${root_dir}/etc/coverage.conf lorax create_instance
    - lorax_env coverage run --rcfile=${root_dir}/etc/coverage.conf lorax create_test_files
    - lorax_env coverage run --rcfile=${root_dir}/etc/coverage.conf lorax set_htpasswd
    - lorax_env coverage run --rcfile=${root_dir}/etc/coverage.conf lorax test_logging
