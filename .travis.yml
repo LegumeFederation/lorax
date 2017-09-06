@@ -44,7 +44,8 @@ script:
    - lorax_env supervisorctl stop lorax
    - lorax_env supervisorctl shutdown
 after_success:
+   - ls -la ${root_dir}/var/run
    - coverage combine --rcfile=${root_dir}/etc/coverage.conf
    - ls -la ${root_dir}/var/run
    - cp ${root_dir)/var/run/.coverage .
-   - codecov --root=${root_dir}
+   - codecov
