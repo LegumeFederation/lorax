@@ -42,4 +42,4 @@ script:
    - lorax_env supervisorctl shutdown
 after_success:
    - ls -l ${root_dir}/var/run/lorax_coverage.dat
-   - coveralls --rc-file=${root_dir}/etc/coverage.conf
+   - coveralls --rcfile=${root_dir}/etc/coverage.conf
