@@ -17,7 +17,7 @@
 #      {{NAME}}_user     User to execute the {{NAME}}_env script as.
 #
 {{NAME}}_root="{{ROOT}}"
-{{NAME}}_var="{{VAR}}"sssssssfdddddd
+{{NAME}}_var="{{VAR}}"
 {{NAME}}_tmp="{{TMP}}"
 {{NAME}}_data="{{DATA}}"
 {{NAME}}_userdata="{{USERDATA}}"

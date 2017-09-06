@@ -6,8 +6,7 @@ set -e
 #
 source ~/.lorax/lorax_rc
 #
-DOC="
-Create a set of protein family definitions from unaligned peptide 
+DOC="""Create a set of protein family definitions from unaligned peptide
 FASTA files and HMM's.  The HMM's may be in different directories,
 but the file stems must match.
 
@@ -21,7 +20,7 @@ Flags:
 Example:
 	./create_families.sh -v legume_gene_families_phytozome_10_2/fasta/ \
 		legume_gene_families_phytozome_10_2/hmm/
-"
+"""
 #
 function ProgressBar {
     let _progress=(${1}*100/${2}*100)/100
@@ -31,7 +30,6 @@ function ProgressBar {
     _empty=$(printf "%${_left}s")
 printf "\rProgress (${2} families): [${_fill// /#}${_empty// /-}] ${_progress}%%"
 }
-#
 #
 # Parse arguments.
 #

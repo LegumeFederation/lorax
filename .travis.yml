@@ -24,7 +24,7 @@ install:
    - pip install coveralls
 before_script:
    - lorax_env lorax create_instance
-   - export COVERAGE_PROCESS_START==${root_dir}/etc/coverage.conf
+   - export COVERAGE_PROCESS_START="${root_dir}/etc/coverage.conf"
    - lorax_env lorax config secret_key
    - lorax_env lorax config secret_key blah
    - lorax_env lorax config coverage True
