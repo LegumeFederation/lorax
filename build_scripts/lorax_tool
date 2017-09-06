@@ -372,7 +372,7 @@ cat << 'EOF'
 #./lorax_tool config hmmer 3.1b2
 #./lorax_tool config raxml 8.2.11
 #./lorax_tool config redis 4.0.1
-#./lorax_tool config nginx 1.13.4
+#./lorax_tool config nginx 1.13.5
 #
 # The following defaults are platform-specific.  Linux defaults are shown.
 #
@@ -477,7 +477,7 @@ init() {
    set_value hmmer 3.1b2
    set_value raxml 8.2.11
    set_value redis 4.0.1
-   set_value nginx 1.13.4
+   set_value nginx 1.13.5
    if [[ "$platform" == "Linux" ]]; then
       echo "Platform is linux." >&1
       set_value bin_dir ~/bin

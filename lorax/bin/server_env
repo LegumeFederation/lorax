@@ -49,23 +49,15 @@ PKG_LOG="${PKG}_LOG"
 #
 # Create the docstring.
 #
-DOC="""${script_path}/${script_name}--runs a command in the proper $pkg environment.
+DOC="""Runs a command in the proper $pkg environment.
 
 Usage:
         ${pkg}_env [-h] [-v] [-i] COMMAND
-
-This script sets required environmental variables for the ${pkg} package,
-activates the virtual environment (if not already activated),
-and executes COMMAND.
-
 Flags:
-
     -h  Print this help message and exit.
     -v  Verbose output on environment before executing command.
     -i  Interactive mode, read commands in a loop.
     -r  Returns the root directory.
-
-
 Environmental variables:
       PATH            Will have the binary director(ies) prepended.
       FLASK_APP       Set to \"${pkg}\"
@@ -73,12 +65,13 @@ Environmental variables:
       ${PKG_VAR}      If not set, will be set to \$${PKG_ROOT}/var.
       ${PKG_LOG}      If not set, will be set to \$${PKG_VAR}/log.
       ${PKG_TMP}      If not set, will be set to \$${PKG_VAR}/tmp.
-
 Files:
       ${PKG_ROOT}/etc/conf.d/${pkg}
                       If this file exists, will be sourced before testing
                       the variables above.  This file is generally created
                       at create_instance time.
+Location:
+     ${script_path}/${script_name}
 
 Joel Berendzen <joelb@ncgr.org>. Copyright (C) 2017, The National Center
 for Genome Resources.  All rights reserved.

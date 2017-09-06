@@ -78,7 +78,7 @@ GIT_REPO = 'https://github.com/LegumeFederation/lorax'
 #
 LIBRARY_PATH_ENVVAR = {'Darwin': 'DYLD_LIBRARY_PATH'}
 #
-# Start coverage if START_COVERAGE_RC is pointed at a config file.
+# Start coverage if COVERAGE_PROCESS_START is pointed at a config file.
 #
 coverage.process_startup()
 #
