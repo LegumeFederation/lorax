@@ -176,8 +176,6 @@ class BaseConfig(object):
     #
     # Current run.
     #
-    USER = getuser()
-    GROUP = 'staff'
     HOSTNAME = getfqdn()
     DATETIME = arrow.now().format('YYYY-MM-DD HH:mm:ss')
     #

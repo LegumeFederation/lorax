@@ -404,9 +404,8 @@ cat <<'EOF'
 # server at non-default locations.  Uncomment and edit as needed.
 # Values shown are not defaults, but rather example values.
 #
+#version="0.94"
 #${root}/bin/lorax_env lorax config secret_key mypasswd
-#${root}/bin/lorax_env lorax config user www
-#${root}/bin/lorax_env lorax config group www
 #${root}/bin/lorax_env lorax config data /usr/local/www/data/lorax/${version}
 #${root}/bin/lorax_env lorax config userdata /persist/lorax/${version}
 #${root}/bin/lorax_env lorax config host 127.0.0.1
