@@ -22,6 +22,7 @@ from flask_rq2 import RQ
 import rq_dashboard
 from Bio import SeqIO, AlignIO, Phylo
 from healthcheck import HealthCheck, EnvironmentDump
+import coverage
 #
 # local imports
 #
@@ -77,6 +78,10 @@ GIT_REPO = 'https://github.com/LegumeFederation/lorax'
 #
 LIBRARY_PATH_ENVVAR = {'Darwin': 'DYLD_LIBRARY_PATH'}
 #
+# Start coverage if START_COVERAGE_RC is pointed at a config file.
+#
+coverage.process_startup()
+#
 # Create an app object and configure it in the directory
 # specified by MYAPP_ROOT (or sys.prefix if not specified).
 #
@@ -112,8 +117,6 @@ envdump.add_section('application', application_data)
 #
 # Helper function defs start here.
 #
-
-
 def get_file(subpath, file_type='data', mode='U'):
     """Get a file, returning exceptions if they exist.
 

@@ -2,9 +2,6 @@
 import importlib
 import os
 import sys
-import coverage
-
-coverage.process_startup()
 
 package_name = os.path.basename(__file__).split('_')[0]
 
