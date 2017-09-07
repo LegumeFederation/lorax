@@ -3,7 +3,6 @@
 
 import os
 from pathlib import Path  # python 3.4 or later
-from flask import current_app
 from .config_file import create_config_file
 
 DIRS = [('TMP', 'nginx'),

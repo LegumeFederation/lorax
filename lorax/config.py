@@ -310,8 +310,7 @@ def configure_app(app):
     """
     config_name = os.getenv(SERVICE_NAME.upper() + '_MODE', 'default')
     if config_name not in config_dict:
-        print('ERROR -- mode "%s" not known.' % config_name,
-              file=sys.stderr)
+        print('ERROR -- mode "%s" not known.' % config_name, file=sys.stderr)
         sys.exit(1)
     app.config.from_object(config_dict[config_name])
     app.config['MODE'] = config_name

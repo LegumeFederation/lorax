@@ -54,9 +54,7 @@ def cli():
 def run():
     """Run a server directly."""
     from .logging import configure_logging
-    print(
-        'Direct start, use of gunicorn is recommended for production.',
-        file=sys.stderr)
+    print('Direct start, use of gunicorn is recommended for production.', file=sys.stderr)
     port = current_app.config['PORT']
     host = current_app.config['HOST']
     debug = current_app.config['DEBUG']

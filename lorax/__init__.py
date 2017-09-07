@@ -535,7 +535,7 @@ def queue_calculation(familyname,
     #
     if alignment_tool == 'hmmalign':
         aligner_command = ['time', 'nice', app.config['HMMALIGN_EXE']] + \
-            app.config['ALIGNERS'][aligner] + \
+            app.config['ALIGNERS'][alignment_tool] + \
             ['--' + hmm_seq_type, str(hmm_path), str(seqfile)]
     if tree_builder == 'FastTree':
         tree_command = ['time', 'nice', app.config['FASTTREE_EXE']] \
