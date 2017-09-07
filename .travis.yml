@@ -23,7 +23,7 @@ install:
    - pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    - pip install -e .
 before_script:
-   - lorax_env coverage ${root_dir}/bin/lorax
+   - lorax_env coverage run lorax
    - export COVERAGE_PROCESS_START="${PWD}/.coveragerc"
    - lorax_env lorax config secret_key
    - lorax_env lorax config secret_key blah
@@ -33,6 +33,7 @@ before_script:
    - lorax_env lorax create_instance --force
    - lorax_env lorax create_test_files
    - lorax_env lorax set_htpasswd
+   - lorax_env lorax set_htpasswd --force
    - lorax_env lorax test_logging
 script:
    - lorax_env supervisord
@@ -41,6 +42,7 @@ script:
    - lorax_env lorax rq info
    - cat ${root_dir}/var/log/lorax_server.log
    - ./test_targets.sh
+   - lorax_env lorax config --delete
    - lorax_env supervisorctl stop lorax
    - lorax_env supervisorctl shutdown
 after_success:
