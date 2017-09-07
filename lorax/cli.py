@@ -214,6 +214,7 @@ def copy_files(pkg_subdir, out_head, force, notemplate_exts=None):
     :return:
     """
     for root, dirs, files in walk_package(pkg_subdir):
+        del dirs
         split_dir = os.path.split(root)
         if split_dir[0] == '':
             out_subdir = ''
@@ -236,7 +237,7 @@ def copy_files(pkg_subdir, out_head, force, notemplate_exts=None):
                 ext = os.path.splitext(filename)[1].lstrip('.')
             except IndexError:
                 ext = ''
-            if notemplate_ext is not None and ext in notemplate_exts:
+            if notemplate_exts is not None and ext in notemplate_exts:
                 templated = 'directly'
                 data_string = pkgutil.get_data(__name__,
                                                root + '/' +
