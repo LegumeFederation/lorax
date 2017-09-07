@@ -46,4 +46,4 @@ after_success:
    - ls -la ${root_dir}/var/run
    - coverage combine --rcfile=$COVERAGE_PROCESS_START
    - ls -la ${root_dir}/var/run
-   - bash <(curl -s https://codecov.io/bash) -v -f ${root_dir}/var/run/.coverage
+   - bash <(curl -s https://codecov.io/bash) -X gcov -s ${root_dir}/var/run/
