@@ -575,10 +575,20 @@ make_dirs() {
    #
    # Make required installation directories.
    #
-   mkdir -p "`get_value root_dir`"/{bin,etc/nginx}
-   mkdir -p "`get_value var_dir`/run/nginx"
-   mkdir -p "`get_value tmp_dir`/nginx"
-   mkdir -p "`get_value log_dir`/nginx"
+   root="`get_value root_dir`"
+   dirlist=("${root}/bin"
+            "${root}/etc/nginx"
+            "`get_value var_dir`/run/nginx"
+            "`get_value tmp_dir`/nginx"
+            "`get_value log_dir`/nginx")
+   for dir in "${dirlist[@]}" ; do
+      if [ ! -e "$dir" ]; then
+         echo "making directory $dir"
+         mkdir -p $dir
+      else
+         echo "directory $dir already exists"
+      fi
+   done
 }
 link_python() {
    root="`get_value root_dir`"
