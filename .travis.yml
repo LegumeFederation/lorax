@@ -44,7 +44,6 @@ script:
    - lorax_env lorax create_instance --force
    - lorax_env lorax set_htpasswd --force
    - lorax_env lorax config --delete
-   - lorax_env timeout 10s lorax run
 after_success:
    - ls -la /tmp
    - coverage combine
