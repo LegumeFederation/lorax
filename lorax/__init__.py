@@ -830,19 +830,6 @@ def bind_calculation(method, superfamily=False):
         return _calculate
 
 
-calculation_methods = []
-for aligner in list(app.config['ALIGNERS'].keys()):
-    calculation_methods.append(bind_calculation(aligner))
-    calculation_methods.append(bind_calculation(aligner, superfamily=True))
-    for builder in list(app.config['TREEBUILDERS'].keys()):
-        calculation_methods.append(bind_calculation(aligner + '_' + builder))
-        calculation_methods.append(
-            bind_calculation(aligner + '_' + builder, superfamily=True))
-for builder in list(app.config['TREEBUILDERS'].keys()):
-    calculation_methods.append(bind_calculation(builder))
-    calculation_methods.append(bind_calculation(builder, superfamily=True))
-
-
 @app.route('/trees/<familyname>/<method>/' + TREE_NAME)
 def get_existing_tree(familyname, method):
     if method not in app.config['TREEBUILDERS']:
