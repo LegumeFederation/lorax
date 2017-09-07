@@ -125,6 +125,10 @@ class BaseConfig(object):
     #
     COVERAGE = False
     #
+    # User for rc scripts.
+    #
+    RC_USER = getuser()
+    #
     # Settings file name.
     #
     SETTINGS = SERVICE_NAME + '.conf'
