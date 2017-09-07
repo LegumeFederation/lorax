@@ -1,3 +1,4 @@
+sudo: false
 language: python
 python:
    - "3.5"
@@ -21,7 +22,6 @@ install:
    - pip install -U setuptools
    - pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    - pip install -e .
-   - pip install codecov
 before_script:
    - lorax_env lorax create_instance
    - export COVERAGE_PROCESS_START="${root_dir}/etc/coverage.conf"
@@ -43,11 +43,7 @@ script:
    - lorax_env supervisorctl stop lorax
    - lorax_env supervisorctl shutdown
 after_success:
-   - export COV_DIR=/home/travis/build/LegumeFederation/lorax/lorax
    - ls -la ${root_dir}/var/run
    - coverage combine --rcfile=$COVERAGE_PROCESS_START
-   - cp ${root_dir}/var/run/.coverage $COV_DIR
-   - cp $COVERAGE_PROCESS_START ${COV_DIR}/.coveragerc
-   - rm ${COV_DIR}/etc/coverage.conf
-   - ls -la $COV_DIR
-   - codecov
+   - ls -la ${root_dir}/var/run
+   - bash <(curl -s https://codecov.io/bash) -v -f ${root_dir}/var/run/.coverage
