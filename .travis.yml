@@ -27,6 +27,8 @@ before_script:
    - export COVERAGE_PROCESS_START="${PWD}/.coveragerc"
    - lorax_env lorax config secret_key
    - lorax_env lorax config secret_key blahblahblah
+   - lorax_env lorax config blah Bob_LobLaw
+   - lorax_env lorax config --vartype=list mylist "[1,2,3]"
    - lorax_env lorax config
    - lorax_env lorax create_instance
    - lorax_env lorax set_htpasswd

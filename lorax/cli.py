@@ -51,7 +51,7 @@ def cli():
 
 
 @cli.command()
-def run():
+def run(): # pragma: no cover
     """Run a server directly."""
     from .logging import configure_logging
     print('Direct start, use of gunicorn is recommended for production.', file=sys.stderr)

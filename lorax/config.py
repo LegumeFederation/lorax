@@ -124,6 +124,7 @@ class BaseConfig(object):
     # User for rc scripts.
     #
     RC_USER = getuser()
+    RC_GROUP = 'staff'
     #
     # Settings file name.
     #
@@ -200,13 +201,13 @@ class BaseConfig(object):
     if system == 'Linux':
         NGINX_LISTEN_ARGS = 'deferred'
         NGINX_EVENTS = 'use epoll;'
-    elif system.endswith('BSD'):
+    elif system.endswith('BSD'): # pragma: no cover
         NGINX_LISTEN_ARGS = 'accept_filter=httpready'
         NGINX_EVENTS = 'use kqueue;'
-    elif system == 'Darwin':
+    elif system == 'Darwin': # pragma: no cover
         NGINX_LISTEN_ARGS = ''
         NGINX_EVENTS = 'use kqueue;'
-    else:
+    else: # pragma: no cover
         NGINX_LISTEN_ARGS = ''
         NGINX_EVENTS = ''
     NGINX_UNIX_SOCKET = False

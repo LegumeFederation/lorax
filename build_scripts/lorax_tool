@@ -410,6 +410,7 @@ cat <<'EOF'
 #${root}/bin/lorax_env lorax config userdata /persist/lorax/${version}
 #${root}/bin/lorax_env lorax config host 127.0.0.1
 #${root}/bin/lorax_env lorax config rc_user www
+#${root}/bin/lorax_env lorax config rc_group www
 #${root}/bin/lorax_env lorax config nginx_server_name mywebsite.org
 #${root}/bin/lorax_env lorax config port 58927
 #${root}/bin/lorax_env lorax config sentry_dsn https://MYDSN@sentry.io/lorax

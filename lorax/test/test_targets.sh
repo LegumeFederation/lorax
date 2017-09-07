@@ -193,7 +193,6 @@ test_DELETE /trees/aspartic_peptidases.myseqs
 #
 test_GET_PASSWORD /log.txt
 test_GET_PASSWORD /environment
-test_GET_PASSWORD /test_exception 500
 trap - EXIT
 echo "lorax tests completed successfully."
 exit 0

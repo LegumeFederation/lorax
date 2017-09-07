@@ -916,5 +916,5 @@ def get_status_super(family, method, sup):
 
 
 @app.route('/test_exception')
-def test_exception():
+def test_exception(): # pragma: no cover
     raise RuntimeError('Intentional error from /test_exception')

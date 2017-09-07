@@ -8,6 +8,7 @@
 
 name="{{NAME}}"
 rcvar="{{NAME}}_enable"
+start_precmd="{{NAME}}_enable"
 start_cmd="{{NAME}}_start"
 stop_cmd="{{NAME}}_stop"
 
@@ -24,6 +25,15 @@ extra_commands="status supervisorctl shell"
 status="{{NAME}}_status"
 supervisorctl="{{NAME}}_supervisorctl"
 shell="{{NAME}}_shell"
+
+{{NAME}}_start_precmd()
+{
+  for dir in ${required_dirs}
+  do
+    mkdir -p ${dir} 2>/dev/null && chown ${{ '{' }}{{NAME}}_user}:{{RC_GROUP}} ${dir}
+  done
+}
+
 
 {{NAME}}_start()
 {
