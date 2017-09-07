@@ -43,12 +43,11 @@ script:
    - lorax_env supervisorctl stop lorax
    - lorax_env supervisorctl shutdown
 after_success:
-   - export GIT_DIR=/home/travis/build/LegumeFederation/lorax/lorax
+   - export COV_DIR=/home/travis/build/LegumeFederation/lorax/lorax
    - ls -la ${root_dir}/var/run
    - coverage combine --rcfile=$COVERAGE_PROCESS_START
-   - ls -la ${root_dir}/var/run
-   - cp ${root_dir}/var/run/.coverage $GIT_DIR
-   - cp $COVERAGE_PROCESS_START ${GIT_DIR}/.coveragerc
-   - rm ${GIT_DIR}/etc/coverage.conf
-   - ls -la $GIT_DIR
+   - cp ${root_dir}/var/run/.coverage $COV_DIR
+   - cp $COVERAGE_PROCESS_START ${COV_DIR}/.coveragerc
+   - rm ${COV_DIR}/etc/coverage.conf
+   - ls -la $COV_DIR
    - codecov
