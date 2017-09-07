@@ -121,10 +121,6 @@ class BaseConfig(object):
     #
     TESTING = False
     #
-    # Coverage (via Travis and coveralls).
-    #
-    COVERAGE = False
-    #
     # User for rc scripts.
     #
     RC_USER = getuser()

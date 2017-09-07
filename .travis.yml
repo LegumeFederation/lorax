@@ -26,15 +26,11 @@ before_script:
    - lorax_env coverage run -m lorax.cli
    - export COVERAGE_PROCESS_START="${PWD}/.coveragerc"
    - lorax_env lorax config secret_key
-   - lorax_env lorax config secret_key blah
-   - lorax_env lorax config coverage True
+   - lorax_env lorax config secret_key blahblahblah
    - lorax_env lorax config
    - lorax_env lorax create_instance
-   - lorax_env lorax create_instance --force
-   - lorax_env lorax create_test_files
    - lorax_env lorax set_htpasswd
-   - lorax_env lorax set_htpasswd --force
-   - lorax_env lorax test_logging
+   - lorax_env lorax create_test_files
 script:
    - lorax_env supervisord
    - while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
@@ -42,9 +38,14 @@ script:
    - lorax_env lorax rq info
    - cat ${root_dir}/var/log/lorax_server.log
    - ./test_targets.sh
-   - lorax_env lorax config --delete
    - lorax_env supervisorctl stop lorax
    - lorax_env supervisorctl shutdown
+   - lorax_env lorax test_logging
+   - lorax_env lorax create_instance --force
+   - lorax_env lorax set_htpasswd --force
+   - lorax_env lorax config --delete
+   - lorax_env lorax run
+   - killall lorax
 after_success:
    - ls -la /tmp
    - coverage combine

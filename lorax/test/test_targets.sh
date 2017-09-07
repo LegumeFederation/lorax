@@ -70,7 +70,7 @@ test_GET () {
    fi
 }
 #
-test_GET_PASSWORD () {
+test_GET_PASSWORD() {
    # Tests HTTP return code of GET with password, optionally printing results.
    # Arguments:
    #         $1 - target URL
@@ -103,7 +103,7 @@ test_GET_PASSWORD () {
    fi
 }
 #
-test_DELETE () {
+test_DELETE() {
    # Tests HTTP return code of DELETE, optionally printing results.
    # Arguments:
    #         $1 - target URL
@@ -155,9 +155,6 @@ test_GET /status
 test_GET /healthcheck
 test_GET /badtarget 404
 test_GET /trees/families.json
-test_GET_PASSWORD /log.txt
-test_GET_PASSWORD /environment
-test_GET_PASSWORD /test_exception 500
 
 # Post sequences.
 ./post_FASTA.sh ${verbose_flag}  peptide aspartic_peptidases.faa aspartic_peptidases sequences
@@ -192,6 +189,11 @@ test_GET /trees/aspartic_peptidases.myseqs/FastTree/run_log.txt
 test_DELETE /trees/aspartic_paptidases.FastTree 403  # forbidden to remove subdirs this way
 test_DELETE /trees/aspartic_peptidases.myseqs
 #
+# Passworded targets.
+#
+test_GET_PASSWORD /log.txt
+test_GET_PASSWORD /environment
+test_GET_PASSWORD /test_exception 500
 trap - EXIT
 echo "lorax tests completed successfully."
 exit 0
