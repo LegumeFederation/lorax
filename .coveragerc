@@ -2,7 +2,7 @@
 ; Configuration file for coverage tool.
 ;
 [run]
-branch = True
+branch = False
 data_file = /tmp/.coverage
 parallel = True
 source = lorax
