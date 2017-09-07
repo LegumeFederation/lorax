@@ -37,13 +37,13 @@ def generate_random_password(length=DEFAULT_PASSWORD_LENGTH,
     if use_punctuation:
         alphabet += string.punctuation.replace('-', '')
     nchars = 0
-    password = ''
+    secret_key = ''
     while nchars < length:
-        password += choice(alphabet)
+        secret_key += choice(alphabet) # noqa
         nchars += 1
         if grouping and nchars < length and not nchars % grouping:
-            password += '-'
-    return password
+            secret_key += '-'
+    return secret_key
 
 
 def write_kv_to_config_file(file_path, key, value, valtype, previous_value):

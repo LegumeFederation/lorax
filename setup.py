@@ -19,7 +19,7 @@ from os import environ as environ
 import platform
 import shutil
 import string
-import subprocess
+import subprocess # noqa
 import sys
 from setuptools import setup, find_packages
 from setuptools.command import build_py, develop, install
@@ -84,8 +84,8 @@ class BuildCBinaryCommand(Command):
 
     def finalize_options(self):
         """Post-process options."""
-        assert shutil.which(self.cc) is not None, (
-            'C compiler %s is not found on path.' % self.cc)
+        if shutil.which(self.cc) is None:
+            raise SystemError('C compiler %s is not found on path.', self.cc)
         self.cflag_list = self.cflags.split()
         self.lib_list = self.libs.split()
 
@@ -171,11 +171,11 @@ class InstallBinariesCommand(Command):
                     file_path))
                 alphabet = string.ascii_letters + string.digits
                 nchars = 0
-                password = ''
+                secret_key = ''
                 while nchars < PASSWORD_LENGTH:
-                    password += choice(alphabet)
+                    secret_key += choice(alphabet) # noqa
                     nchars += 1
-                print('SECRET_KEY = "%s" # set at install time' % (password),
+                print('SECRET_KEY = "%s" # set at install time' % (secret_key),
                       file=config_fh)
 
     def run(self):

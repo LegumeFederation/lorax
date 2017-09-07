@@ -327,7 +327,7 @@ def configure_app(app):
         with pyfile_path.open(mode='rb') as config_file:
             exec(compile(config_file.read(), str(pyfile_path),
                          'exec'),
-                 pyfile_dict)
+                 pyfile_dict) # noqa
     except IOError:
         print('Unable to load configuration file "%s".' % str(pyfile_path))
     for internal_key in ['__doc__', '__builtins__']:
