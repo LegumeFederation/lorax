@@ -24,7 +24,7 @@ install:
    - pip install codecov
 before_script:
    - lorax_env lorax create_instance
-   - cp ${root_dir}/etc/coverage.conf .coveragerc
+   - cp ${root_dir}/etc/coverage.conf /home/travis/build/LegumeFederation/lorax/.coveragerc
    - export COVERAGE_PROCESS_START="${root_dir}/etc/coverage.conf"
    - lorax_env lorax config secret_key
    - lorax_env lorax config secret_key blah
@@ -47,5 +47,5 @@ after_success:
    - ls -la ${root_dir}/var/run
    - coverage combine --rcfile=${root_dir}/etc/coverage.conf
    - ls -la ${root_dir}/var/run
-   - cp ${root_dir)/var/run/.coverage .
+   - cp ${root_dir)/var/run/.coverage /home/travis/build/LegumeFederation/lorax/
    - codecov
