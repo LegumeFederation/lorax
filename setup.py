@@ -176,7 +176,7 @@ class InstallBinariesCommand(Command):
                     secret_key += choice(alphabet) # noqa
                     nchars += 1
                 print('SECRET_KEY = "%s" # set at install time' % (secret_key),
-                      file=config_fh)
+                      file=config_fh) # noqa
 
     def run(self):
         """Run command."""

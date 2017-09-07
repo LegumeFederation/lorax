@@ -24,6 +24,10 @@ from Bio import SeqIO, AlignIO, Phylo
 from healthcheck import HealthCheck, EnvironmentDump
 import coverage
 #
+# Start coverage if COVERAGE_PROCESS_START is pointed at a config file.
+#
+coverage.process_startup()
+#
 # local imports
 #
 from .config import configure_app
@@ -77,10 +81,6 @@ GIT_REPO = 'https://github.com/LegumeFederation/lorax'
 # Library path for fixing external libraries.
 #
 LIBRARY_PATH_ENVVAR = {'Darwin': 'DYLD_LIBRARY_PATH'}
-#
-# Start coverage if COVERAGE_PROCESS_START is pointed at a config file.
-#
-coverage.process_startup()
 #
 # Create an app object and configure it in the directory
 # specified by MYAPP_ROOT (or sys.prefix if not specified).
