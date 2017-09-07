@@ -2,7 +2,8 @@ doc-warnings: false
 test-warnings: false
 strictness: medium
 max-line-length: 120
-uses: flask
+uses:
+   - flask
 autodetect: true
 ignore-paths:
   - docs

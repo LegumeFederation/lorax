@@ -57,7 +57,7 @@ def get_path(name, default):
             Path(path_str).relative_to('/')
         except ValueError:  # relative path, not acceptable
             print('ERROR--path variable %s="%s" not absolute, ignoring'
-                  % (var, path_str))
+                  % (varname, path_str))
             path_str = default
     else:
         path_str = default

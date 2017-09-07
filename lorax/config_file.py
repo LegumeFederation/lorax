@@ -91,4 +91,4 @@ def create_config_file(file_path):
 
 if __name__ == '__main__':  # for development and testing purposes only
     from pathlib import Path  # python > 3.4
-    create_config_file(Path(sys.prefix), 'settings.conf')
+    create_config_file(Path(sys.prefix)/'settings.conf')

@@ -63,11 +63,11 @@ def configure_logging(app):
     if app.config['SENTRY_DSN'] is not '':
         from raven.contrib.flask import Sentry
         # import logging
-        sentry = Sentry(app,
-                        dsn=app.config['SENTRY_DSN'],
-                        # logging=True,
-                        # level=logging.ERROR
-                        )
+        Sentry(app,
+               dsn=app.config['SENTRY_DSN'],
+               # logging=True,
+               # level=logging.ERROR
+                )
 
     #
     # Start log file.

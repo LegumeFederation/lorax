@@ -204,7 +204,7 @@ def walk_package(root):
     yield root, dirs, files
 
 
-def copy_files(pkg_subdir, out_head, force, notemplate_exts=[]):
+def copy_files(pkg_subdir, out_head, force, notemplate_exts=None):
     """Copy files from package, with templating.
 
     :param pkg_subdir:
@@ -236,7 +236,7 @@ def copy_files(pkg_subdir, out_head, force, notemplate_exts=[]):
                 ext = os.path.splitext(filename)[1].lstrip('.')
             except IndexError:
                 ext = ''
-            if ext in notemplate_exts:
+            if notemplate_ext is not None and ext in notemplate_exts:
                 templated = 'directly'
                 data_string = pkgutil.get_data(__name__,
                                                root + '/' +
