@@ -204,7 +204,7 @@ def walk_package(root):
     yield root, dirs, files
 
 
-def copy_files(pkg_subdir, out_head, force, notemplate_exts=None):
+def copy_files(pkg_subdir, out_head, force, notemplate_exts=[]):
     """Copy files from package, with templating.
 
     :param pkg_subdir:
