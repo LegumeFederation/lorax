@@ -204,7 +204,7 @@ def walk_package(root):
     yield root, dirs, files
 
 
-def copy_files(pkg_subdir, out_head, force, notemplate_exts=[]):
+def copy_files(pkg_subdir, out_head, force, notemplate_exts=None):
     """Copy files from package, with templating.
 
     :param pkg_subdir:
@@ -284,21 +284,21 @@ def set_htpasswd(force):
     htpasswd_file = current_app.config['ROOT'] + '/etc/nginx/htpasswd'
     htpasswd_path = Path(htpasswd_file)
     user = current_app.config['NAME']
-    password = current_app.config['SECRET_KEY']
-    print('Setting password for user %s to %s. ' % (user, password))
+    secret_key = current_app.config['SECRET_KEY']
+    print('Setting password for user %s to %s. ' % (user, secret_key))
     if not htpasswd_path.exists():
         print('Creating htpasswd file.')
         htpasswd_path.touch()
     with htpasswd.Basic(htpasswd_file) as userdb:
-        if password == '':
+        if len(secret_key) == 0:
             print('ERROR--must set SECRET_KEY first.')
             sys.exit(1)
         try:
-            userdb.add(user, password)
+            userdb.add(user, secret_key)
         except htpasswd.basic.UserExists:
             if force:
                 print('Updating site password for existing user %s.' % user)
-                userdb.change_password(user, password)
+                userdb.change_password(user, secret_key)
             else:
                 print('ERROR--user %s already exists in htpasswd, use --force.')
                 sys.exit(1)

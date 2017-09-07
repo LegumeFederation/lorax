@@ -43,8 +43,10 @@ script:
    - lorax_env supervisorctl stop lorax
    - lorax_env supervisorctl shutdown
 after_success:
-   - cp $COVERAGE_PROCESS_START ~/.coveragerc
+   - cp $COVERAGE_PROCESS_START .coveragerc
+   - cp $COVERAGE_PROCESS_START ${root_dir)/var/run/.coveragerc
    - ls -la ${root_dir}/var/run
+   - ls -la
    - coverage combine
    - ls -la ${root_dir}/var/run
    - bash <(curl -s https://codecov.io/bash) -X gcov -f ${root_dir}/var/run/.coverage

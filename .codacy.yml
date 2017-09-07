@@ -1,10 +1,10 @@
 ---
 
 exclude_paths:
-  - doc
-  - lorax/fasttree
-  - lorax/static
-  - lorax/templates
+  - doc/**
+  - lorax/fasttree/**
+  - lorax/static/**
+  - lorax/templates/**
   - .bundle/**
   - '*.min.js'
   - '**/test/**'
