@@ -23,7 +23,7 @@ install:
    - pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    - pip install -e .
 before_script:
-   - lorax_env coverage run lorax
+   - lorax_env coverage run -m lorax.cli
    - export COVERAGE_PROCESS_START="${PWD}/.coveragerc"
    - lorax_env lorax config secret_key
    - lorax_env lorax config secret_key blah
