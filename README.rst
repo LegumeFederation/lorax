@@ -17,7 +17,7 @@ alignments, `RQ`_ to queue long calculations, and `Flask`_ to serve up results.
    :alt: Travis continuous integration testing
 
 .. image:: https://readthedocs.org/projects/lorax/badge/?version=latest
-   :target: https://lorax.readthedocs.io/en/latest/?badge=latest
+   :target: http://lorax.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
 .. image:: https://landscape.io/github/LegumeFederation/lorax/master/landscape.svg?style=flat

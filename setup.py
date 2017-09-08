@@ -40,6 +40,8 @@ ENV_SCRIPT_INNAME = 'server_env'
 ENV_SCRIPT_OUTNAME = NAME + '_env'
 RUN_SCRIPT_INNAME = 'server_run.py'
 RUN_SCRIPT_OUTNAME = NAME + '_run.py'
+DIR_SCRIPT_INNAME = 'server_dirs'
+DIR_SCRIPT_OUTNAME = NAME + '_dirs'
 SOURCE_PATH = Path('.') / NAME / C_NAME.lower()
 BUILD_PATH = Path('.') / NAME / 'bin'
 PASSWORD_LENGTH = 12
@@ -195,6 +197,8 @@ class InstallBinariesCommand(Command):
                          str(self.bin_path / ENV_SCRIPT_OUTNAME))
             shutil.copy2(str(BUILD_PATH / RUN_SCRIPT_INNAME),
                          str(self.bin_path / RUN_SCRIPT_OUTNAME))
+            shutil.copy2(str(BUILD_PATH / DIR_SCRIPT_INNAME),
+                         str(self.bin_path / DIR_SCRIPT_OUTNAME))
             my_python = self.bin_path / (NAME + '_python')
             if not my_python.exists():
                 logger.info('creating ' + str(my_python) + ' link')
