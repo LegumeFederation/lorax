@@ -1,12 +1,8 @@
 # config file for {{NAME}} version {{VERSION}} in {{MODE}} mode.
 # Templated on node {{HOSTNAME}} on {{DATETIME}} by {{USER}}.
 #
-# This file sets values needed by the rc.d startup scripts.
-# It is *not* sourced by the server_env script, which requires
-# a different repertoire of environmental variables.  Note
-# that these variables are entirely lower-cased as some rc systems
-# pass them along while others launch into a clean environment.
-# The environmental variables are:
+# This file sets values needed by the server_dirs and 
+# rc.d startup scripts.  The  variables are:
 #
 #      {{NAME}}_root     Root of the package, with bin/ and etc/ directories.
 #      {{NAME}}_var      Home of the redis/ and run/ directories.
@@ -15,9 +11,11 @@
 #      {{NAME}}_data     Home of persistent data files.
 #      {{NAME}}_userdata Home of user data files (different persistence).
 #      {{NAME}}_user     User to execute the {{NAME}}_env script as.
+#      {{NAME}}_enable   Set to "YES" if the service is to be started.
 #
 {{NAME}}_root="{{ROOT}}"
 {{NAME}}_var="{{VAR}}"
+{{NAME}}_log="{{LOG}}"
 {{NAME}}_tmp="{{TMP}}"
 {{NAME}}_data="{{DATA}}"
 {{NAME}}_userdata="{{USERDATA}}"
