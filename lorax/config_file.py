@@ -3,7 +3,7 @@
 import string
 import sys
 from datetime import datetime
-if sys.version_info >= (3, 6, 0, 'final', 0):
+if sys.version_info >= (3, 6, 0, 'final', 0): # pragma: no cover
     from secrets import choice
 else:
     from random import choice
@@ -27,15 +27,9 @@ Types are derived from python typing rules.
 
 
 def generate_random_password(length=DEFAULT_PASSWORD_LENGTH,
-                             grouping=DEFAULT_GROUPING,
-                             use_uppercase=True,
-                             use_punctuation=False):
+                             grouping=DEFAULT_GROUPING):
     """Generate a password from an alphabet"""
     alphabet = string.ascii_lowercase + string.digits
-    if use_uppercase:
-        alphabet += string.ascii_uppercase
-    if use_punctuation:
-        alphabet += string.punctuation.replace('-', '')
     nchars = 0
     secret_key = ''
     while nchars < length:
@@ -70,7 +64,7 @@ def write_kv_to_config_file(file_path, key, value, valtype, previous_value):
 def create_config_file(file_path):
     """Initializes config file with secret key."""
     dir_path = file_path.parent
-    if not dir_path.is_dir():
+    if not dir_path.is_dir(): # pragma: no cover
         print('Creating application etc/ directory "%s".' % str(dir_path))
         dir_path.mkdir(mode=0o775,
                        parents=True)

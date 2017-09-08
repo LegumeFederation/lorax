@@ -527,7 +527,7 @@ def queue_calculation(familyname,
                         ALIGNMENT_NAME + SEQUENCE_EXTENSIONS[key])
                     seq_type = key
                     break
-            else:
+            else: # pragma: no cover
                 app.logger.error('Unable to find aligned sequences.')
                 abort(404)
     #
@@ -541,7 +541,7 @@ def queue_calculation(familyname,
         tree_command = ['time', 'nice', app.config['FASTTREE_EXE']] \
             + app.config['TREEBUILDERS'][tree_builder][seq_type] \
             + [str(alignment_input_path)]
-    elif tree_builder == 'RAxML':
+    elif tree_builder == 'RAxML': # pragma: no cover
         tree_command = ['time', 'nice', app.config['RAXML_EXE']] \
             + app.config['TREEBUILDERS'][tree_builder][seq_type] \
             + ['-n',
@@ -760,7 +760,7 @@ def put_hmm(family):
     hmm_path = Path(app.config['DATA']) / family / HMM_FILENAME
     try:
         hmm_fh = hmm_path.open('wb')
-    except IOError:  # e.g., if family has not been created
+    except IOError:  # pragma: no cover
         app.logger.error('Unable to create "%s".', str(hmm_path))
         abort(400)
     hmm_fh.write(request.data)
@@ -795,7 +795,7 @@ def put_hmm(family):
                 hmmstats_dict['relE'] = float(fields[8])
                 hmmstats_dict['compKL'] = float(fields[9])
             except (TypeError, KeyError,
-                    ValueError):  # format error on hmmstats
+                    ValueError):  # pragma: no cover
                 app.logger.error(
                     'hmmstats did not return expected stats, check version.')
                 abort(406)

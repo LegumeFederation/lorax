@@ -24,15 +24,14 @@ DEFAULT_STDERR_LOGLEVEL = logging.WARNING
 class ContextualFilter(logging.Filter):
     """A logging filter with request-based info."""
 
-    def filter(self, log_record):
-        log_record.utcnow = (datetime.utcnow()
-                             .strftime('%Y-%m-%d %H:%M:%S%Z'))
+    def filter(self, record):
+        record.utcnow = (datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S%Z'))
         try:
-            log_record.url = request.path
-            log_record.method = request.method
+            record.url = request.path
+            record.method = request.method
         except RuntimeError:
-            log_record.url = ''
-            log_record.method = ''
+            record.url = ''
+            record.method = ''
 
         return True
 
@@ -43,11 +42,11 @@ def configure_logging(app):
     :param app:
     :return:
     """
-    if app.config['DEBUG']:
+    if app.config['DEBUG']: # pragma: no cover
         stderr_log_level = logging.DEBUG
     else:
         stderr_log_level = DEFAULT_STDERR_LOGLEVEL
-    if app.config['QUIET']:
+    if app.config['QUIET']: # pragma: no cover
         file_log_level = logging.ERROR
     else:
         file_log_level = DEFAULT_FILE_LOGLEVEL
@@ -60,7 +59,7 @@ def configure_logging(app):
     #
     # Start Sentry monitoring, if SENTRY_DNS is configured.
     #
-    if app.config['SENTRY_DSN'] is not '':
+    if app.config['SENTRY_DSN'] is not '': # pragma: no cover
         from raven.contrib.flask import Sentry
         # import logging
         Sentry(app,
@@ -76,14 +75,14 @@ def configure_logging(app):
         logfile_name = app.config['LOGGER_NAME'] + '_errors.log'
         app.config['LOGFILE_NAME'] = logfile_name
         logfile_path = Path(app.config['LOG']) / logfile_name
-        if app.config['DEBUG']:
+        if app.config['DEBUG']: # pragma: no cover
             print('Logging to file "%s".' % str(logfile_path),
                   file=sys.stderr)
         if not logfile_path.parent.is_dir():  # create logs/ dir
-            try:
+            try: # pragma: no cover
                 logfile_path.parent.mkdir(mode=int(app.config['DIR_MODE'], 8),
                                           parents=True)
-            except OSError:
+            except OSError: # pragma: no cover
                 app.logger.error('Unable to create logfile directory "%s"',
                                  logfile_path.parent)
                 raise OSError

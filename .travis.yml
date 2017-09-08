@@ -40,7 +40,7 @@ script:
    - lorax_env lorax rq info
    - cat ${root_dir}/var/log/lorax_server.log
    - ./test_targets.sh
-   - lorax_env supervisorctl stop lorax
+   - lorax_env supervisorctl stop lorax aligner treebuilder
    - lorax_env supervisorctl shutdown
    - lorax_env lorax test_logging
    - lorax_env lorax create_instance --force
