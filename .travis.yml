@@ -32,7 +32,7 @@ before_script:
    - lorax_env lorax config --vartype=list mylist "[1,2,3]"
    - lorax_env lorax config
    - lorax_env lorax create_instance
-   - lorax_env lorax_dirs
+   - ls -l ${root_dir}/bin/lorax* #lorax_env lorax_dirs
    - lorax_env lorax set_htpasswd
    - lorax_env lorax create_test_files
 script:
