@@ -157,7 +157,7 @@ if [ -x "${bin_dir}/conda" ]; then
    if [ "$active_env" == "${!PKG_ROOT}" ]; then # already in environment
         in_venv=1
         if [ -z "$CONDA_DEFAULT_ENV" ] ; then
-           venv_name=active_env_name
+           venv_name="$active_env_name"
         else
            venv_name="$CONDA_DEFAULT_ENV"
         fi
