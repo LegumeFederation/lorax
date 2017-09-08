@@ -23,7 +23,7 @@ def create_dir(config_path, subdir, app):
         try:
             dir_path.mkdir(mode=int(app.config['DIR_MODE'], 8),
                            parents=True)
-        except OSError:
+        except OSError: # pragma: no cover
             print('Unable to create directory "%s"'
                   % (str(dir_path)))
             raise OSError

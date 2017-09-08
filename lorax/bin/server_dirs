@@ -53,6 +53,9 @@ if [ -e "${conf_dir}/${pkg}" ]; then
         exit 1
 fi
 source "${conf_dir}/${pkg}"
+#
+# Create directories.
+#
 for path in "${pathlist[@]}" ; do
    if [ -z "${!path}" ]; then
        echo "ERROR--Path $path not defined."
