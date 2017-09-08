@@ -38,8 +38,7 @@ conf_dir=${root_dir}/etc/conf.d
 #
 pkg="${script_name%_dirs}"
 PKG=$(echo ${pkg} | tr /a-z/ /A-Z/)
-pathlist=("${pkg}_root"
-          "${pkg}_var"
+pathlist=("${pkg}_var"
           "${pkg}_tmp"
           "${pkg}_log"
           "${pkg}_data"
@@ -65,6 +64,8 @@ for path in "${pathlist[@]}" ; do
        echo "Creating directory ${!path}."
        mkdir -p "${!path}"
    else
-       echo "Directory ${!path} exists."
+       echo "$path directory ${!path} exists."
    fi
 done
+trap - EXIT
+exit 0

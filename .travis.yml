@@ -30,7 +30,6 @@ before_script:
    - lorax_env lorax config secret_key blahblahblah
    - lorax_env lorax config
    - lorax_env lorax create_instance
-   - ${root_dir}/bin/lorax_dirs
    - lorax_env lorax set_htpasswd
    - lorax_env lorax create_test_files
 script:
