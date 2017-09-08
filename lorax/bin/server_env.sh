@@ -33,15 +33,15 @@ myrealpath() {
 #
 # Get the real path to this script.
 #
-script_path=`myrealpath "${BASH_SOURCE}"`
-script_name=`basename "${script_path}"`
-bin_dir=`dirname "${script_path}"`
-root_dir=`dirname "${bin_dir}"`
+script_path=$(myrealpath "${BASH_SOURCE}")
+script_name=$(basename "${script_path}")
+bin_dir=$(dirname "${script_path}")
+root_dir=$(dirname "${bin_dir}")
 #
 # Get the names of variables to be defined.
 #
 pkg="${script_name%_env}"
-PKG=`echo ${pkg} | tr /a-z/ /A-Z/`
+PKG=$(echo ${pkg} | tr /a-z/ /A-Z/)
 PKG_ROOT="${PKG}_ROOT"
 PKG_VAR="${PKG}_VAR"
 PKG_TMP="${PKG}_TMP"
@@ -126,7 +126,7 @@ fi
 #
 # Do platform-specific things.
 #
-platform=`uname`
+platform=$(uname)
 if [[ "$platform" == 'Linux' ]]; then
     :
 elif [[ "$platform" == *'BSD' ]]; then
@@ -152,8 +152,8 @@ if [ -x "${bin_dir}/conda" ]; then
     # corresponding to the installation directory and "source activate" it
     # before running COMMAND.
    venv_type="conda"
-   active_env=`${bin_dir}/conda env list | grep \* | awk '{print $3}'`
-   active_env_name=`${bin_dir}/conda env list | grep \* | awk '{print $1}'`
+   active_env=$(${bin_dir}/conda env list | grep \* | awk '{print $3}')
+   active_env_name=$(${bin_dir}/conda env list | grep \* | awk '{print $1}')
    if [ "$active_env" == "${!PKG_ROOT}" ]; then # already in environment
         in_venv=1
         if [ -z "$CONDA_DEFAULT_ENV" ] ; then
@@ -163,10 +163,10 @@ if [ -x "${bin_dir}/conda" ]; then
         fi
    else
       # conda venv needs activation
-      environments=`${bin_dir}/conda env list | grep -v \# | grep -v \*`
+      environments=$(${bin_dir}/conda env list | grep -v \# | grep -v \*)
       while read -r envline; do
-         env_path=`echo ${envline} | awk '{print $2}'`
-         env_name=`echo ${envline} | awk '{print $1}'`
+         env_path=$(echo ${envline} | awk '{print $2}')
+         env_name=$(echo ${envline} | awk '{print $1}')
          if [ "$env_path" == "${!PKG_ROOT}" ]; then
             venv_name="$env_name"
             break
@@ -184,7 +184,7 @@ else
     # If not and if "activate" script is found in the directory with this
     # script, source the activate script.
     venv_type="normal"
-    real_prefix=`${bin_dir}/${pkg}_python -c 'import sys; print(hasattr(sys, "real_prefix"))'`
+    real_prefix=$(${bin_dir}/${pkg}_python -c 'import sys; print(hasattr(sys, "real_prefix"))')
     if [ "$real_prefix" == "True" ]; then # in a venv already
         in_venv=1
     else
@@ -200,7 +200,7 @@ fi
 # If environment python's binary directory and $bin_dir are not in the path,
 # prepend them.
 #
-sys_bin_dir=`${bin_dir}/${pkg}_python -c 'import os,sys; print(os.path.dirname(sys.executable))'`
+sys_bin_dir=$(${bin_dir}/${pkg}_python -c 'import os,sys; print(os.path.dirname(sys.executable))')
 if [[ ":$PATH:" != *"${sys_bin_dir}:"* ]]; then
     export PATH=${sys_bin_dir}:${PATH}
 fi

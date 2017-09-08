@@ -38,12 +38,12 @@ conf_dir=${root_dir}/etc/conf.d
 #
 pkg="${script_name%_dirs}"
 PKG=$(echo ${pkg} | tr /a-z/ /A-Z/)
-pathlist=("${PKG}_ROOT"
-          "${PKG}_VAR"
-          "${PKG}_TMP"
-          "${PKG}_LOG"
-          "${PKG}_DATA"
-          "${PKG}_USERDATA")
+pathlist=("${pkg}_root"
+          "${pkg}_var"
+          "${pkg}_tmp"
+          "${pkg}_log"
+          "${pkg}_data"
+          "${pkg}_userdata")
 #
 # Source configuration.
 #
@@ -58,7 +58,7 @@ source "${conf_dir}/${pkg}"
 #
 for path in "${pathlist[@]}" ; do
    if [ -z "${!path}" ]; then
-       echo "ERROR--Path $path not defined."
+       echo "ERROR--Variable $path not defined."
        trap - EXIT
        exit 1
    elif [ ! -d "${!path}" ]; then
