@@ -13,7 +13,7 @@ trap error_exit EXIT
 myrealpath() {
   if hash realpath 2>/dev/null; then
      realpath "$@"
-  else # realpath doesn't exist, fake it
+  else # realpath does not exist, fake it
      pushd "$(dirname "$1")" 2&>/dev/null
      islink=$(readlink "$(basename "$1")")
      while [ "$islink" ]; do
@@ -28,16 +28,16 @@ myrealpath() {
 #
 # Get the real path to this script.
 #
-script_path=`myrealpath "${BASH_SOURCE}"`
-script_name=`basename "${script_path}"`
-bin_dir=`dirname "${script_path}"`
-root_dir=`dirname "${bin_dir}"`
+script_path=$(myrealpath "${BASH_SOURCE}")
+script_name=$(basename "${script_path}")
+bin_dir=$(dirname "${script_path}")
+root_dir=$(dirname "${bin_dir}")
 conf_dir=${root_dir}/etc/conf.d
 #
 # Get the names of variables to be defined.
 #
 pkg="${script_name%_dirs}"
-PKG=`echo ${pkg} | tr /a-z/ /A-Z/`
+PKG=$(echo ${pkg} | tr /a-z/ /A-Z/)
 pathlist=("${PKG}_ROOT"
           "${PKG}_VAR"
           "${PKG}_TMP"
@@ -47,7 +47,7 @@ pathlist=("${PKG}_ROOT"
 #
 # Source configuration.
 #
-if [ -e "${conf_dir}/${pkg}" ]; then
+if [ ! -e "${conf_dir}/${pkg}" ]; then
         echo "Unable to source ${conf_dir}/${pkg}."
         trap - EXIT
         exit 1
