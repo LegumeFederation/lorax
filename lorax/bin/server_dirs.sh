@@ -36,7 +36,7 @@ conf_dir=${root_dir}/etc/conf.d
 #
 # Get the names of variables to be defined.
 #
-pkg="${script_name%_env}"
+pkg="${script_name%_dirs}"
 PKG=`echo ${pkg} | tr /a-z/ /A-Z/`
 pathlist=("${PKG}_ROOT"
           "${PKG}_VAR"
