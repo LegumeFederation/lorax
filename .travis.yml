@@ -25,7 +25,6 @@ install:
 before_script:
    - lorax_env coverage run -m lorax.cli
    - export COVERAGE_PROCESS_START="${PWD}/.coveragerc"
-   - export LORAX_SUPERVISORD_START_SERVER=True
    - lorax_env lorax config secret_key
    - lorax_env lorax config secret_key blahblahblah
    - lorax_env lorax config
@@ -46,6 +45,7 @@ after_success:
    - lorax_env lorax config blah Bob_LobLaw
    - lorax_env lorax config --vartype=list mylist "[1,2,3]"
    - lorax_env lorax config var /tmp/loraxvar
+   - export LORAX_SUPERVISORD_START_SERVER=True
    - lorax_env lorax config supervisord_start_nginx False
    - export LORAX_SUPERVISORD_START_SERVER=False
    - lorax_env lorax config gunicorn_unix_socket False
