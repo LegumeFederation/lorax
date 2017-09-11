@@ -580,7 +580,6 @@ make_dirs() {
    dirlist=("${root}/bin"
             "${root}/etc/nginx"
             "`get_value var_dir`/run/nginx"
-            "`get_value tmp_dir`/nginx"
             "`get_value log_dir`/nginx")
    for dir in "${dirlist[@]}" ; do
       if [ ! -e "$dir" ]; then
@@ -725,7 +724,7 @@ update() {
    #
    rawsite="https://raw.githubusercontent.com/LegumeFederation/${pkg}/master/build_scripts"
    printf "Checking for self-update..."
-   curl -L -s -o ${pkg}_tool.new ${rawsite}/${pkg}_tool
+   curl -L -s -o ${pkg}_tool.new ${rawsite}/${pkg}_tool.sh
    chmod 755 ${pkg}_tool.new
    if cmp -s ${pkg}_tool ${pkg}_tool.new ; then
       rm ${pkg}_tool.new

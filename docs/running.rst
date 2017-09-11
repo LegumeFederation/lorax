@@ -20,7 +20,6 @@ a public port opens the
 possibility of denial-of-service attacks.
 
 We recommend that ``lorax`` be run in a virtual environment if on a shared
-server.  However, the shell
-scripts will work for real environments as well.
+server.  However, the shell scripts will work for real environments as well.
 
 

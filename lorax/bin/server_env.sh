@@ -59,6 +59,11 @@ Flags:
     -v  Verbose output on environment before executing command.
     -i  Interactive mode, read commands in a loop.
     -r  Returns the root directory.
+Commands:
+      The following internal commands are defined:
+          start       Starts the ${pkg} server.
+           stop       Stops the ${pkg} server.
+      All else will launch commands via the shell.
 Environmental variables:
       PATH            Will have the binary director(ies) prepended.
       FLASK_APP       Set to \"${pkg}\"
@@ -111,7 +116,7 @@ start_server() {
              "${pkg}_data"
              "${pkg}_userdata")
    pkg_group=${pkg}_group
-   group_name=${!pkg_group}
+   group_id=${!pkg_group}
    # Source configuration script.
    if [ ! -e "${conf_dir}/${pkg}" ]; then
       >&2 echo "Unable to source ${conf_dir}/${pkg}."
@@ -125,9 +130,9 @@ start_server() {
          >&2 echo "ERROR--Variable $path not defined."
          trap - EXIT
          exit 1
-      elif [ ! -d "${!path}" ]; then
-         >&2 echo "Creating directory ${!path} in group ${group_name}."
-         mkdir -p ${!path} 2>/dev/null && chgrp ${group_name} ${!path}
+      elif [ ! -d "${!path}/nginx" ]; then
+         >&2 echo "Creating directory ${!path}/nginx in group ${group_id}."
+         mkdir -p ${!path}/nginx 2>/dev/null && chgrp -R ${group_id} ${!path}
       fi
    done
    # Start all processes.
@@ -139,6 +144,11 @@ start_server() {
    fi
 }
 #
+stop_server() {
+   supervisorctl shutdown
+}
+
+}#
 # Copy command out of argv, else it can mess up later sourcings.
 #
 command=( "$@" )
@@ -261,8 +271,10 @@ if [ "$_I" -eq 1 ]; then
   echo "Executing commands in ${environ}, control-D to exit."
   PS1="${script_name}> " bash
   echo ""
-elif [ "$1" == "start" ]; then
+elif [ "${command[0]}" == "start" ]; then
    start_server ${command[*]}
+elif [ "${command[0]}" == "stop" ]; then
+   stop_server ${command[*]}
 else
   if [ "$_V" -eq 1 ]; then
     echo "Executing \"${command[*]}\" in ${environ}."

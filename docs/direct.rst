@@ -14,14 +14,14 @@ by issuing the following commands::
 
     mkdir -p ~/.lorax/build
     cd ~/.lorax/build
-    curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool
+    curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool.sh
     chmod 755 lorax_tool
 
 
 If you wish to customize anything about the installation, you should issue
 the following command::
 
-        ./lorax_tool.sh create_scripts
+        ./lorax_tool create_scripts
 
 Then, review and edit the ``my_build.sh`` script to reflect the directories you
 wish to use for your installation.
