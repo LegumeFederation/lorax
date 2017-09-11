@@ -130,9 +130,9 @@ start_server() {
          >&2 echo "ERROR--Variable $path not defined."
          trap - EXIT
          exit 1
-      elif [ ! -d "${!path}/nginx" ]; then
-         >&2 echo "Creating directory ${!path}/nginx in group ${group_id}."
-         mkdir -p ${!path}/nginx 2>/dev/null && chgrp -R ${group_id} ${!path}
+      elif [ ! -d "${!path}" ]; then
+         >&2 echo "Creating directory ${!path} in group ${group_id}."
+         mkdir -p ${!path} 2>/dev/null && chgrp -R ${group_id} ${!path}
       fi
    done
    # Start all processes.

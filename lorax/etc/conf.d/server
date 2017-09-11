@@ -15,11 +15,11 @@
 #      {{NAME}}_enable   Set to "YES" if the service is to be started.
 #
 {{NAME}}_root="{{ROOT}}"
-{{NAME}}_var="{{VAR}}"
-{{NAME}}_log="{{LOG}}"
-{{NAME}}_tmp="{{TMP}}"
+{{NAME}}_var="{{VAR}}/run/nginx"
+{{NAME}}_log="{{LOG}}/nginx"
+{{NAME}}_tmp="{{TMP}}/nginx"
 {{NAME}}_data="{{DATA}}"
 {{NAME}}_userdata="{{USERDATA}}"
 {{NAME}}_user="{{RC_USER}}"
-{{NAME}}_group="{{RC_GROUP}}""
+{{NAME}}_group="{{RC_GROUP}}
 {{NAME}}_enable="YES"

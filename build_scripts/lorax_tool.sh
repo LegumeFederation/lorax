@@ -574,13 +574,11 @@ link_env() {
 }
 make_dirs() {
    #
-   # Make required installation directories.
+   # Make required build-time directories.
    #
    root="`get_value root_dir`"
    dirlist=("${root}/bin"
-            "${root}/etc/nginx"
-            "`get_value var_dir`/run/nginx"
-            "`get_value log_dir`/nginx")
+            "${root}/etc/nginx")
    for dir in "${dirlist[@]}" ; do
       if [ ! -e "$dir" ]; then
          >&1 echo "making directory $dir"
