@@ -1,9 +1,9 @@
 #!/bin/bash
 # Build configuration system.
 set -e # exit on error
-script_name="`basename "${BASH_SOURCE}"`"
+script_name=$(basename "${BASH_SOURCE}")
 pkg="${script_name%_tool}"
-PKG="`echo ${pkg} | tr /a-z/ /A-Z/`"
+PKG=$(echo ${pkg} | tr /a-z/ /A-Z/)
 PKG_BUILD_DIR="${PKG}_BUILD_DIR"
 PKG_TEST_DIR="${PKG}_TEST_DIR"
 if [ -z "${!PKG_BUILD_DIR}" ]; then
@@ -11,7 +11,7 @@ if [ -z "${!PKG_BUILD_DIR}" ]; then
 else
    build_dir="${!PKG_BUILD_DIR}"
 fi
-build_root_dir="`dirname $build_dir`"
+build_root_dir=$(dirname $build_dir)
 confdir=${build_dir}/config
 if [ -z "${!PKG_TEST_DIR}" ]; then
    test_dir=${build_root_dir}/test
@@ -19,7 +19,7 @@ else
    test_dir="${!PKG_TEST_DIR}"
 fi
 version="0.94"
-platform="`uname`"
+platform=$(uname)
 error_exit() {
    >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
    >&2 echo "   $BASH_COMMAND"
@@ -112,8 +112,8 @@ install_python() {
    rm -r Python-${1}
 }
 install_raxml() {
-   model="`get_value raxml_model`"
-   binsuffix="`get_value raxml_binsuffix`"
+   model=$(get_value raxml_model)
+   binsuffix=$(get_value raxml_binsuffix)
    >&1 echo "Installing RAxML version $1 to $2 using ${model} model."
    curl -L -o raxml_v${1}.tar.gz https://github.com/stamatak/standard-RAxML/archive/v${1}.tar.gz
    tar xf raxml_v${1}.tar.gz 
@@ -137,7 +137,7 @@ install_hmmer() {
    rm -r hmmer-${1}-linux-intel-x86_64
 }
 install_redis() {
-   redis_cflags="`get_value redis_cflags`" # -DAF_LOCAL=1
+   redis_cflags=$(get_value redis_cflags)
    >&1 echo "Installing redis $1 to ${2}."
    curl -L -o redis-${1}.tar.gz  http://download.redis.io/releases/redis-${1}.tar.gz
    tar xf redis-${1}.tar.gz
@@ -560,7 +560,7 @@ link_env() {
    #
    # Link the _env script to $bin_dir.
    #
-   root="`get_value root_dir`"
+   root=$(get_value root_dir)
    bin_dir="`get_value bin_dir`"
    >&1 echo "linking ${pkg}_env to ${bin_dir}"
    if [ ! -e ${bin_dir} ]; then
@@ -576,7 +576,7 @@ make_dirs() {
    #
    # Make required build-time directories.
    #
-   root="`get_value root_dir`"
+   root=$(get_value root_dir)
    dirlist=("${root}/bin"
             "${root}/etc/nginx")
    for dir in "${dirlist[@]}" ; do
@@ -589,9 +589,9 @@ make_dirs() {
    done
 }
 link_python() {
-   root="`get_value root_dir`"
+   root=$(get_value root_dir)
    root_bin="${root}/bin"
-   python_version="`get_value python`"
+   python_version=$(get_value python)
    cd $root_bin
    if [ ! -e python ]; then
       >&1 echo "creating python ${python_version} link in ${root_bin}."

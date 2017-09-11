@@ -5,20 +5,20 @@ import os
 from pathlib import Path  # python 3.4 or later
 from .config_file import create_config_file
 
-DIRS = [('TMP',),
-        ('LOG',),
-        ('VAR',),
-        ('DATA',),
-        ('USERDATA',)]
+DIRS = ['TMP',
+        'LOG',
+        'VAR',
+        'DATA',
+        'USERDATA']
 SERVICE_NAME = os.getenv('FLASK_APP', __name__.split('.')[0])
 
 
-def create_dir(config_path, subdir, app):
+def create_dir(config_path,  app):
     """Creates runtime directories, if they don't exist."""
-    dir_path = Path(app.config[config_path]) / subdir
+    dir_path = Path(app.config[config_path])
     if not dir_path.is_dir():  # create logs/ dir
-        print('Creating directory %s/%s at %s.'
-              % (config_path, subdir, str(dir_path)))
+        print('Creating directory %s at %s.'
+              % (config_path, str(dir_path)))
         try:
             dir_path.mkdir(mode=int(app.config['DIR_MODE'], 8),
                            parents=True)
@@ -30,8 +30,8 @@ def create_dir(config_path, subdir, app):
 
 def init_filesystem(app):
     """Initialize the filesystem."""
-    for dir_tuple in DIRS:
-        create_dir(*dir_tuple, app=app)
+    for dir in DIRS:
+        create_dir(dir, app=app)
     #
     # Config file may not exist if SETTINGS value was changed.
     #
