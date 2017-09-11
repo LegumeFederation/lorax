@@ -50,13 +50,16 @@ Commands:
         version - Get installed ${pkg} version.
 
 Variables (accessed by \"config\" command):
+      alert_manager - The prometheus.io alert_manager version string.
             bin_dir - A writable directory in PATH for script links.
                  cc - The C compiler to use.
   directory_version - ${pkg} version for directory naming purposes.
               hmmer - The HMMer version string.
               nginx - The nginx version string.
+      node_exporter - The prometheus.io node_exporter version string.
          prometheus - The prometheus version string.
      prometheus_sys - The prometheus platform string.
+        pushgateway - The prometheus.io pushgateway version string.
              python - The python version string.
               raxml - The raxml version string.
     raxml_binsuffix - The suffix to the binary produced (e.g., \"-PTHREADS-SSE3\").
@@ -202,6 +205,27 @@ install_prometheus() {
    tar xf prometheus.tar.gz -C "$2"
    ls -l "$2"
    rm prometheus.tar.gz
+}
+install_alertmanager() {
+   sys="$(get_value prometheus_sys)"
+   >&1 echo "Installing alertmanager $1 to ${2}."
+   curl -L -o alertmanager.tar.gz  http://github.com/prometheus/alertmanager/releases/download/v${1}/alertmanager-${1}.${sys}-amd64.tar.gz
+   tar xf alertmanager.tar.gz -C "$2"
+   rm alertmanager.tar.gz
+}
+install_node_exporter() {
+   sys="$(get_value prometheus_sys)"
+   >&1 echo "Installing node_exporter $1 to ${2}."
+   curl -L -o node_exporter.tar.gz  http://github.com/prometheus/node_exporter/releases/download/v${1}/node_exporter-${1}.${sys}-amd64.tar.gz
+   tar xf node_exporter.tar.gz -C "$2"
+   rm node_exporter.tar.gz
+}
+install_pushgateway() {
+   sys="$(get_value prometheus_sys)"
+   >&1 echo "Installing pushgateway $1 to ${2}."
+   curl -L -o pushgateway.tar.gz  http://github.com/prometheus/pushgateway/releases/download/v${1}/pushgateway-${1}.${sys}-amd64.tar.gz
+   tar xf pushgateway.tar.gz -C "$2"
+   rm pushgateway.tar.gz
 }
 #
 # Command functions begin here.
@@ -384,6 +408,9 @@ cat << 'EOF'
 #./lorax_tool config redis 4.0.1
 #./lorax_tool config nginx 1.13.5
 #./lorax_tool config prometheus 2.0.0-geta.2
+#./lorax_tool config alertmanager 0.8.0
+#./lorax_tool config node_exporter 0.14.0
+#./lorax_tool config pushgateway 0.4.0
 #
 # The following defaults are platform-specific.  Linux defaults are shown.
 #
@@ -492,6 +519,9 @@ init() {
    set_value redis 4.0.1
    set_value nginx 1.13.5
    set_value prometheus 2.0.0-beta.2
+   set_value alertmanager 0.8.0
+   set_value node_exporter 0.14.0
+   set_value pushgateway 0.4.0
    if [[ "$platform" == "Linux" ]]; then
       >&1 echo "Platform is linux."
       set_value bin_dir ~/bin
@@ -540,17 +570,20 @@ Usage:
    $scriptname install PACKAGE
 
 Packages:
-       hmmer - HMMer alignment.
-       nginx - nginx web proxy server.
-  prometheus - prometheus.io statistics server.
-      python - Python interpreter.
-       raxml - RAxML treebuilder.
-       redis - redis database.
+  alertmanager - prometheus.io alert manager.
+         hmmer - HMMer alignment.
+         nginx - nginx web proxy server.
+ node_exporter - prometheus.io node statistics exporter.
+    prometheus - prometheus.io statistics server.
+   pushgateway - prometheus.io push gateway.
+        python - Python interpreter.
+         raxml - RAxML treebuilder.
+         redis - redis database.
 """
   root=$(get_value root_dir)
   cc="$(get_value cc)"
   make="$(get_value make)"
-  commandlist="python raxml hmmer redis nginx prometheus"
+  commandlist="python raxml hmmer redis nginx prometheus alertmanager node_exporter pushgateway"
   if [ "$#" -eq 0 ]; then # install the whole list
       for package in $commandlist; do
          version="$(get_value $package)"
