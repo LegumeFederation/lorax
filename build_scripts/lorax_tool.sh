@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build configuration system.
 set -e # exit on error
-script_name="(basename "${BASH_SOURCE}")"
+script_name="$(basename "${BASH_SOURCE}")"
 pkg="${script_name%_tool}"
 PKG="$(echo ${pkg} | tr /a-z/ /A-Z/)"
 PKG_BUILD_DIR="${PKG}_BUILD_DIR"
@@ -88,7 +88,7 @@ set_value() {
       >&2 echo "Making ${confdir} directory."
       mkdir -p ${confdir}
    fi
-   echo "$2" > ${confdir}/${1}
+   echo "$2" > "${confdir}/${1}"
 }
 get_value() {
   if [ -e ${confdir}/${1} ]; then
