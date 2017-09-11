@@ -11,6 +11,7 @@
 #      {{NAME}}_data     Home of persistent data files.
 #      {{NAME}}_userdata Home of user data files (different persistence).
 #      {{NAME}}_user     User to execute the {{NAME}}_env script as.
+#      {{NAME}}_group    Group for directory creation.
 #      {{NAME}}_enable   Set to "YES" if the service is to be started.
 #
 {{NAME}}_root="{{ROOT}}"
@@ -20,4 +21,5 @@
 {{NAME}}_data="{{DATA}}"
 {{NAME}}_userdata="{{USERDATA}}"
 {{NAME}}_user="{{RC_USER}}"
+{{NAME}}_group="{{RC_GROUP}}""
 {{NAME}}_enable="YES"

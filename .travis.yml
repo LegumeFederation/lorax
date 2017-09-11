@@ -32,9 +32,7 @@ before_script:
    - lorax_env lorax set_htpasswd
    - lorax_env lorax create_test_files
 script:
-   - lorax_env supervisord
-   - while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
-   - lorax_env supervisorctl status
+   - lorax_env -v start
    - lorax_env lorax rq info
    - cat ${root_dir}/var/log/lorax_server.log
    - ./test_targets.sh

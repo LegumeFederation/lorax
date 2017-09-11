@@ -11,7 +11,7 @@
 set -e # exit on error
 #
 error_exit() {
-  echo "ERROR--unexpected exit from environment script."
+  echo "ERROR--unexpected exit from environment script." 1>&2
 }
 trap error_exit EXIT
 #
@@ -31,12 +31,13 @@ myrealpath() {
   fi
 }
 #
-# Get the real path to this script.
+# Get real paths for later.
 #
 script_path=$(myrealpath "${BASH_SOURCE}")
 script_name=$(basename "${script_path}")
 bin_dir=$(dirname "${script_path}")
 root_dir=$(dirname "${bin_dir}")
+conf_dir=${root_dir}/etc/conf.d
 #
 # Get the names of variables to be defined.
 #
@@ -101,6 +102,42 @@ fi
 if [ "$1" == "-i" ]; then
   echo "$root_dir"
 fi
+#
+start_server() {
+   # Create directories, start processes, wait until started.
+   pathlist=("${pkg}_var"
+             "${pkg}_tmp"
+             "${pkg}_log"
+             "${pkg}_data"
+             "${pkg}_userdata")
+   pkg_group=${pkg}_group
+   group_name=${!pkg_group}
+   # Source configuration script.
+   if [ ! -e "${conf_dir}/${pkg}" ]; then
+      >&2 echo "Unable to source ${conf_dir}/${pkg}."
+      trap - EXIT
+      exit 1
+   fi
+   source "${conf_dir}/${pkg}"
+   # Create directories, if needed.
+   for path in "${pathlist[@]}" ; do
+      if [ -z "${!path}" ]; then
+         >&2 echo "ERROR--Variable $path not defined."
+         trap - EXIT
+         exit 1
+      elif [ ! -d "${!path}" ]; then
+         >&2 echo "Creating directory ${!path} in group ${group_name}."
+         mkdir -p ${!path} 2>/dev/null && chgrp ${group_name} ${!path}
+      fi
+   done
+   # Start all processes.
+   supervisord
+   # Wait until starting is done.
+   while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
+   if [ "$_V" -eq 1 ]; then
+      >&2 supervisorctl
+   fi
+}
 #
 # Copy command out of argv, else it can mess up later sourcings.
 #
@@ -224,6 +261,8 @@ if [ "$_I" -eq 1 ]; then
   echo "Executing commands in ${environ}, control-D to exit."
   PS1="${script_name}> " bash
   echo ""
+elif [ "$1" == "start" ]; then
+   start_server ${command[*]}
 else
   if [ "$_V" -eq 1 ]; then
     echo "Executing \"${command[*]}\" in ${environ}."
