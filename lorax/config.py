@@ -46,7 +46,7 @@ SERVICE_NAME = os.getenv('FLASK_APP', __name__.split('.')[0])
 #
 IMMUTABLES = ('ROOT', 'VAR', 'LOG', 'TMP')
 PATHVARS = ('ROOT', 'VAR', 'LOG', 'TMP', 'DATA', 'USERDATA')
-
+PROMETHEUS_SERVICES = ('prometheus', 'alertmanager', 'node_exporter', 'push_gateway')
 
 def get_path(name, default):
     """Get path from environ, checking absoluteness."""
@@ -193,6 +193,10 @@ class BaseConfig(object):
     SUPERVISORD_START_TREEBUILDING = True
     SUPERVISORD_START_CRASHMAIL = True
     SUPERVISORD_START_NGINX = True
+    SUPERVISORD_START_PROMETHEUS = False
+    SUPERVISORD_START_ALERTMANAGER = False
+    SUPERVISORD_START_NODE_EXPORTER = False
+    SUPERVISORD_START_PUSHGATEWAY = False
     #
     # nginx defs.
     #
@@ -360,6 +364,14 @@ def configure_app(app):
     #
     app.config['VERSION'] = __version__
     app.config['PLATFORM'] = platform.system()
+    #
+    # Prometheus services.
+    #
+    for service in PROMETHEUS_SERVICES:
+        try:
+            app.config[service.upper()+'_DIR'] = str([x for x in p.glob(service + '*') if x.is_dir()][0])
+        except IndexError:
+            app.config[service.upper()+'_DIR'] = None
     #
     # Set redis socket type.
     #

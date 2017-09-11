@@ -203,7 +203,6 @@ install_prometheus() {
    >&1 echo "Installing prometheus $1 to ${2}."
    curl -L -o prometheus.tar.gz  http://github.com/prometheus/prometheus/releases/download/v${1}/prometheus-${1}.${sys}-amd64.tar.gz
    tar xf prometheus.tar.gz -C "$2"
-   ls -l "$2"
    rm prometheus.tar.gz
 }
 install_alertmanager() {
@@ -561,6 +560,7 @@ init() {
       set_value redis_cflags ""
       set_value raxml_model .AVX2.PTHREADS.gcc
       set_value raxml_binsuffix -PTHREADS-AVX2
+      set_value prometheus_sys linux
    fi
 }
 install() {
