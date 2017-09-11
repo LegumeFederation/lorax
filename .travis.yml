@@ -3,7 +3,7 @@ language: python
 python:
    - "3.5"
 before_install:
-   - curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool
+   - curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool.sh
    - chmod 755 lorax_tool
    - ./lorax_tool create_scripts
    - ./lorax_tool init
@@ -37,7 +37,7 @@ script:
    - cat ${root_dir}/var/log/lorax_server.log
    - ./test_targets.sh
    - lorax_env supervisorctl stop lorax alignment treebuilding
-   - lorax_env supervisorctl shutdown
+   - lorax_env stop
 after_success:
    - lorax_env lorax test_logging
    - lorax_env lorax config blah Bob_LobLaw
