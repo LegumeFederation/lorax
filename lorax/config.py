@@ -368,8 +368,11 @@ def configure_app(app):
     # Prometheus services.
     #
     for service in PROMETHEUS_SERVICES:
+        root_path = Path(app.config['ROOT'])
         try:
-            app.config[service.upper()+'_DIR'] = str([x for x in p.glob(service + '*') if x.is_dir()][0])
+            app.config[service.upper()+'_DIR'] = str([p for p in
+                                                      root_path.glob(service + '*')
+                                                      if p.is_dir()][0])
         except IndexError:
             app.config[service.upper()+'_DIR'] = None
     #
