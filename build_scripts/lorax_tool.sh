@@ -531,7 +531,7 @@ init() {
       set_value redis_cflags ""
       set_value raxml_model .SSE3.PTHREADS.gcc
       set_value raxml_binsuffix -PTHREADS-SSE3
-      set_value prometheus_sys linx
+      set_value prometheus_sys linux
    elif [[ "$platform" == *"BSD" ]]; then
       >&1 echo "Platform is bsd."
       set_value platform bsd
