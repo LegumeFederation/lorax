@@ -140,7 +140,7 @@ start_server() {
    # Wait until starting is done.
    while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
    if [ "$_V" -eq 1 ]; then
-      >&2 supervisorctl
+      >&2 supervisorctl status
    fi
 }
 #
@@ -264,19 +264,21 @@ fi
 #
 # In proper environment now, exec command(s).
 #
-trap - EXIT
-set +e
 if [ "$_I" -eq 1 ]; then
-  echo "Executing commands in ${environ}, control-D to exit."
-  PS1="${script_name}> " bash
-  echo ""
+   echo "Executing commands in ${environ}, control-D to exit."
+   trap - EXIT
+   set +e
+   PS1="${script_name}> " bash
+   echo ""
 elif [ "${command[0]}" == "start" ]; then
    start_server ${command[*]}
 elif [ "${command[0]}" == "stop" ]; then
    stop_server ${command[*]}
 else
-  if [ "$_V" -eq 1 ]; then
-    echo "Executing \"${command[*]}\" in ${environ}."
-  fi
-   ${command[*]}
+   if [ "$_V" -eq 1 ]; then
+      echo "Executing \"${command[*]}\" in ${environ}."
+   fi
+      trap - EXIT
+      set +e
+      ${command[*]}
 fi

@@ -21,5 +21,5 @@
 {{NAME}}_data="{{DATA}}"
 {{NAME}}_userdata="{{USERDATA}}"
 {{NAME}}_user="{{RC_USER}}"
-{{NAME}}_group="{{RC_GROUP}}
+{{NAME}}_group="{{RC_GROUP}}"
 {{NAME}}_enable="YES"
