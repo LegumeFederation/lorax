@@ -10,3 +10,4 @@ healthcheck
 htpasswd
 prometheus_client
 coverage
+supervisor-wildcards

@@ -147,8 +147,7 @@ start_server() {
 stop_server() {
    supervisorctl shutdown
 }
-
-}#
+#
 # Copy command out of argv, else it can mess up later sourcings.
 #
 command=( "$@" )
