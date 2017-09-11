@@ -110,13 +110,19 @@ fi
 #
 start_server() {
    # Create directories, start processes, wait until started.
-   pathlist=("${pkg}_var"
-             "${pkg}_tmp"
-             "${pkg}_log"
-             "${pkg}_data"
-             "${pkg}_userdata")
-   pkg_group=${pkg}_group
-   group_id=${!pkg_group}
+   pkg_var=${pkg}_var
+   pkg_tmp=${pkg}_tmp
+   pkg_log=${pkg}_log
+   pkg_data=${pkg}_data
+   pkg_userdata=${pkg}_userdata
+   pathlist=("${!pkg_var}/redis"
+             "${!pkg_var}/run/nginx"
+             "${!pkg_tmp}/nginx"
+             "${!pkg_log}/nginx"
+             "${!pkg_data}"
+             "${!pkg_userdata}")
+   pkg_group="${pkg}_group"
+   group_id="${!pkg_group}"
    # Source configuration script.
    if [ ! -e "${conf_dir}/${pkg}" ]; then
       >&2 echo "Unable to source ${conf_dir}/${pkg}."
@@ -126,13 +132,9 @@ start_server() {
    source "${conf_dir}/${pkg}"
    # Create directories, if needed.
    for path in "${pathlist[@]}" ; do
-      if [ -z "${!path}" ]; then
-         >&2 echo "ERROR--Variable $path not defined."
-         trap - EXIT
-         exit 1
-      elif [ ! -d "${!path}" ]; then
-         >&2 echo "Creating directory ${!path} in group ${group_id}."
-         mkdir -p ${!path} 2>/dev/null && chgrp -R ${group_id} ${!path}
+      if [ ! -d "${path}" ]; then
+         >&2 echo "Creating directory ${path} in group ${group_id}."
+         mkdir -p ${path} #2>/dev/null && chgrp -R ${group_id} ${path}
       fi
    done
    # Start all processes.

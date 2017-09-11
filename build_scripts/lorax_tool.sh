@@ -530,7 +530,7 @@ Packages:
        redis - redis database.
        nginx - nginx web proxy server.
 """
-  root="`get_value root_dir`"
+  root=$(get_value root_dir)
   cc="`get_value cc`"
   make="`get_value make`"
   commandlist="python raxml hmmer redis nginx"
