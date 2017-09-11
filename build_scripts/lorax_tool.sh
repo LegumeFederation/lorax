@@ -1,9 +1,9 @@
 #!/bin/bash
 # Build configuration system.
 set -e # exit on error
-script_name=$(basename "${BASH_SOURCE}")
+script_name="(basename "${BASH_SOURCE}")"
 pkg="${script_name%_tool}"
-PKG=$(echo ${pkg} | tr /a-z/ /A-Z/)
+PKG="$(echo ${pkg} | tr /a-z/ /A-Z/)"
 PKG_BUILD_DIR="${PKG}_BUILD_DIR"
 PKG_TEST_DIR="${PKG}_TEST_DIR"
 if [ -z "${!PKG_BUILD_DIR}" ]; then
@@ -11,15 +11,15 @@ if [ -z "${!PKG_BUILD_DIR}" ]; then
 else
    build_dir="${!PKG_BUILD_DIR}"
 fi
-build_root_dir=$(dirname $build_dir)
-confdir=${build_dir}/config
+build_root_dir="$(dirname $build_dir)"
+confdir="${build_dir}/config"
 if [ -z "${!PKG_TEST_DIR}" ]; then
-   test_dir=${build_root_dir}/test
+   test_dir="${build_root_dir}/test"
 else
    test_dir="${!PKG_TEST_DIR}"
 fi
 version="0.94"
-platform=$(uname)
+platform="$(uname)"
 error_exit() {
    >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
    >&2 echo "   $BASH_COMMAND"
@@ -106,14 +106,14 @@ install_python() {
    tar xf Python-${1}.tar.gz
    rm Python-${1}.tar.gz
    pushd Python-${1}
-   ./configure --prefix=${2} CC=${3}
+   ./configure --prefix="${2}" CC="${3}"
    ${4} install
    popd
    rm -r Python-${1}
 }
 install_raxml() {
-   model=$(get_value raxml_model)
-   binsuffix=$(get_value raxml_binsuffix)
+   model="$(get_value raxml_model)"
+   binsuffix="$(get_value raxml_binsuffix)"
    >&1 echo "Installing RAxML version $1 to $2 using ${model} model."
    curl -L -o raxml_v${1}.tar.gz https://github.com/stamatak/standard-RAxML/archive/v${1}.tar.gz
    tar xf raxml_v${1}.tar.gz 
@@ -130,21 +130,21 @@ install_hmmer() {
    tar xf hmmer-${1}-linux-intel-x86_64.tar.gz 
    rm hmmer-${1}-linux-intel-x86_64.tar.gz 
    pushd hmmer-${1}-linux-intel-x86_64/
-   ./configure --prefix=${2} CC=$3 CFLAGS='-O3 -march=native'
+   ./configure --prefix="${2}" CC="$3" CFLAGS='-O3 -march=native'
    ${4}
    ${4} install
    popd
    rm -r hmmer-${1}-linux-intel-x86_64
 }
 install_redis() {
-   redis_cflags=$(get_value redis_cflags)
+   redis_cflags="$(get_value redis_cflags)"
    >&1 echo "Installing redis $1 to ${2}."
    curl -L -o redis-${1}.tar.gz  http://download.redis.io/releases/redis-${1}.tar.gz
    tar xf redis-${1}.tar.gz
    rm redis-${1}.tar.gz
-   export CFLAGS=$redis_cflags
-   export CC=$3
-   export PREFIX=${2}
+   export CFLAGS="$redis_cflags"
+   export CC="$3"
+   export PREFIX="${2}"
    pushd redis-${1}
    pushd deps
    ${4} lua linenoise jemalloc hiredis
@@ -154,21 +154,21 @@ install_redis() {
    rm -r redis-${1}
 }
 install_nginx() {
-   var="`get_value var_dir`"
-   tmp="`get_value tmp_dir`"
-   log="`get_value log_dir`"
+   var="$(get_value var_dir)"
+   tmp="$(get_value tmp_dir)"
+   log="$(get_value log_dir)"
    >&1 echo "Installing nginx $1 to ${2}."
    curl -L -o nginx-${1}.tar.gz http://nginx.org/download/nginx-${1}.tar.gz
    tar xf nginx-${1}.tar.gz
    rm nginx-${1}.tar.gz
    mkdir -p ${2}/etc/nginx
    pushd nginx-${1}
-   ./configure --prefix=${2} \
+   ./configure --prefix="${2}" \
    --with-threads \
    --with-stream \
    --with-stream=dynamic \
    --with-pcre \
-   --with-cc=${3} \
+   --with-cc="${3}" \
    --with-http_ssl_module \
    --with-http_v2_module \
    --with-http_auth_request_module \
@@ -176,17 +176,17 @@ install_nginx() {
    --with-http_gzip_static_module \
    --with-http_realip_module \
    --sbin-path=bin \
-   --modules-path=${root}/lib/nginx/modules \
-   --conf-path=${root}/etc/nginx/nginx.conf \
-   --error-log-path=${log}/nginx/error.log \
-   --http-log-path=${log}/nginx/access.log \
-   --pid-path=${var}/run/nginx/nginx.pid \
-   --lock-path=${var}/run/nginx/nginx.lock \
-   --http-fastcgi-temp-path=${tmp}/nginx/fastcgi \
-   --http-client-body-temp-path=${tmp}/nginx/client \
-   --http-proxy-temp-path=${tmp}/nginx/proxy \
-   --http-uwsgi-temp-path=${tmp}/nginx/uwsgi \
-   --http-scgi-temp-path=${tmp}/nginx/scgi
+   --modules-path="${root}/lib/nginx/modules" \
+   --conf-path="${root}/etc/nginx/nginx.conf" \
+   --error-log-path="${log}/nginx/error.log" \
+   --http-log-path="${log}/nginx/access.log" \
+   --pid-path="${var}/run/nginx/nginx.pid" \
+   --lock-path="${var}/run/nginx/nginx.lock" \
+   --http-fastcgi-temp-path="${tmp}/nginx/fastcgi" \
+   --http-client-body-temp-path="${tmp}/nginx/client" \
+   --http-proxy-temp-path="${tmp}/nginx/proxy" \
+   --http-uwsgi-temp-path="${tmp}/nginx/uwsgi" \
+   --http-scgi-temp-path="${tmp}/nginx/scgi"
    ${4} install
    rm -f ${root}/etc/nginx/* # remove generated etc files
    rm -rf ${root}/html # and html
@@ -231,10 +231,10 @@ You may run this command with a \"-y\" argument to skip this question.
    # The following exports are needed for the freshly-built python to run
    # on BSD (and probably harmless on others).
    if [ -z "$LC_ALL" ]; then
-      export LC_ALL=en_US.UTF-8
+      export LC_ALL="en_US.UTF-8"
    fi
    if [ -z "$LANG" ]; then
-      export LANG=en_US.UTF-8
+      export LANG="en_US.UTF-8"
    fi
    # Do pip installs.
    >&1 echo "Doing python installs."
@@ -243,7 +243,7 @@ You may run this command with a \"-y\" argument to skip this question.
    link_env       # put lorax_env in PATH
    # Test to make sure it runs.
    >&1 echo "Testing lorax binary."
-   root="`get_value root_dir`"
+   root="$(get_value root_dir)"
    version > ${root}/version
    >&1 echo "Installation was successful."
    >&1 echo "You should now proceed with configuring lorax via the command"
@@ -270,12 +270,12 @@ Arguments:
         >&1 echo "These values are stored in ${confdir}."
         >&1 echo -e "       key         \t       value"
         >&1 echo -e "-------------------\t------------------"
-        for key in `ls ${confdir}`; do
-          value="`get_value ${key}`"
+        for key in $(ls ${confdir}); do
+          value="$(get_value ${key})"
         printf '%-20s\t%s\n' ${key} ${value} >&1
       done
     elif [ -e ${confdir}/${1} ]; then
-      echo `get_value $1`
+      echo "$(get_value $1)"
     else
       trap - EXIT
       >&2 echo "${1} has not been set."
@@ -310,11 +310,11 @@ You may run this command with a \"-y\" argument to skip this question.
          fi
       fi
    fi
-   root="`get_value root_dir`"
-   version="`get_value directory_version`"
-   var_dir="`get_value var_dir`"
-   log_dir="`get_value log_dir`"
-   tmp_dir="`get_value tmp_dir`"
+   root="$(get_value root_dir)"
+   version="$(get_value directory_version)"
+   var_dir="$(get_value var_dir)"
+   log_dir="$(get_value log_dir)"
+   tmp_dir="$(get_value tmp_dir)"
    if [ "$var_dir" != "${root}/var" ]; then
       >&1 echo "Configuring non-default var directory ${var_dir}."
       ${root}/bin/lorax_env lorax config var $var_dir
@@ -334,13 +334,13 @@ You may run this command with a \"-y\" argument to skip this question.
       >&2 echo "WARNING--my_config.sh not found, using defaults."
    fi
    # Save a copy of the configuration to a time-stamped file.
-   config_filename="lorax_config-`date '+%Y-%m-%d-%H-%M'`.txt"
+   config_filename="lorax_config-$(date '+%Y-%m-%d-%H-%M').txt"
    ${root}/bin/lorax_env lorax config > ${confdir}/${config_filename}
    # Create the configured instance.
    >&1 echo "Creating a configured instance at ${root}."
    ${root}/bin/lorax_env lorax create_instance --force
    # Set the password for restricted parts of the site.
-   passwd="`${root}/bin/lorax_env lorax config secret_key`"
+   passwd="$(${root}/bin/lorax_env lorax config secret_key)"
    >&1 echo "Setting the http password to \"${passwd}\";"
    >&1 echo "please write it down, because you will need it to access some services."
    ${root}/bin/lorax_env lorax set_htpasswd --force
@@ -560,7 +560,7 @@ link_env() {
    #
    # Link the _env script to $bin_dir.
    #
-   root=$(get_value root_dir)
+   root="$(get_value root_dir)"
    bin_dir="$(get_value bin_dir)"
    >&1 echo "linking ${pkg}_env to ${bin_dir}"
    if [ ! -e ${bin_dir} ]; then
@@ -576,7 +576,7 @@ make_dirs() {
    #
    # Make required build-time directories.
    #
-   root=$(get_value root_dir)
+   root="$(get_value root_dir)"
    dirlist=("${root}/bin"
             "${root}/etc/nginx")
    for dir in "${dirlist[@]}" ; do
@@ -589,9 +589,9 @@ make_dirs() {
    done
 }
 link_python() {
-   root=$(get_value root_dir)
+   root="$(get_value root_dir)"
    root_bin="${root}/bin"
-   python_version=$(get_value python)
+   python_version="$(get_value python)"
    cd $root_bin
    if [ ! -e python ]; then
       >&1 echo "creating python ${python_version} link in ${root_bin}."
@@ -737,7 +737,7 @@ update() {
       >&2 echo "    ./${script_name} build"
    fi
    pypi="$(pypi)"
-   version="`version`"
+   version="$(version)"
    if [ "${version}" == "${pkg} build not configured" ]; then
       >&1 echo "Next run \"./${script_name} build\" to build and configure ${pkg}."
    elif [ "$pypi" == "$version" ]; then
@@ -754,10 +754,10 @@ version() {
    set +e
    trap - EXIT
    if [ -e ${confdir}/root_dir ]; then
-    root="`cat ${confdir}/root_dir`"
+    root="$(cat ${confdir}/root_dir)"
       pkg_env_path="${root}/bin/${pkg}_env"
       if [ -e $pkg_env_path ]; then
-         echo "`${pkg_env_path} ${pkg} config version`"
+         echo "$(${pkg_env_path} ${pkg} config version)"
       else
          >&2 echo "${pkg} package not installed"
          exit 0
