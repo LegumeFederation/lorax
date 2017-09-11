@@ -15,7 +15,7 @@
 #      {{NAME}}_enable   Set to "YES" if the service is to be started.
 #
 {{NAME}}_root="{{ROOT}}"
-{{NAME}}_var="{{VAR}}/run/nginx"
+{{NAME}}_var="{{VAR}}/{redis,run/nginx}"
 {{NAME}}_log="{{LOG}}/nginx"
 {{NAME}}_tmp="{{TMP}}/nginx"
 {{NAME}}_data="{{DATA}}"

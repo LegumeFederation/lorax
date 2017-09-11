@@ -138,6 +138,8 @@ start_server() {
    # Start all processes.
    supervisord
    # Wait until starting is done.
+   trap - EXIT
+   set +e
    while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
    if [ "$_V" -eq 1 ]; then
       >&2 supervisorctl status
@@ -145,6 +147,7 @@ start_server() {
 }
 #
 stop_server() {
+   supervisorctl mstop \*
    supervisorctl shutdown
 }
 #
@@ -273,6 +276,8 @@ if [ "$_I" -eq 1 ]; then
 elif [ "${command[0]}" == "start" ]; then
    start_server ${command[*]}
 elif [ "${command[0]}" == "stop" ]; then
+   trap - EXIT
+   set +e
    stop_server ${command[*]}
 else
    if [ "$_V" -eq 1 ]; then
