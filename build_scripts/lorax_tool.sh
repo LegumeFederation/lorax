@@ -360,10 +360,10 @@ cat << 'EOF'
 # are compile-time-only settings which cannot be overridden.
 #
 #./lorax_tool config directory_version 0.94
-#./lorax_tool config root_dir ~/.lorax/`./lorax_tool config directory_version`
-#./lorax_tool config var_dir "`./lorax_tool config root_dir`/var"
-#./lorax_tool config tmp_dir "`./lorax_tool config var_dir`/tmp"
-#./lorax_tool config log_dir "`./lorax_tool config var_dir`/log"
+#./lorax_tool config root_dir "~/.lorax/$(./lorax_tool config directory_version)"
+#./lorax_tool config var_dir "$(./lorax_tool config root_dir)/var"
+#./lorax_tool config tmp_dir "$(./lorax_tool config var_dir)/tmp"
+#./lorax_tool config log_dir "$(./lorax_tool config var_dir)/log"
 #
 # Version numbers of packages.  Setting these to "system" will cause them
 # not to be built.
@@ -471,9 +471,9 @@ init() {
    #
    set_value root_dir ${build_root_dir}/${version}
    set_value directory_version ${version}
-   set_value var_dir "`get_value root_dir`/var"
-   set_value tmp_dir "`get_value var_dir`/tmp"
-   set_value log_dir "`get_value var_dir`/log"
+   set_value var_dir "$(get_value root_dir)/var"
+   set_value tmp_dir "$(get_value var_dir)/tmp"
+   set_value log_dir "$(get_value var_dir)/log"
    set_value python 3.6.2
    set_value hmmer 3.1b2
    set_value raxml 8.2.11
@@ -531,12 +531,12 @@ Packages:
        nginx - nginx web proxy server.
 """
   root=$(get_value root_dir)
-  cc="`get_value cc`"
-  make="`get_value make`"
+  cc="$(get_value cc)"
+  make="$(get_value make)"
   commandlist="python raxml hmmer redis nginx"
   if [ "$#" -eq 0 ]; then # install the whole list
       for package in $commandlist; do
-         version="`get_value $package`"
+         version="$(get_value $package)"
          if [ "$version" == "system" ]; then
            >&1 echo "System version of $package will be used, skipping build."
          else
@@ -546,7 +546,7 @@ Packages:
   else
      case $commandlist in
         *"$1"*)
-           install_$1 `get_value $1` ${root} ${cc} ${make}
+           install_$1 $(get_value $1) ${root} ${cc} ${make}
         ;;
         $commandlist)
           trap - EXIT
@@ -561,7 +561,7 @@ link_env() {
    # Link the _env script to $bin_dir.
    #
    root=$(get_value root_dir)
-   bin_dir="`get_value bin_dir`"
+   bin_dir="$(get_value bin_dir)"
    >&1 echo "linking ${pkg}_env to ${bin_dir}"
    if [ ! -e ${bin_dir} ]; then
      >&1 echo "Creating binary directory at ${bin_dir}"
@@ -606,7 +606,7 @@ pip_install() {
    #
    # Do pip installations for package.
    #
-   root="`get_value root_dir`"
+   root="$(get_value root_dir)"
    if [[ ":$PATH:" != *"${root}:"* ]]; then
       export PATH="${root}/bin:${PATH}"
    fi
@@ -615,7 +615,7 @@ pip_install() {
    pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    pip install -U ${pkg}
    pkg_env_path="${root}/bin/${pkg}_env"
-   pkg_version="`${pkg_env_path} ${pkg} config version`"
+   pkg_version="$(${pkg_env_path} ${pkg} config version)"
    set_value version $pkg_version
    >&1 echo "${pkg} version $pkg_version is now installed."
 }
@@ -623,7 +623,7 @@ pip_upgrade() {
    #
    # Upgrade an existing installation.
    #
-   root="`get_value root_dir`"
+   root="$(get_value root_dir)"
    if [[ ":$PATH:" != *"${root}:"* ]]; then
       export PATH="${root}/bin:${PATH}"
    fi
@@ -632,7 +632,7 @@ pip_upgrade() {
    pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
    pip install -U ${pkg}
    pkg_env_path="${root}/bin/${pkg}_env"
-   pkg_version="`${pkg_env_path} ${pkg} config version`"
+   pkg_version="$(${pkg_env_path} ${pkg} config version)"
    set_value version $pkg_version
    >&1 echo "${pkg} version $pkg_version is now installed."
 }
@@ -646,13 +646,13 @@ pypi() {
   # The piped function below does version sorting using only awk.
   #
   simple_url="https://pypi.python.org/simple/${pkg}"
-  latest="`curl -L -s $simple_url |\
+  latest="$(curl -L -s $simple_url |\
           grep tar.gz |\
           sed -e 's/.*lorax-//g' -e 's#.tar.gz</a><br/>##g'|\
           awk -F. '{ printf("%03d%03d%03d\n", $1, $2, $3); }'|\
           sort -g |\
           awk '{printf("%d.%d.%d\n", substr($0,0,3),substr($0,4,3),substr($0,7,3))}'|\
-          tail -1`"
+          tail -1)"
    if [ "$?" -eq 0 ]; then
      echo "$latest"
    else
@@ -664,7 +664,7 @@ shell() {
    #
    # Execute in build environment.
    #
-   root="`get_value root_dir`"
+   root="$(get_value root_dir)"
    export PATH="${root}/bin:${PATH}"
    trap - EXIT
    set +e
@@ -693,7 +693,7 @@ Interrupt this script if you do not wish to test at this time.
       fi
    fi
    set -e
-   root="`get_value root_dir`"
+   root="$(get_value root_dir)"
    >&1 echo "Running lorax processes."
    ${root}/bin/lorax_env supervisord
    # Wait until nothing is STARTING.
@@ -736,7 +736,7 @@ update() {
       fi
       >&2 echo "    ./${script_name} build"
    fi
-   pypi="`pypi`"
+   pypi="$(pypi)"
    version="`version`"
    if [ "${version}" == "${pkg} build not configured" ]; then
       >&1 echo "Next run \"./${script_name} build\" to build and configure ${pkg}."
