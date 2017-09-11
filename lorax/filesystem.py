@@ -30,8 +30,8 @@ def create_dir(config_path,  app):
 
 def init_filesystem(app):
     """Initialize the filesystem."""
-    for dir in DIRS:
-        create_dir(dir, app=app)
+    for path in DIRS:
+        create_dir(path, app=app)
     #
     # Config file may not exist if SETTINGS value was changed.
     #

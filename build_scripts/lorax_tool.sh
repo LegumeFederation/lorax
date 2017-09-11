@@ -50,18 +50,20 @@ Commands:
         version - Get installed ${pkg} version.
 
 Variables (accessed by \"config\" command):
-           root_dir - Path to the root directory.
-  directory_version - ${pkg} version for directory naming purposes.
             bin_dir - A writable directory in PATH for script links.
-             python - The python version string.
                  cc - The C compiler to use.
-              raxml - The raxml version string.
-        raxml_model - The RAxML compiler model suffix (e.g., \".SSE3.PTHREADS.gcc\").
-    raxml_binsuffix - The suffix to the binary produced (e.g., \"-PTHREADS-SSE3\").
+  directory_version - ${pkg} version for directory naming purposes.
               hmmer - The HMMer version string.
+              nginx - The nginx version string.
+         prometheus - The prometheus version string.
+     prometheus_sys - The prometheus platform string.
+             python - The python version string.
+              raxml - The raxml version string.
+    raxml_binsuffix - The suffix to the binary produced (e.g., \"-PTHREADS-SSE3\").
+        raxml_model - The RAxML compiler model suffix (e.g., \".SSE3.PTHREADS.gcc\").
               redis - The redis version string.
        redis_cflags - CFLAGS for use in building redis.
-              nginx - The nginx version string.
+           root_dir - Path to the root directory.
             version - Installed version.
 
 Environmental variables:
@@ -192,6 +194,14 @@ install_nginx() {
    rm -rf ${root}/html # and html
    popd
    rm -r nginx-${1}
+}
+install_prometheus() {
+   sys="$(get_value prometheus_sys)"
+   >&1 echo "Installing prometheus $1 to ${2}."
+   curl -L -o prometheus.tar.gz  http://github.com/prometheus/prometheus/releases/download/v${1}/prometheus-${1}.${sys}-amd64.tar.gz
+   tar xf prometheus.tar.gz -C "$2"
+   ls -l "$2"
+   rm prometheus.tar.gz
 }
 #
 # Command functions begin here.
@@ -373,6 +383,7 @@ cat << 'EOF'
 #./lorax_tool config raxml 8.2.11
 #./lorax_tool config redis 4.0.1
 #./lorax_tool config nginx 1.13.5
+#./lorax_tool config prometheus 2.0.0-geta.2
 #
 # The following defaults are platform-specific.  Linux defaults are shown.
 #
@@ -381,6 +392,7 @@ cat << 'EOF'
 #./lorax_tool config make make
 #./lorax_tool config cc gcc
 #./lorax_tool config redis_cflags ""
+#./lorax_tool config prometheus_sys linux
 #
 # The following defaults are hardware-specific for the RAxML build.
 # If you have both hardware and compiler support, you may wish to substitute
@@ -479,6 +491,7 @@ init() {
    set_value raxml 8.2.11
    set_value redis 4.0.1
    set_value nginx 1.13.5
+   set_value prometheus 2.0.0-beta.2
    if [[ "$platform" == "Linux" ]]; then
       >&1 echo "Platform is linux."
       set_value bin_dir ~/bin
@@ -488,6 +501,7 @@ init() {
       set_value redis_cflags ""
       set_value raxml_model .SSE3.PTHREADS.gcc
       set_value raxml_binsuffix -PTHREADS-SSE3
+      set_value prometheus_sys linx
    elif [[ "$platform" == *"BSD" ]]; then
       >&1 echo "Platform is bsd."
       set_value platform bsd
@@ -497,6 +511,7 @@ init() {
       set_value raxml_model .SSE3.PTHREADS.gcc
       set_value raxml_binsuffix -PTHREADS-SSE3
       set_value redis_cflags -DAF_LOCAL=AF_UNIX
+      set_value prometheus_sys freebsd
    elif [[ "$platform" == "Darwin" ]]; then
       >&2 echo "Platform is mac.  Warning: You must have XCODE installed."
       set_value platform mac
@@ -506,6 +521,7 @@ init() {
       set_value raxml_model .SSE3.PTHREADS.mac
       set_value raxml_binsuffix -PTHREADS-SSE3
       set_value redis_cflags ""
+      set_value prometheus_sys darwin
    else
       >&2 echo "WARNING--Unknown platform ${platform}, pretending it is linux."
       set_value platform linux
@@ -524,16 +540,17 @@ Usage:
    $scriptname install PACKAGE
 
 Packages:
+       hmmer - HMMer alignment.
+       nginx - nginx web proxy server.
+  prometheus - prometheus.io statistics server.
       python - Python interpreter.
        raxml - RAxML treebuilder.
-       hmmer - HMMer alignment.
        redis - redis database.
-       nginx - nginx web proxy server.
 """
   root=$(get_value root_dir)
   cc="$(get_value cc)"
   make="$(get_value make)"
-  commandlist="python raxml hmmer redis nginx"
+  commandlist="python raxml hmmer redis nginx prometheus"
   if [ "$#" -eq 0 ]; then # install the whole list
       for package in $commandlist; do
          version="$(get_value $package)"
