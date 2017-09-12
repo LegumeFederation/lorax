@@ -181,6 +181,7 @@ install_nginx() {
    --with-http_addition_module \
    --with-http_gzip_static_module \
    --with-http_realip_module \
+   --with-http_sub_module \
    --sbin-path=bin \
    --modules-path="${root}/lib/nginx/modules" \
    --conf-path="${root}/etc/nginx/nginx.conf" \

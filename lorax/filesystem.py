@@ -2,6 +2,7 @@
 """Create and manage essential filesystem locations."""
 
 import os
+import sys
 from pathlib import Path  # python 3.4 or later
 from .config_file import create_config_file
 
@@ -22,10 +23,10 @@ def create_dir(config_path,  app):
         try:
             dir_path.mkdir(mode=int(app.config['DIR_MODE'], 8),
                            parents=True)
-        except OSError: # pragma: no cover
-            print('Unable to create directory "%s"'
-                  % (str(dir_path)))
-            raise OSError
+        except OSError as err: # pragma: no cover
+            print('Unable to create directory "%s": '
+                  % (str(dir_path)), err)
+            sys.exit(1)
 
 
 def init_filesystem(app):

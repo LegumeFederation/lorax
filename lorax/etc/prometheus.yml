@@ -1,7 +1,7 @@
 # my global config
 global:
-  scrape_interval:     60s
-  evaluation_interval: 3000s
+  scrape_interval:     15s
+  evaluation_interval: 15s
   # scrape_timeout is set to the global default (10s).
 
   # Attach these labels to any time series or alerts when communicating with
@@ -19,10 +19,7 @@ rule_files:
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: 'prometheus'
-    scrape_interval: 60s
-
-    # metrics_path defaults to '/metrics'
-    # scheme defaults to 'http'.
-
+    scrape_interval: 5s
+    metrics_path: /prometheus/metrics
     static_configs:
       - targets: ['localhost:58932']

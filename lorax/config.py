@@ -94,7 +94,7 @@ class BaseConfig(object):
     #
     # Directory/file permissions.
     #
-    PROCESS_UMASK = '007'
+    PROCESS_UMASK = '0007'
     DIR_MODE = '770'  # Note interaction with process umask
     #
     # The DEBUG parameter has multiple implications:

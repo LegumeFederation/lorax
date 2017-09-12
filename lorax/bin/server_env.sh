@@ -122,23 +122,31 @@ start_server() {
    fi
    source "${conf_dir}/${pkg}"
    pkg_userdata="${pkg}_userdata"
-   pathlist=("${!pkg_var}/redis"
+   pathlist=("${!pkg_var}"
+             "${!pkg_var}/redis"
+             "${!pkg_var}/run"
              "${!pkg_var}/run/nginx"
+             "${!pkg_var}/prometheus"
+             "${!pkg_tmp}"
              "${!pkg_tmp}/nginx"
+             "${!pkg_log}"
              "${!pkg_log}/nginx"
              "${!pkg_data}"
              "${!pkg_userdata}")
    pkg_group="${pkg}_group"
    group_id="${!pkg_group}"
+   pkg_umask="${pkg}_umask"
+   mask="${!pkg_umask}"
    # Create directories, if needed.
+   umask $mask
    for path in "${pathlist[@]}" ; do
       if [ ! -d "${path}" ]; then
-         >&2 echo -e "Creating directory ${path}"
+         >&2 echo -e "Creating directory ${path} with umask ${mask}"
          mkdir -p ${path}
          if [ "$group_id" == "" ]; then
             echo "."
          else
-            echo "in group ${group_id}."
+            echo " in group ${group_id}."
             chgrp -R ${group_id} ${path}
          fi
       fi
