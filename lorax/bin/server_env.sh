@@ -142,8 +142,7 @@ start_server() {
    umask $mask
    for path in "${pathlist[@]}" ; do
       if [ ! -d "${path}" ]; then
-         >&2 echo -n
-          "Creating directory ${path} with umask ${mask}"
+         >&2 echo -n "Creating directory ${path} with umask ${mask}"
          mkdir -p ${path}
          if [ "$group_id" == "" ]; then
             echo "."
