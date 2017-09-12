@@ -124,7 +124,7 @@ class BaseConfig(object):
     # User for rc scripts.
     #
     RC_USER = getuser()
-    RC_GROUP = os.getuid()
+    RC_GROUP = ''
     #
     # Settings file name.
     #

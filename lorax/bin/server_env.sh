@@ -133,8 +133,14 @@ start_server() {
    # Create directories, if needed.
    for path in "${pathlist[@]}" ; do
       if [ ! -d "${path}" ]; then
-         >&2 echo "Creating directory ${path} in group ${group_id}."
-         mkdir -p ${path} 2>/dev/null && chgrp -R ${group_id} ${path}
+         >&2 echo -e "Creating directory ${path}"
+         mkdir -p ${path}
+         if [ "$group_id" == "" ]; then
+            echo "."
+         else
+            echo "in group ${group_id}."
+            chgrp -R ${group_id} ${path}
+         fi
       fi
    done
    # Start all processes.

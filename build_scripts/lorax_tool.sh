@@ -57,6 +57,7 @@ Variables (accessed by \"config\" command):
               hmmer - The HMMer version string.
               nginx - The nginx version string.
       node_exporter - The prometheus.io node_exporter version string.
+  node_exporter_sys - The node_exporter platform string.
          prometheus - The prometheus version string.
      prometheus_sys - The prometheus platform string.
         pushgateway - The prometheus.io pushgateway version string.
@@ -213,7 +214,7 @@ install_alertmanager() {
    rm alertmanager.tar.gz
 }
 install_node_exporter() {
-   sys="$(get_value prometheus_sys)"
+   sys="$(get_value node_exporter_sys)"
    >&1 echo "Installing node_exporter $1 to ${2}."
    curl -L -o node_exporter.tar.gz  http://github.com/prometheus/node_exporter/releases/download/v${1}/node_exporter-${1}.${sys}-amd64.tar.gz
    tar xf node_exporter.tar.gz -C "$2"
@@ -419,6 +420,7 @@ cat << 'EOF'
 #./lorax_tool config cc gcc
 #./lorax_tool config redis_cflags ""
 #./lorax_tool config prometheus_sys linux
+#./lorax_tool config node_exporter_sys linux
 #
 # The following defaults are hardware-specific for the RAxML build.
 # If you have both hardware and compiler support, you may wish to substitute
@@ -531,6 +533,7 @@ init() {
       set_value raxml_model .SSE3.PTHREADS.gcc
       set_value raxml_binsuffix -PTHREADS-SSE3
       set_value prometheus_sys linux
+      set_value node_exporter_sys linux
    elif [[ "$platform" == *"BSD" ]]; then
       >&1 echo "Platform is bsd."
       set_value platform bsd
@@ -541,6 +544,7 @@ init() {
       set_value raxml_binsuffix -PTHREADS-SSE3
       set_value redis_cflags -DAF_LOCAL=AF_UNIX
       set_value prometheus_sys freebsd
+      set_value node_exporter_sys netbsd
    elif [[ "$platform" == "Darwin" ]]; then
       >&2 echo "Platform is mac.  Warning: You must have XCODE installed."
       set_value platform mac
@@ -551,6 +555,7 @@ init() {
       set_value raxml_binsuffix -PTHREADS-SSE3
       set_value redis_cflags ""
       set_value prometheus_sys darwin
+      set_value node_exporter_sys darwin
    else
       >&2 echo "WARNING--Unknown platform ${platform}, pretending it is linux."
       set_value platform linux
@@ -561,6 +566,7 @@ init() {
       set_value raxml_model .AVX2.PTHREADS.gcc
       set_value raxml_binsuffix -PTHREADS-AVX2
       set_value prometheus_sys linux
+      set_value node_exporter_sys linux
    fi
 }
 install() {
@@ -745,9 +751,7 @@ Interrupt this script if you do not wish to test at this time.
    set -e
    root="$(get_value root_dir)"
    >&1 echo "Running lorax processes."
-   ${root}/bin/lorax_env supervisord
-   # Wait until nothing is STARTING.
-   while ${root}/bin/lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
+   ${root}/bin/lorax_env -v start
    # Print status.
    ${root}/bin/lorax_env supervisorctl status
    # Create the test directory and cd to it.
@@ -762,8 +766,7 @@ Interrupt this script if you do not wish to test at this time.
    # Clean up.  Note that lorax process doesn't stop properly from
    # shutdown alone across all platforms.
    >&1 echo "Stopping lorax processes."
-   ${root}/bin/lorax_env supervisorctl stop lorax alignment treebuilding nginx
-   ${root}/bin/lorax_env supervisorctl shutdown
+   ${root}/bin/lorax_env stop
    >&1 echo "Tests completed successfully."
 }
 update() {
