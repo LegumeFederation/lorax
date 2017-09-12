@@ -153,19 +153,21 @@ start_server() {
       fi
    done
    # Start all processes.
-   supervisord
+   supervisord -c ${root_dir}/etc/supervisord.conf
    # Wait until starting is done.
    trap - EXIT
    set +e
-   while ${script_name} supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
+   while ${script_name} supervisorctl  -c ${root_dir}/etc/supervisord.conf status | grep STARTING >/dev/null; do
+      sleep 5
+   done
    if [ "$_V" -eq 1 ]; then
-      >&2 supervisorctl status
+      >&2 supervisorctl  -c ${root_dir}/etc/supervisord.conf status
    fi
 }
 #
 stop_server() {
-   supervisorctl mstop \*
-   supervisorctl shutdown
+   supervisorctl  -c ${root_dir}/etc/supervisord.conf mstop \*
+   supervisorctl  -c ${root_dir}/etc/supervisord.conf shutdown
 }
 #
 # Copy command out of argv, else it can mess up later sourcings.

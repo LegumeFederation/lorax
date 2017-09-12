@@ -1,10 +1,14 @@
 #!/bin/bash
-# Create a set of gene familes using peptide FASTAs and HMMs.
-set -e
 #
 # Get environmental variables.
 #
 source ~/.lorax/lorax_rc
+set -e
+error_exit() {
+   >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+   >&2 echo "   $BASH_COMMAND"
+}
+trap error_exit EXIT
 #
 DOC="""Create a set of protein family definitions from unaligned peptide
 FASTA files and HMM's.  The HMM's may be in different directories,
@@ -23,8 +27,8 @@ Example:
 """
 #
 function ProgressBar {
-    let _progress=(${1}*100/${2}*100)/100
-    let _done=(${_progress}*4)/10
+    let _progress=(${1}*100/${2}*100)/100 || true
+    let _done=(${_progress}*4)/10 || true
     let _left=40-$_done
     _fill=$(printf "%${_done}s")
     _empty=$(printf "%${_left}s")
@@ -52,7 +56,7 @@ hmmpath=$2
 # Loop over FASTA files, POST FASTA and PUT HMM.
 #
 nfiles=`find ${fastapath} -type f | wc -l`
-let count=0
+let count=0 || true
 rm -f families.raw
 echo -e "#family_name\tseqs\tavg_len" >families.tsv
 for seqfile in `find ${fastapath}/* -type f` ; do
