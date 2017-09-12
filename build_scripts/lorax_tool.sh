@@ -235,7 +235,7 @@ build() {
    BUILD_DOC="""This command downloads, builds, and installs ${pkg} and its dependencies.
 It sources the \"my_build.sh\" script after initializaiton to allow customization.
 You should stop and edit my_build.sh if you wish to:
-   * install lorax to non-default locations
+   * install ${pkg} to non-default locations
    * use RAxML and your system has AVX or AVX2 hardware
 
 You may run this command with a \"-y\" argument to skip this question.
@@ -274,15 +274,15 @@ You may run this command with a \"-y\" argument to skip this question.
    # Do pip installs.
    >&1 echo "Doing python installs."
    link_python    # python and pip links
-   pip_install    # Do installs for lorax and dependencies
-   link_env       # put lorax_env in PATH
+   pip_install    # Do installs for server and dependencies
+   link_env       # put server_env in PATH
    # Test to make sure it runs.
-   >&1 echo "Testing lorax binary."
+   >&1 echo "Testing ${pkg} binary."
    root="$(get_value root_dir)"
    version > ${root}/version
    >&1 echo "Installation was successful."
-   >&1 echo "You should now proceed with configuring lorax via the command"
-   >&1 echo "   lorax_tool configure_pkg"
+   >&1 echo "You should now proceed with configuring ${pkg} via the command"
+   >&1 echo "   ./${script_name} configure_pkg"
 }
 config() {
   CONFIG_DOC="""Sets/displays key/value pairs for the $pkg build system.
@@ -352,15 +352,15 @@ You may run this command with a \"-y\" argument to skip this question.
    tmp_dir="$(get_value tmp_dir)"
    if [ "$var_dir" != "${root}/var" ]; then
       >&1 echo "Configuring non-default var directory ${var_dir}."
-      ${root}/bin/lorax_env lorax config var $var_dir
+      ${root}/bin/${pkg}_env ${pkg} config var $var_dir
    fi
    if [ "$log_dir" != "${var_dir}/log" ]; then
       >&1 echo "Configuring non-default log directory ${log_dir}."
-      ${root}/bin/lorax_env lorax config log $log_dir
+      ${root}/bin/${pkg}_env ${pkg} config log $log_dir
    fi
    if [ "$tmp_dir" != "${var_dir}/tmp" ]; then
       >&1 echo "Configuring non-default tmp directory ${tmp_dir}."
-      ${root}/bin/lorax_env lorax config tmp $tmp_dir
+      ${root}/bin/${pkg}_env ${pkg} config tmp $tmp_dir
    fi
    if [ -e my_config.sh ]; then
       >&1 echo "Sourcing configuration specifics in my_config.sh."
@@ -369,16 +369,16 @@ You may run this command with a \"-y\" argument to skip this question.
       >&2 echo "WARNING--my_config.sh not found, using defaults."
    fi
    # Save a copy of the configuration to a time-stamped file.
-   config_filename="lorax_config-$(date '+%Y-%m-%d-%H-%M').txt"
-   ${root}/bin/lorax_env lorax config > ${confdir}/${config_filename}
+   config_filename="${pkg}_config-$(date '+%Y-%m-%d-%H-%M').txt"
+   ${root}/bin/${pkg}_env ${pkg} config > ${confdir}/${config_filename}
    # Create the configured instance.
    >&1 echo "Creating a configured instance at ${root}."
-   ${root}/bin/lorax_env lorax create_instance --force
+   ${root}/bin/${pkg}_env ${pkg} create_instance --force
    # Set the password for restricted parts of the site.
-   passwd="$(${root}/bin/lorax_env lorax config secret_key)"
+   passwd="$(${root}/bin/${pkg}_env ${pkg} config secret_key)"
    >&1 echo "Setting the http password to \"${passwd}\";"
    >&1 echo "please write it down, because you will need it to access some services."
-   ${root}/bin/lorax_env lorax set_htpasswd --force
+   ${root}/bin/${pkg}_env ${pkg} set_htpasswd --force
    >&1 echo "To run the test suite, issue the command:"
    >&1 echo "   ./${script_name} testify"
 }
@@ -386,50 +386,50 @@ create_scripts() {
 (
 cat << 'EOF'
 #
-# lorax_tool init configures the following default values, which you may
+# ${pkg}_tool init configures the following default values, which you may
 # override by uncommenting here.  These default values are for a linux
-# build and may be different then the values created by lorax_tools init
+# build and may be different then the values created by ${pkg}_tools init
 # command.
 #
 # Note that if you are building nginx, some of these configuration values
 # are compile-time-only settings which cannot be overridden.
 #
-#./lorax_tool config directory_version 0.94
-#./lorax_tool config root_dir "~/.lorax/$(./lorax_tool config directory_version)"
-#./lorax_tool config var_dir "$(./lorax_tool config root_dir)/var"
-#./lorax_tool config tmp_dir "$(./lorax_tool config var_dir)/tmp"
-#./lorax_tool config log_dir "$(./lorax_tool config var_dir)/log"
+#./${pkg}_tool config directory_version 0.94
+#./${pkg}_tool config root_dir "~/.${pkg}/$(./${pkg}_tool config directory_version)"
+#./${pkg}_tool config var_dir "$(./${pkg}_tool config root_dir)/var"
+#./${pkg}_tool config tmp_dir "$(./${pkg}_tool config var_dir)/tmp"
+#./${pkg}_tool config log_dir "$(./${pkg}_tool config var_dir)/log"
 #
 # Version numbers of packages.  Setting these to "system" will cause them
 # not to be built.
 #
-#./lorax_tool config python 3.6.2
-#./lorax_tool config hmmer 3.1b2
-#./lorax_tool config raxml 8.2.11
-#./lorax_tool config redis 4.0.1
-#./lorax_tool config nginx 1.13.5
-#./lorax_tool config prometheus 2.0.0-geta.2
-#./lorax_tool config alertmanager 0.8.0
-#./lorax_tool config node_exporter 0.14.0
-#./lorax_tool config pushgateway 0.4.0
+#./${pkg}_tool config python 3.6.2
+#./${pkg}_tool config hmmer 3.1b2
+#./${pkg}_tool config raxml 8.2.11
+#./${pkg}_tool config redis 4.0.1
+#./${pkg}_tool config nginx 1.13.5
+#./${pkg}_tool config prometheus 2.0.0-geta.2
+#./${pkg}_tool config alertmanager 0.8.0
+#./${pkg}_tool config node_exporter 0.14.0
+#./${pkg}_tool config pushgateway 0.4.0
 #
 # The following defaults are platform-specific.  Linux defaults are shown.
 #
-#./lorax_tool config platform linux
-#./lorax_tool config bin_dir ~/bin  # dir in PATH where lorax_env is symlinked
-#./lorax_tool config make make
-#./lorax_tool config cc gcc
-#./lorax_tool config redis_cflags ""
-#./lorax_tool config prometheus_sys linux
-#./lorax_tool config node_exporter_sys linux
+#./${pkg}_tool config platform linux
+#./${pkg}_tool config bin_dir ~/bin  # dir in PATH where ${pkg}_env is symlinked
+#./${pkg}_tool config make make
+#./${pkg}_tool config cc gcc
+#./${pkg}_tool config redis_cflags ""
+#./${pkg}_tool config prometheus_sys linux
+#./${pkg}_tool config node_exporter_sys linux
 #
 # The following defaults are hardware-specific for the RAxML build.
 # If you have both hardware and compiler support, you may wish to substitute
 # "SSE3" with either "AVX" or "AVX2".  Note that clang on BSD uses the gcc
 # model, but mac has its own model.
 #
-#./lorax_tool config raxml_model .SSE3.PTHREADS.gcc
-#./lorax_tool config raxml_binsuffix -PTHREADS-SSE3
+#./${pkg}_tool config raxml_model .SSE3.PTHREADS.gcc
+#./${pkg}_tool config raxml_binsuffix -PTHREADS-SSE3
 #
 EOF
 ) > build_example.sh.new
@@ -437,7 +437,7 @@ EOF
 (
 cat <<'EOF'
 #
-# This file is sourced after lorax_tool configure_pkg does initializations,
+# This file is sourced after ${pkg}_tool configure_pkg does initializations,
 # including picking up non-default values from the build configuration for
 # root_dir, var_dir, tmp_dir, and log_dir.
 #
@@ -446,16 +446,16 @@ cat <<'EOF'
 # Values shown are not defaults, but rather example values.
 #
 #version="0.94"
-#${root}/bin/lorax_env lorax config secret_key mysecret
-#${root}/bin/lorax_env lorax config data /usr/local/www/data/lorax/${version}
-#${root}/bin/lorax_env lorax config userdata /persist/lorax/${version}
-#${root}/bin/lorax_env lorax config host 127.0.0.1
-#${root}/bin/lorax_env lorax config rc_user www
-#${root}/bin/lorax_env lorax config rc_group www
-#${root}/bin/lorax_env lorax config nginx_server_name mywebsite.org
-#${root}/bin/lorax_env lorax config port 58927
-#${root}/bin/lorax_env lorax config sentry_dsn https://MYDSN@sentry.io/lorax
-#${root}/bin/lorax_env lorax config crashmail_email user@example.com
+#${root}/bin/${pkg}_env ${pkg} config secret_key mysecret
+#${root}/bin/${pkg}_env ${pkg} config data /usr/local/www/data/${pkg}/${version}
+#${root}/bin/${pkg}_env ${pkg} config userdata /persist/${pkg}/${version}
+#${root}/bin/${pkg}_env ${pkg} config host 127.0.0.1
+#${root}/bin/${pkg}_env ${pkg} config rc_user www
+#${root}/bin/${pkg}_env ${pkg} config rc_group www
+#${root}/bin/${pkg}_env ${pkg} config nginx_server_name mywebsite.org
+#${root}/bin/${pkg}_env ${pkg} config port 58927
+#${root}/bin/${pkg}_env ${pkg} config sentry_dsn https://MYDSN@sentry.io/${pkg}
+#${root}/bin/${pkg}_env ${pkg} config crashmail_email user@example.com
 EOF
 ) > config_example.sh.new
    # Check for updates to other files, in an edit-aware way.
@@ -751,23 +751,23 @@ Interrupt this script if you do not wish to test at this time.
    fi
    set -e
    root="$(get_value root_dir)"
-   >&1 echo "Running lorax processes."
-   ${root}/bin/lorax_env -v start
+   >&1 echo "Running ${pkg} processes."
+   ${root}/bin/${pkg}_env -v start
    # Print status.
-   ${root}/bin/lorax_env supervisorctl status
+   ${root}/bin/${pkg}_env supervisorctl status
    # Create the test directory and cd to it.
    mkdir -p ${test_dir}
    pushd ${test_dir}
    >&1 echo "Getting a set of test files in the ${test_dir} directory."
-   ${root}/bin/lorax_env lorax create_test_files --force
-   >&1 echo "Running test of lorax server."
+   ${root}/bin/${pkg}_env ${pkg} create_test_files --force
+   >&1 echo "Running test of ${pkg} server."
    ./test_targets.sh
    >&1 echo ""
    popd
-   # Clean up.  Note that lorax process doesn't stop properly from
+   # Clean up.  Note that server process doesn't stop properly from
    # shutdown alone across all platforms.
-   >&1 echo "Stopping lorax processes."
-   ${root}/bin/lorax_env stop
+   >&1 echo "Stopping ${pkg} processes."
+   ${root}/bin/${pkg}_env stop
    >&1 echo "Tests completed successfully."
 }
 update() {

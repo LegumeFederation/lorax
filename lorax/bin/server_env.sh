@@ -123,6 +123,7 @@ start_server() {
    source "${conf_dir}/${pkg}"
    pkg_userdata="${pkg}_userdata"
    pathlist=("${!pkg_var}"
+             "${!pkg_var}/html"
              "${!pkg_var}/redis"
              "${!pkg_var}/run"
              "${!pkg_var}/run/nginx"
@@ -156,7 +157,7 @@ start_server() {
    # Wait until starting is done.
    trap - EXIT
    set +e
-   while lorax_env supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
+   while ${script_name} supervisorctl status | grep STARTING >/dev/null; do sleep 5; done
    if [ "$_V" -eq 1 ]; then
       >&2 supervisorctl status
    fi
