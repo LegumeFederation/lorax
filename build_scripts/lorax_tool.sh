@@ -703,9 +703,9 @@ pypi() {
   # The piped function below does version sorting using only awk.
   #
   simple_url="https://pypi.python.org/simple/${pkg}"
-  latest="$(curl -L -s $simple_url |\
+  latest="$(curl -L -s ${simple_url} |\
           grep tar.gz |\
-          sed -e 's/.*lorax-//g' -e 's#.tar.gz</a><br/>##g'|\
+          sed -e "s/.*${pkg}-//g' -e 's#.tar.gz</a><br/>##g"|\
           awk -F. '{ printf("%03d%03d%03d\n", $1, $2, $3); }'|\
           sort -g |\
           awk '{printf("%d.%d.%d\n", substr($0,0,3),substr($0,4,3),substr($0,7,3))}'|\
