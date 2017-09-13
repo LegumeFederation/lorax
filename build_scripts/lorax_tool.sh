@@ -464,14 +464,12 @@ EOF
          if cmp -s ${f} ${f}.new; then
             rm ${f}.new # no change
          else
-           updates=1
            >&1 echo "$f has been updated."
            mv ${f} ${f}.old
            chmod 755 ${f}.new
            mv ${f}.new ${f}
          fi
       else
-         updates=1
          chmod 755 ${f}.new
          mv ${f}.new ${f}
       fi
@@ -607,6 +605,7 @@ Packages:
         ;;
         $commandlist)
           trap - EXIT
+          cat "$INSTALL_DOC"
           >&2 echo  "ERROR--unrecognized package $1"
           exit 1
         ;;

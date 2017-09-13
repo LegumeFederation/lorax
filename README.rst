@@ -25,8 +25,9 @@ alignments, `RQ`_ to queue long calculations, and `Flask`_ to serve up results.
    :alt: Codacy.io grade
 
 .. image:: https://codecov.io/gh/LegumeFederation/lorax/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/LegumeFederation/lorax
-  :alt: Codecov.io test coverage
+   :target: https://codecov.io/gh/LegumeFederation/lorax
+   :alt: Codecov.io test coverage
+
 
 :Homepage: `Lorax GitHub`_
 :Download: `Lorax PyPI`_

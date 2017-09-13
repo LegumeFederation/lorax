@@ -140,20 +140,29 @@ start_server() {
    mask="${!pkg_umask}"
    # Create directories, if needed.
    umask $mask
+   if [ "$_V" -eq 1 ]; then
+      >&2 echo "${pkg}_env start running as user $(whoami)."
+   fi
    for path in "${pathlist[@]}" ; do
       if [ ! -d "${path}" ]; then
-         >&2 echo -n "Creating directory ${path} with umask ${mask}"
+         if [ "$_V" -eq 1 ]; then
+            >&2 echo -n "Creating directory ${path} with umask ${mask}"
+         fi
          mkdir -p ${path}
          if [ "$group_id" == "" ]; then
-            echo "."
+            if [ "$_V" -eq 1 ]; then
+               >&2 echo "."
+            fi
          else
-            echo " in group ${group_id}."
+            if [ "$_V" -eq 1 ]; then
+               >&2 echo " in group ${group_id}."
+            fi
             chgrp -R ${group_id} ${path}
          fi
       fi
    done
    # Start all processes.
-   supervisord -c ${root_dir}/etc/supervisord.conf
+   >&2 supervisord -c ${root_dir}/etc/supervisord.conf
    # Wait until starting is done.
    trap - EXIT
    set +e
@@ -166,8 +175,11 @@ start_server() {
 }
 #
 stop_server() {
-   supervisorctl  -c ${root_dir}/etc/supervisord.conf mstop \*
-   supervisorctl  -c ${root_dir}/etc/supervisord.conf shutdown
+   if [ "$_V" -eq 1 ]; then
+      >&2 echo "Stopping ${pkg} processes as user $(whoami)."
+   fi
+   >&2 supervisorctl  -c ${root_dir}/etc/supervisord.conf mstop \*
+   ?&2 supervisorctl  -c ${root_dir}/etc/supervisord.conf shutdown
 }
 #
 # Copy command out of argv, else it can mess up later sourcings.

@@ -14,6 +14,12 @@ stop_cmd="{{NAME}}_stop"
 load_rc_config $name
 
 rc_user="${{ '{' }}{{NAME}}_user}"
+command="${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env"
+{% if RC_VERBOSE %}
+command_args="-v"
+{% else %}
+command_args=""
+{% endif %}
 pidfile="${{ '{' }}{{NAME}}_var}/run/supervisord.pid"
 required_files="${{ '{' }}{{NAME}}_root}/etc/supervisord.conf ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_run.py"
 required_dirs="${{ '{' }}{{NAME}}_data}"
@@ -25,27 +31,27 @@ shell="{{NAME}}_shell"
 
 {{NAME}}_start()
 {
- sudo -u ${{ '{' }}{{NAME}}_user}  ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env start
+  ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env start
 }
 
 {{NAME}}_stop()
 {
- sudo -u ${{ '{' }}{{NAME}}_user} ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env stop
+ ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env stop
 }
 
 {{NAME}}_status()
 {
- sudo -u ${{ '{' }}{{NAME}}_user} ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl status
+  ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl status
 }
 
 {{NAME}}_supervisorctl()
 {
- sudo -u ${{ '{' }}{{NAME}}_user} ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl
+  ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env supervisorctl
 }
 
 {{NAME}}_shell()
 {
-  sudo -u ${{ '{' }}{{NAME}}_user} ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env -i
+  ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env -i
 }
 
 run_rc_command "$1"

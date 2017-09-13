@@ -125,6 +125,7 @@ class BaseConfig(object):
     #
     RC_USER = getuser()
     RC_GROUP = ''
+    RC_VERBOSE = False
     #
     # Settings file name.
     #
