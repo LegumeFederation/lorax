@@ -452,6 +452,7 @@ cat <<'EOF'
 #${root}/bin/${pkg}_env ${pkg} config host 127.0.0.1
 #${root}/bin/${pkg}_env ${pkg} config rc_user www
 #${root}/bin/${pkg}_env ${pkg} config rc_group www
+#${root}/bin/${pkg}_env ${pkg} config rc_verbose True
 #${root}/bin/${pkg}_env ${pkg} config nginx_server_name mywebsite.org
 #${root}/bin/${pkg}_env ${pkg} config port 58927
 #${root}/bin/${pkg}_env ${pkg} config sentry_dsn https://MYDSN@sentry.io/${pkg}
