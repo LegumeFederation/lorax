@@ -179,7 +179,7 @@ stop_server() {
       >&2 echo "Stopping ${pkg} processes as user $(whoami)."
    fi
    >&2 supervisorctl  -c ${root_dir}/etc/supervisord.conf mstop \*
-   ?&2 supervisorctl  -c ${root_dir}/etc/supervisord.conf shutdown
+   >&2 supervisorctl  -c ${root_dir}/etc/supervisord.conf shutdown
 }
 #
 # Copy command out of argv, else it can mess up later sourcings.
