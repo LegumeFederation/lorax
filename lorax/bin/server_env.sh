@@ -146,19 +146,9 @@ start_server() {
    for path in "${pathlist[@]}" ; do
       if [ ! -d "${path}" ]; then
          if [ "$_V" -eq 1 ]; then
-            >&2 echo -n "Creating directory ${path} with umask ${mask}"
+            >&2 echo "Creating directory ${path} with umask ${mask}."
          fi
          mkdir -p ${path}
-         if [ "$group_id" == "" ]; then
-            if [ "$_V" -eq 1 ]; then
-               >&2 echo "."
-            fi
-         else
-            if [ "$_V" -eq 1 ]; then
-               >&2 echo " in group ${group_id}."
-            fi
-            chgrp -R ${group_id} ${path}
-         fi
       fi
    done
    # Start all processes.

@@ -32,7 +32,7 @@ done
 #
 # Get environmental variables.
 #
-source ~/.lorax/lorax_rc
+source {{USER_CONFIG_FILE}}
 #
 if [ ! -f "$1" ] ; then
 	echo "Must specify a readable HMM file."

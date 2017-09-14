@@ -2,7 +2,7 @@
 #
 # Get environmental variables.
 #
-source ~/.lorax/lorax_rc
+source {{USER_CONFIG_FILE}}
 set -e
 error_exit() {
    >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"

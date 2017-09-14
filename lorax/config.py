@@ -39,6 +39,7 @@ from .version import version as __version__  # noqa
 # Name of this service.
 #
 SERVICE_NAME = os.getenv('FLASK_APP', __name__.split('.')[0])
+SERVICE_ORG = 'LegumeFederation'
 #
 # Definitions that *must* be set in environmental variables.  Trying to
 # set these from the config file would be too late, so they are
@@ -78,7 +79,7 @@ class BaseConfig(object):
     #
     # Web site associated with this project.
     #
-    PROJECT_HOME = 'https://github.com/LegumeFederation/lorax'
+    PROJECT_HOME = 'https://github.com/' + SERVICE_ORG + '/' +SERVICE_NAME
     #
     # File path locations.  All of these are immutable except DATA.
     # Since different components run from different locations, these
@@ -91,6 +92,7 @@ class BaseConfig(object):
     TMP = get_path('TMP', VAR + '/tmp')
     DATA = get_path('DATA', VAR + '/data/')
     USERDATA = get_path('DATA', VAR + '/userdata/')
+    USER_CONFIG_FILE = '~/.' + SERVICE_NAME
     #
     # Directory/file permissions.
     #

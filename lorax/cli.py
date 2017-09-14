@@ -313,7 +313,7 @@ def create_test_files(force):
     copy_files('test',
                Path('.'),
                force,
-               notemplate_exts=['hmm', 'faa', 'sh'])
+               notemplate_exts=['hmm', 'faa'])
     copy_files('user_conf',
-               Path.home() / '.lorax',
+               Path.(current_app.config['USER_CONFIG_FILE']),
                force)
