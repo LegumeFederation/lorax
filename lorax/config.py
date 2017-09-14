@@ -92,7 +92,7 @@ class BaseConfig(object):
     TMP = get_path('TMP', VAR + '/tmp')
     DATA = get_path('DATA', VAR + '/data/')
     USERDATA = get_path('DATA', VAR + '/userdata/')
-    USER_CONFIG_FILE = '~/.' + SERVICE_NAME
+    USER_CONFIG_FILE = '~/.' + SERVICE_NAME + '/lorax_rc'
     #
     # Directory/file permissions.
     #
