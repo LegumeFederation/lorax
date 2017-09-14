@@ -315,5 +315,5 @@ def create_test_files(force):
                force,
                notemplate_exts=['hmm', 'faa'])
     copy_files('user_conf',
-               Path.(current_app.config['USER_CONFIG_FILE']),
+               Path(current_app.config['USER_CONFIG_FILE']),
                force)
