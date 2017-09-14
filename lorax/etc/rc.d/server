@@ -15,40 +15,35 @@ load_rc_config $name
 
 rc_user="${{ '{' }}{{NAME}}_user}"
 command="${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_env"
-required_vars="{{NAME}}_root} {{NAME}}_var {{NAME}}_log {{NAME}}_tmp {{NAME}}_data {{NAME}}_userdata {{NAME}}_user {{NAME}}_group {{NAME}}_umask"
+#required_vars="{{NAME}}_root {{NAME}}_var {{NAME}}_log {{NAME}}_tmp {{NAME}}_data {{NAME}}_userdata {{NAME}}_user {{NAME}}_group {{NAME}}_umask"
 pidfile="${{ '{' }}{{NAME}}_var}/run/supervisord.pid"
 required_files="${{ '{' }}{{NAME}}_root}/etc/supervisord.conf ${{ '{' }}{{NAME}}_root}/bin/{{NAME}}_run.py"
 required_dirs="${{ '{' }}{{NAME}}_data}"
 sig_reload="USR1"
-extra_commands="status supervisorctl shell"
-status="{{NAME}}_status"
+extra_commands="supervisorctl"
 supervisorctl="{{NAME}}_supervisorctl"
-shell="{{NAME}}_shell"
+lrx_run=0
 
 {{NAME}}_start()
 {
   rc_flags="${rc_flags} start"
+  lrx_run=1
 }
 
 {{NAME}}_stop()
 {
  rc_flags="${rc_flags} stop"
-}
-
-{{NAME}}_status()
-{
-  rc_flags="${rc_flags} supervisorctl status"
+ lrx_run=1
 }
 
 {{NAME}}_supervisorctl()
 {
-  rc_flags="${rc_flags} supervisorctl"
-}
-
-{{NAME}}_shell()
-{
-  rc_flags="-i"
+  rc_flags="${rc_flags} supervisorctl status"
+  lrx_run=1
 }
 
 run_rc_command "$1"
+if [ "$lrx_run" -eq 1 ]; then
+  /usr/local/bin/sudo -u $lorax_user -g $lorax_group $command $rc_flags
+fi
 {% endif %}

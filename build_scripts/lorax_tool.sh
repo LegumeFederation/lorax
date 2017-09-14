@@ -754,8 +754,6 @@ Interrupt this script if you do not wish to test at this time.
    root="$(get_value root_dir)"
    >&1 echo "Running ${pkg} processes."
    ${root}/bin/${pkg}_env -v start
-   # Print status.
-   ${root}/bin/${pkg}_env supervisorctl status
    # Create the test directory and cd to it.
    mkdir -p ${test_dir}
    pushd ${test_dir}

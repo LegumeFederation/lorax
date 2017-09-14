@@ -96,8 +96,8 @@ class BaseConfig(object):
     #
     # Directory/file permissions.
     #
-    PROCESS_UMASK = '0007'
-    DIR_MODE = '770'  # Note interaction with process umask
+    PROCESS_UMASK = '0002'
+    DIR_MODE = '755'  # Note interaction with process umask
     #
     # The DEBUG parameter has multiple implications:
     #           * access to python debugging via flask
