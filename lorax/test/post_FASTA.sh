@@ -42,7 +42,7 @@ done
 #
 # Get environmental variables.
 #
-source {{USER_CONFIG_FILE}}
+source {{USER_CONFIG_PATH}}/lorax_rc
 #
 # Parse arguments
 #

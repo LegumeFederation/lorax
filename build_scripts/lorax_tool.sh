@@ -446,7 +446,7 @@ cat <<'EOF'
 # Values shown are not defaults, but rather example values.
 #
 #version="0.94"
-#${root}/bin/${pkg}_env ${pkg} config user_config_file ~/.lorax-dev
+#${root}/bin/${pkg}_env ${pkg} config user_config_path ~/.lorax-dev
 #${root}/bin/${pkg}_env ${pkg} config secret_key mysecret
 #${root}/bin/${pkg}_env ${pkg} config data /usr/local/www/data/${pkg}/${version}
 #${root}/bin/${pkg}_env ${pkg} config userdata /persist/${pkg}/${version}
