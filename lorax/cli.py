@@ -271,10 +271,13 @@ def copy_files(pkg_subdir, out_head, force, notemplate_exts=None):
               default=False)
 @click.option('--init/--no-init', help='Initialize filesystem',
               default=True)
-def create_instance(force, init):
+@click.option('--var/--no-var', help='Create files in var directory',
+              default=True)
+def create_instance(force, init, var):
     """Configures instance files."""
     copy_files('etc', Path(current_app.config['ROOT']) / 'etc', force)
-    copy_files('var', Path(current_app.config['VAR']), force)
+    if var:
+        copy_files('var', Path(current_app.config['VAR']), force)
     if init:
         init_filesystem(current_app)
 
