@@ -269,11 +269,14 @@ def copy_files(pkg_subdir, out_head, force, notemplate_exts=None):
 @cli.command()
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
-def create_instance(force):
+@click.option('--init/--no-init', help='Initialize filesystem',
+              default=True)
+def create_instance(force, init):
     """Configures instance files."""
     copy_files('etc', Path(current_app.config['ROOT']) / 'etc', force)
     copy_files('var', Path(current_app.config['VAR']), force)
-    init_filesystem(current_app)
+    if init:
+        init_filesystem(current_app)
 
 
 @cli.command()
@@ -308,12 +311,15 @@ def set_htpasswd(force):
 @cli.command()
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
-def create_test_files(force):
+@click.option('--configonly/--no-configonly', help='Only create config file',
+              default=False)
+def create_test_files(force, configonly):
     """Create test files."""
-    copy_files('test',
-               Path('.'),
-               force,
-               notemplate_exts=['hmm', 'faa', 'sh'])
+    if not configonly:
+        copy_files('test',
+                   Path('.'),
+                   force,
+                   notemplate_exts=['hmm', 'faa', 'sh'])
     copy_files('user_conf',
                Path(os.path.expanduser(current_app.config['USER_CONFIG_PATH'])),
                force)
