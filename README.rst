@@ -3,25 +3,25 @@ and phylogenetic trees for genes and gene families.  Lorax uses
 `FastTree`_ or `RAxML`_ to calculate trees, `HMMER`_ to do multiple sequence
 alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
 
-+-------------------+------------+----------------------------------------+
-| Latest Release    | |pypi|     | |TheLorax|                             |
-+-------------------+------------+                                        +
-| GitHub            | |repo|     |                                        |
-+-------------------+------------+                                        +
-| License           | |license|  |                                        |
-+-------------------+------------+                                        +
-| Documentation     |  |docs|    |                                        |
-+-------------------+------------+                                        +
-| Travis Build      | |travis|   |                                        |
-+-------------------+------------+                                        +
-| Coverage          | |coverage| |                                        |
-+-------------------+------------+                                        +
-| Pythonicity       | |landscape||                                        |
-+-------------------+------------+                                        +
-| Code Grade        | |codacy|   |                                        |
-+-------------------+------------+----------------------------------------+
-| Issues            | |issues|   |I am the Lorax.  I speak for the trees. |
-+-------------------+------------+----------------------------------------+
+    +-------------------+------------+-----------------------------------------+
+    | Latest Release    | |pypi|     | |TheLorax|                              |
+    +-------------------+------------+                                         +
+    | GitHub            | |repo|     |                                         |
+    +-------------------+------------+                                         +
+    | License           | |license|  |                                         |
+    +-------------------+------------+                                         +
+    | Documentation     |  |docs|    |                                         |
+    +-------------------+------------+                                         +
+    | Travis Build      | |travis|   |                                         |
+    +-------------------+------------+                                         +
+    | Coverage          | |coverage| |                                         |
+    +-------------------+------------+                                         +
+    | Pythonicity       | |landscape||                                         |
+    +-------------------+------------+                                         +
+    | Code Grade        | |codacy|   |                                         |
+    +-------------------+------------+-----------------------------------------+
+    | Issues            | |issues|   |*I am the Lorax.  I speak for the trees.*|
+    +-------------------+------------+-----------------------------------------+
 
  .. |TheLorax| image:: docs/lorax_big_icon.jpg
      :target: https://en.wikipedia.org/wiki/The_Lorax
@@ -35,15 +35,15 @@ alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
     :target: https://github.com/LegumeFederation/lorax
     :alt: GitHub repository
 
-.. |license| image:: https://img.shields.io/github/license/LegumeFederation/lorax.svg
+.. |license| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
     :target: https://github.com/LegumeFederation/lorax/blob/master/LICENSE.txt
     :alt: License terms
 
-.. |docs| image:: https://readthedocs.org/projects/lorax/badge/?version=latest
+.. |docs| image:: https://lorax.readthedocs.io/projects/en/latest/?badge=latest
     :target: https://lorax.readthedocs.io/en/latest
     :alt: ReadTheDocs documentation
 
-.. |travis| image:: https://secure.travis-ci.org/LegumeFederation/lorax.png
+.. |travis| image:: https://img.shields.io/travis/LegumeFederation/lorax.svg
     :target:  https://travis-ci.org/LegumeFederation/lorax
     :alt: Travis CI
 
