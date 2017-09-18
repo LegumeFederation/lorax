@@ -1,10 +1,27 @@
-.. epigraph:: I am the Lorax. I speak for the trees. I speak for the trees, for the trees have no tongues.
-                  --Dr. Seuss, The Lorax
-
 lorax is a web service for calculating multiple sequence alignments
-and phylogenetic trees for genes and gene families.  Under the hood, lorax uses
+and phylogenetic trees for genes and gene families.  Lorax uses
 `FastTree`_ or `RAxML`_ to calculate trees, `HMMER`_ to do multiple sequence
-alignments, `RQ`_ to queue long calculations, and `Flask`_ to serve up results.
+alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
+
++-------------------+------------+----------------------------------------+
+| Latest Release    | |pypi|     | |TheLorax|                             |
++-------------------+------------+                                        +
+| GitHub            | |repo|     |                                        |
++-------------------+------------+                                        +
+| License           | |license|  |                                        |
++-------------------+------------+                                        +
+| Documentation     |  |docs|    |                                        |
++-------------------+------------+                                        +
+| Travis Build      | |travis|   |                                        |
++-------------------+------------+                                        +
+| Coverage          | |coverage| |                                        |
++-------------------+------------+                                        +
+| Pythonicity       | |landscape||                                        |
++-------------------+------------+                                        +
+| Code Grade        | |codacy|   |                                        |
++-------------------+------------+----------------------------------------+
+| Issues            | |issues|   |I am the Lorax.  I speak for the trees. |
++-------------------+------------+----------------------------------------+
 
  .. |TheLorax| image:: docs/lorax_big_icon.jpg
      :target: https://en.wikipedia.org/wiki/The_Lorax
@@ -42,30 +59,9 @@ alignments, `RQ`_ to queue long calculations, and `Flask`_ to serve up results.
     :target: https://codecov.io/gh/LegumeFederation/lorax
     :alt: Codecov.io test coverage
 
-.. |issues| image:: .. https://img.shields.io/github/issues/LegumeFederation/lorax.svg
+.. |issues| image:: https://img.shields.io/github/issues/LegumeFederation/lorax.svg
     :target:  https://github.com/LegumeFederation/lorax/issues
     :alt: Issues reported
-
-
-+-------------------+------------+------------+
-| Latest Release    | |pypi|     | |TheLorax| |
-+-------------------+------------+            +
-| GitHub Repository | |repo|     |            |
-+-------------------+------------+            +
-| License           | |license|  |            |
-+-------------------+------------+            +
-| Documentation     |  |docs|    |            |
-+-------------------+------------+            +
-| Travis Build      | |travis|   |            |
-+-------------------+------------+            +
-| Coverage          | |coverage| |            |
-+-------------------+------------+            +
-| landscape.io score| |landscape||            |
-+-------------------+------------+            +
-| Codacy Grade      | |codacy|   |            |
-+-------------------+------------+            +
-| Issues            | |issues|   |            |
-+-------------------+------------+------------+
 
 .. _Flask: http://flask.pocoo.org/
 .. _RQ: https://github.com/nvie/rq
