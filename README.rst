@@ -42,7 +42,7 @@ alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
 
 .. |RTD| image:: https://lorax.readthedocs.io/en/latest/?badge=latest
     :target: https://lorax.readthedocs.io/en/latest
-    :alt: ReadTheDocs documentation
+    :alt: ReadTheDocs
 
 .. |travis| image:: https://img.shields.io/travis/LegumeFederation/lorax.svg
     :target:  https://travis-ci.org/LegumeFederation/lorax
