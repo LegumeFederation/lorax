@@ -1,4 +1,5 @@
 .. epigraph:: I am the Lorax.  I speak for the trees.
+              --Dr. Seuss
 
 
 lorax implements a queued web service for calculating phylogenetic trees for
@@ -14,7 +15,7 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 +-------------------+------------+            +
 | License           | |license|  |            |
 +-------------------+------------+            +
-| Documentation     |  |RTD|     |            |
+| Documentation     | |RTD|      |            |
 +-------------------+------------+            +
 | Travis Build      | |travis|   |            |
 +-------------------+------------+            +
@@ -23,7 +24,7 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 | Pythonicity       | |landscape||            |
 +-------------------+------------+            +
 | Code Grade        | |codacy|   |            |
-+-------------------+------------+------------+
++-------------------+------------+            +
 | Issues            | |issues|   |            |
 +-------------------+------------+------------+
 
@@ -44,7 +45,7 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
     :target: https://github.com/LegumeFederation/lorax/blob/master/LICENSE.txt
     :alt: License terms
 
-.. |RTD| image:: https://lorax.readthedocs.io/en/latest/?badge=latest
+.. |RTD| image:: https://readthedocs.org/projects/lorax/badge/?version=latest
     :target: https://lorax.readthedocs.io/en/latest
     :alt: ReadTheDocs
 

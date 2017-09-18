@@ -22,7 +22,7 @@ Only working ``bash`` and C compilers were assumed to be deployment
 prerequisites;  everything else needs to be built as a non-privileged user
 without depending on a particular package manager.
 
-The primary design goal for lorax was to implement best practices for::
+The primary design goal for lorax was to implement best practices for:
 
 *   Service architecture: make use of RESTful endpoints, with a migration
     path to GraphQL in the near future.  A great deal of effort goes
@@ -53,11 +53,12 @@ being not quite ready.  We forked supervisord and enabled explicit Python 3
 support, with installation direct from repository.
 
 The block diagram (from the HTTP point of view) of  processes that run to
-implement lorax is shown below::
-   .. image:: lorax_processes.svg
+implement lorax is shown below:
+
+.. image:: lorax_processes.svg
 
 Red lines in this figure represent http connections (whether over IP or unix
-sockets). The components in this software ecosystem are::
+sockets). The components in this software ecosystem are:
 
 * A front-end web proxy (nginx) to handle dispatching, compression, and security.
 * A Flask-based service process (lorax) that handles configuration and dispatching
