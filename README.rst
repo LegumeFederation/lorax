@@ -4,7 +4,7 @@ and phylogenetic trees for genes and gene families.  Under the hood, lorax uses
 alignments, `RQ`_ to queue long calculations, and `Flask`_ to serve up results.
 
 
-..sidebar:: Lorax speaks for the trees.
+.. sidebar:: Lorax speaks for the trees.
     .. image:: docs/lorax_big_icon.jpg
         :target: https://en.wikipedia.org/wiki/The_Lorax
         :width: 24pc
