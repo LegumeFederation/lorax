@@ -10,7 +10,7 @@ alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
 +-------------------+------------+                                         +
 | License           | |license|  |                                         |
 +-------------------+------------+                                         +
-| Documentation     |  |docs|    |                                         |
+| Documentation     |  |RTD|     |                                         |
 +-------------------+------------+                                         +
 | Travis Build      | |travis|   |                                         |
 +-------------------+------------+                                         +
@@ -40,7 +40,7 @@ alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
     :target: https://github.com/LegumeFederation/lorax/blob/master/LICENSE.txt
     :alt: License terms
 
-.. |docs| image:: https://lorax.readthedocs.io/en/latest/?badge=latest
+.. |RTD| image:: https://lorax.readthedocs.io/en/latest/?badge=latest
     :target: https://lorax.readthedocs.io/en/latest
     :alt: ReadTheDocs documentation
 
