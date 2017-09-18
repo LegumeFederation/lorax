@@ -3,6 +3,8 @@ and phylogenetic trees for genes and gene families.  Lorax uses
 `FastTree`_ or `RAxML`_ to calculate trees, `HMMER`_ to do multiple sequence
 alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
 
+.. table::
+    :align: center
     +-------------------+------------+-----------------------------------------+
     | Latest Release    | |pypi|     | |TheLorax|                              |
     +-------------------+------------+                                         +
@@ -23,7 +25,8 @@ alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
     | Issues            | |issues|   |*I am the Lorax.  I speak for the trees.*|
     +-------------------+------------+-----------------------------------------+
 
- .. |TheLorax| image:: docs/lorax_big_icon.jpg
+
+.. |TheLorax| image:: docs/lorax_big_icon.jpg
      :target: https://en.wikipedia.org/wiki/The_Lorax
      :alt: Dr. Suess, The Lorax
 
@@ -39,7 +42,7 @@ alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
     :target: https://github.com/LegumeFederation/lorax/blob/master/LICENSE.txt
     :alt: License terms
 
-.. |docs| image:: https://lorax.readthedocs.io/projects/en/latest/?badge=latest
+.. |docs| image:: https://lorax.readthedocs.io/en/latest/?badge=latest
     :target: https://lorax.readthedocs.io/en/latest
     :alt: ReadTheDocs documentation
 
