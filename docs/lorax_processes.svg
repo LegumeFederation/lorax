@@ -15,9 +15,17 @@
    version="1.1"
    id="svg8"
    sodipodi:docname="lorax_processes.svg"
-   inkscape:version="0.92.1 r">
+   inkscape:version="0.91 r13725">
   <defs
-     id="defs2" />
+     id="defs2">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 44.45 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="165.1 : 44.45 : 1"
+       inkscape:persp3d-origin="82.55 : 29.633333 : 1"
+       id="perspective3416" />
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -26,14 +34,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.7916667"
-     inkscape:cx="312"
-     inkscape:cy="168"
+     inkscape:cx="115.52573"
+     inkscape:cy="189.0989"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
      units="in"
-     inkscape:window-width="2613"
-     inkscape:window-height="1520"
+     inkscape:window-width="1440"
+     inkscape:window-height="856"
      inkscape:window-x="-8"
      inkscape:window-y="0"
      inkscape:window-maximized="0" />
@@ -45,7 +53,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -328,40 +336,44 @@
     <g
        id="g4523-4-2-7"
        transform="translate(-53.99388,74.613473)" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:0.21881226;stroke-opacity:1"
-       y="263.08423"
-       x="3.8158953"
-       height="16.912233"
-       width="35.305058"
-       id="rect4487-3-7-5" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="21.473919"
-       y="269.13443"
-       id="text4493-94-62-5"><tspan
-         sodipodi:role="line"
-         id="tspan4491-38-0-7"
-         x="21.473919"
+    <g
+       id="g3427"
+       transform="translate(0.07443223,-5.2102564)">
+      <rect
+         id="rect4487-3-7-5"
+         width="35.305058"
+         height="16.912233"
+         x="3.8158953"
+         y="263.08423"
+         style="fill:none;stroke:#000000;stroke-width:0.21881226;stroke-opacity:1" />
+      <text
+         id="text4493-94-62-5"
          y="269.13443"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;stroke-width:0.26458332">crashmail</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="21.672352"
-       y="273.89291"
-       id="text4493-6-5-48-6"><tspan
-         sodipodi:role="line"
-         x="21.672352"
+         x="21.473919"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;writing-mode:lr-tb;text-anchor:middle;stroke-width:0.26458332"
+           y="269.13443"
+           x="21.473919"
+           id="tspan4491-38-0-7"
+           sodipodi:role="line">crashmail</tspan></text>
+      <text
+         id="text4493-6-5-48-6"
          y="273.89291"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#0000ff;fill-opacity:1;stroke-width:0.26458332"
-         id="tspan4513-2-23-7">SMTP/TXT</tspan><tspan
-         sodipodi:role="line"
          x="21.672352"
-         y="279.18457"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#0000ff;fill-opacity:1;stroke-width:0.26458332"
-         id="tspan5282">crash reporter</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan4513-2-23-7"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#0000ff;fill-opacity:1;stroke-width:0.26458332"
+           y="273.89291"
+           x="21.672352"
+           sodipodi:role="line">SMTP/TXT</tspan><tspan
+           id="tspan5282"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#0000ff;fill-opacity:1;stroke-width:0.26458332"
+           y="279.18457"
+           x="21.672352"
+           sodipodi:role="line">crash reporter</tspan></text>
+    </g>
     <ellipse
        style="fill:none;stroke:#000000;stroke-width:0.4069784;stroke-opacity:1"
        id="path4825"
@@ -477,12 +489,6 @@
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.35277778;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 22.917473,263.2928 0.04855,-5.37969"
-       id="path5370-5-7-0-5"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="3" />
-    <path
        style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.31240368;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 87.174525,240.28492 125.89609,225.60608"
        id="path5370-50"
@@ -490,7 +496,7 @@
        inkscape:connector-curvature="3" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.26569268px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 89.521927,240.31211 V 257.1501"
+       d="m 89.521927,240.31211 0,16.83799"
        id="path5528"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3" />

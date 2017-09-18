@@ -1,27 +1,31 @@
-lorax is a web service for calculating multiple sequence alignments
-and phylogenetic trees for genes and gene families.  Lorax uses
-`FastTree`_ or `RAxML`_ to calculate trees, `HMMER`_ to do multiple sequence
-alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
+.. epigraph:: I am the Lorax.  I speak for the trees.
 
-+-------------------+------------+-----------------------------------------+
-| Latest Release    | |pypi|     | |TheLorax|                              |
-+-------------------+------------+                                         +
-| GitHub            | |repo|     |                                         |
-+-------------------+------------+                                         +
-| License           | |license|  |                                         |
-+-------------------+------------+                                         +
-| Documentation     |  |RTD|     |                                         |
-+-------------------+------------+                                         +
-| Travis Build      | |travis|   |                                         |
-+-------------------+------------+                                         +
-| Coverage          | |coverage| |                                         |
-+-------------------+------------+                                         +
-| Pythonicity       | |landscape||                                         |
-+-------------------+------------+                                         +
-| Code Grade        | |codacy|   |                                         |
-+-------------------+------------+-----------------------------------------+
-| Issues            | |issues|   |*I am the Lorax.  I speak for the trees.*|
-+-------------------+------------+-----------------------------------------+
+
+lorax implements a queued web service for calculating phylogenetic trees for
+gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
+`FastTree`_ or `RAxML`_ to calculate trees,
+`RQ`_ to queue calculations, and `Flask`_ to serve up results.
+
+
++-------------------+------------+------------+
+| Latest Release    | |pypi|     | |TheLorax| |
++-------------------+------------+            +
+| GitHub            | |repo|     |            |
++-------------------+------------+            +
+| License           | |license|  |            |
++-------------------+------------+            +
+| Documentation     |  |RTD|     |            |
++-------------------+------------+            +
+| Travis Build      | |travis|   |            |
++-------------------+------------+            +
+| Coverage          | |coverage| |            |
++-------------------+------------+            +
+| Pythonicity       | |landscape||            |
++-------------------+------------+            +
+| Code Grade        | |codacy|   |            |
++-------------------+------------+------------+
+| Issues            | |issues|   |            |
++-------------------+------------+------------+
 
 
 .. |TheLorax| image:: docs/lorax_big_icon.jpg
@@ -69,7 +73,3 @@ alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
 .. _HMMER: http://hmmer.org
 .. _RAxML: https://github.com/stamatak/standard-RAxML
 .. _FastTree: http://www.microbesonline.org/fasttree
-
-
-
-
