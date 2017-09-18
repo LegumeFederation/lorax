@@ -3,27 +3,25 @@ and phylogenetic trees for genes and gene families.  Lorax uses
 `FastTree`_ or `RAxML`_ to calculate trees, `HMMER`_ to do multiple sequence
 alignments, `RQ`_ to queue calculations, and `Flask`_ to serve up results.
 
-.. table::
-    :align: center
-    +-------------------+------------+-----------------------------------------+
-    | Latest Release    | |pypi|     | |TheLorax|                              |
-    +-------------------+------------+                                         +
-    | GitHub            | |repo|     |                                         |
-    +-------------------+------------+                                         +
-    | License           | |license|  |                                         |
-    +-------------------+------------+                                         +
-    | Documentation     |  |docs|    |                                         |
-    +-------------------+------------+                                         +
-    | Travis Build      | |travis|   |                                         |
-    +-------------------+------------+                                         +
-    | Coverage          | |coverage| |                                         |
-    +-------------------+------------+                                         +
-    | Pythonicity       | |landscape||                                         |
-    +-------------------+------------+                                         +
-    | Code Grade        | |codacy|   |                                         |
-    +-------------------+------------+-----------------------------------------+
-    | Issues            | |issues|   |*I am the Lorax.  I speak for the trees.*|
-    +-------------------+------------+-----------------------------------------+
++-------------------+------------+-----------------------------------------+
+| Latest Release    | |pypi|     | |TheLorax|                              |
++-------------------+------------+                                         +
+| GitHub            | |repo|     |                                         |
++-------------------+------------+                                         +
+| License           | |license|  |                                         |
++-------------------+------------+                                         +
+| Documentation     |  |docs|    |                                         |
++-------------------+------------+                                         +
+| Travis Build      | |travis|   |                                         |
++-------------------+------------+                                         +
+| Coverage          | |coverage| |                                         |
++-------------------+------------+                                         +
+| Pythonicity       | |landscape||                                         |
++-------------------+------------+                                         +
+| Code Grade        | |codacy|   |                                         |
++-------------------+------------+-----------------------------------------+
+| Issues            | |issues|   |*I am the Lorax.  I speak for the trees.*|
++-------------------+------------+-----------------------------------------+
 
 
 .. |TheLorax| image:: docs/lorax_big_icon.jpg
