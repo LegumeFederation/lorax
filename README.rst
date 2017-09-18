@@ -1,3 +1,15 @@
+.. image:: docs/lorax_big_icon.jpg
+    :class: with-border
+    :target: https://en.wikipedia.org/wiki/The_Lorax
+    :width: 33pc
+    :alt: I speak for the trees!
+    :align: center
+
+.. epigraph:: I am the Lorax. I speak for the trees. I speak for the trees, for the trees have no tongues.
+               --Dr. Seuss, The Lorax
+
+__________________
+
 lorax is a web service for calculating multiple sequence alignments
 and phylogenetic trees for genes and gene families.  Under the hood, lorax uses
 `FastTree`_ or `RAxML`_ to calculate trees, `HMMER`_ to do multiple sequence

@@ -373,7 +373,7 @@ You may run this command with a \"-y\" argument to skip this question.
    ${root}/bin/${pkg}_env ${pkg} config > ${confdir}/${config_filename}
    # Create the configured instance.
    >&1 echo "Creating a configured instance at ${root}."
-   if [ ! -z "$@" ]; then
+   if [ "$#" -ne 0 ]; then
       >&1 echo "Using additional arguments to create_instance \"$@\"."
    fi
    ${root}/bin/${pkg}_env ${pkg} create_instance --force $@
