@@ -335,7 +335,9 @@ You should stop and edit my_config.sh if you wish to:
 
 You may run this command with a \"-y\" argument to skip this question.
 """
-   if [ "$1" != "-y" ]; then
+   if [ "$1" == "-y" ]; then
+      shift 1
+   else
       >&1 echo "$CONFIGURE_DOC"
       read -p "Do you want to continue? <(y)> " response
       if [ ! -z "$response" ]; then
