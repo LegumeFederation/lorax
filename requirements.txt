@@ -30,7 +30,7 @@ raven[flask]==6.1.0
 redis==2.10.6             # via rq, rq-dashboard
 rq-dashboard==0.3.8
 rq-scheduler==0.7.0       # via flask-rq2
-rq==0.6.0,<0.7            # flask-rq2 requires <0.7
+rq<0.7                    # flask-rq2 requires <0.7
 six==1.11.0               # via orderedmultidict, python-dateutil
 superlance==1.0.0
 supervisor-wildcards==0.1.3
