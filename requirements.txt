@@ -24,7 +24,7 @@ markupsafe==1.0           # via jinja2
 meld3==1.0.2
 numpy==1.13.1             # via biopython
 orderedmultidict==0.7.11  # via htpasswd
-prometheus-client==0.0.20
+prometheus-client==0.0.21
 python-dateutil==2.6.1    # via arrow, croniter
 raven[flask]==6.1.0
 redis==2.10.6             # via rq, rq-dashboard
