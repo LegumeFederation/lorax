@@ -25,6 +25,10 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 +-------------------+------------+            +
 | Code Grade        | |codacy|   |            |
 +-------------------+------------+            +
+| Dependencies      | |pyup|     |            |
++-------------------+------------+            +
+| Working On        | |waffle|   |            |
++-------------------+------------+            +
 | Issues            | |issues|   |            |
 +-------------------+------------+------------+
 
@@ -68,6 +72,18 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 .. |issues| image:: https://img.shields.io/github/issues/LegumeFederation/lorax.svg
     :target:  https://github.com/LegumeFederation/lorax/issues
     :alt: Issues reported
+
+.. |requires| image:: https://requires.io/github/LegumeFederation/lorax/requirements.svg?branch=master
+     :target: https://requires.io/github/LegumeFederation/lorax/requirements/?branch=master
+     :alt: Requirements Status
+
+.. |pyup| image:: https://pyup.io/repos/github/LegumeFederation/lorax/shield.svg
+     :target: https://pyup.io/repos/github/LegumeFederation/lorax/
+     :alt: pyup.io dependencies
+
+.. |waffle| image:: https://badge.waffle.io/LegumeFederation/lorax.png?label=ready&title=Ready
+    :target: https://waffle.io/LegumeFederation/lorax
+    :alt: waffle.io status
 
 .. _Flask: http://flask.pocoo.org/
 .. _RQ: https://github.com/nvie/rq
