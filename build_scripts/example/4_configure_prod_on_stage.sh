@@ -15,12 +15,12 @@ trap error_exit EXIT
 echo "Changing configuration to prod"
 cd $LORAX_BUILD_DIR
 rm my_config.sh
-ln -s ~${LRX_INSTALLER}/prod_config.sh ./my_config.sh
-/usr/local/www/lorax-${LRX_VERSION}/bin/lorax_env lorax config --delete
+ln -s ${LRX_SCRIPT_DIR}/prod_config.sh ./my_config.sh
+${LRX_ROOT}/bin/lorax_env lorax config --delete
 pushd $LORAX_BUILD_DIR
-./lorax_tool configure_pkg --no-init --no-var
+./lorax_tool configure_pkg -y --no-init --no-var
 popd
-/usr/local/www/lorax-${LRX_VERSION}/bin/lorax_env lorax create_test_files --force --configonly
+${LRX_ROOT}/bin/lorax_env lorax create_test_files --force --configonly
 echo "Ready for move to production."
 trap - EXIT
 exit 0

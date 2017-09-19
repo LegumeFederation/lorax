@@ -29,4 +29,5 @@ echo "testing as $LRX_USER"
 $LRX_SUDO -u $LRX_USER ${LRX_ROOT}/bin/lorax_env -v start
 cd $LORAX_TEST_DIR
 ./test_targets.sh
+$LRX_SUDO -u $LRX_USER ${LRX_ROOT}/bin/lorax_env -v stop
 echo "Done testing as $LRX_USER"

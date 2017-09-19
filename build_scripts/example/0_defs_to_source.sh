@@ -47,6 +47,7 @@ export LRX_SCRIPT_DIR=$PWD
 export LRX_VAR=/var/lorax/${LRX_VERSION}
 export LRX_TMP=/tmp/lorax
 export LRX_LOG=/var/log/lorax
+export LRX_INSTALLER_HOME=~
 export LORAX_BUILD_DIR="${LRX_ROOT}/build"
 export LORAX_TEST_DIR="${LRX_ROOT}/test"
 #

@@ -14,8 +14,6 @@ sudo cp /usr/local/www/lorax-${LRX_VERSION}/etc/conf.d/lorax /etc/rc.conf.d/lora
 sudo chmod 555 /usr/local/etc/rc.d/lorax
 echo "starting service..."
 sudo service lorax start
-echo "getting the status"
-$LRX_SUDO -u $LRX_USER ${LRX_ROOT}/bin/lorax_env supervisorctl status
 echo "Stopping the service..."
 sudo service lorax stop
 trap - EXIT

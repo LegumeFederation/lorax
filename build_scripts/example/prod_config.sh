@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # These defs are for a production instance.
 #

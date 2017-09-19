@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # These defs are for use on a staging instance.
 #

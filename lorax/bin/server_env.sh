@@ -134,8 +134,6 @@ start_server() {
              "${!pkg_log}/nginx"
              "${!pkg_data}"
              "${!pkg_userdata}")
-   pkg_group="${pkg}_group"
-   group_id="${!pkg_group}"
    pkg_umask="${pkg}_umask"
    mask="${!pkg_umask}"
    # Create directories, if needed.
