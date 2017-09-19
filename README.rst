@@ -15,7 +15,7 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 +-------------------+------------+            +
 | License           | |license|  |            |
 +-------------------+------------+            +
-| Documentation     | |RTD|      |            |
+| Documentation     | |rtd|      |            |
 +-------------------+------------+            +
 | Travis Build      | |travis|   |            |
 +-------------------+------------+            +
@@ -49,9 +49,9 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
     :target: https://github.com/LegumeFederation/lorax/blob/master/LICENSE.txt
     :alt: License terms
 
-.. |RTD| image:: https://readthedocs.org/projects/lorax/badge/?version=latest
-    :target: https://lorax.readthedocs.io/en/latest
-    :alt: ReadTheDocs
+.. |rtd| image:: https://readthedocs.org/projects/lorax/badge/?version=latest
+    :target: http://lorax.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 .. |travis| image:: https://img.shields.io/travis/LegumeFederation/lorax.svg
     :target:  https://travis-ci.org/LegumeFederation/lorax
