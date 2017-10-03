@@ -78,7 +78,7 @@ CURL_ARGS               P     Arguments for use with curl.
 
   HOST type(str) =  "localhost"
 
-  HOSTNAME type(str)      D   Hostname for nginx to use.  Defaults to 
+  HOSTNAME type(str)      D   Hostname for nginx to use.  Defaults to
 
   JSONIFY_MIMETYPE type(str) =  "application/json"
 
