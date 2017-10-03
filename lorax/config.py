@@ -65,7 +65,7 @@ def get_path(name, default):
     return path_str
 
 
-class BaseConfig(obj):
+class BaseConfig(object):
     """Base class for configuration objects.
 
     Note that only values in uppercase will be stored in the app
