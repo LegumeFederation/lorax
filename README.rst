@@ -27,9 +27,9 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 +-------------------+------------+            +
 | Dependencies      | |pyup|     |            |
 +-------------------+------------+            +
-| Working On        | |waffle|   |            |
-+-------------------+------------+            +
 | Issues            | |issues|   |            |
++-------------------+------------+            +
+| Kanban            | |ZenHub|   |            |
 +-------------------+------------+------------+
 
 
@@ -81,9 +81,9 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
      :target: https://pyup.io/repos/github/LegumeFederation/lorax/
      :alt: pyup.io dependencies
 
-.. |waffle| image:: https://badge.waffle.io/LegumeFederation/lorax.png?label=ready&title=Ready
-    :target: https://waffle.io/LegumeFederation/lorax
-    :alt: waffle.io status
+.. |ZenHub| image:: https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png
+    :target: https://zenhub.com
+    :alt: Powered by ZenHub
 
 .. _Flask: http://flask.pocoo.org/
 .. _RQ: https://github.com/nvie/rq
