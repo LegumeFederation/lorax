@@ -51,7 +51,7 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 
 .. |rtd| image:: https://readthedocs.org/projects/lorax/badge/?version=latest
     :target: http://lorax.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+    :alt: Documentation Server
 
 .. |travis| image:: https://img.shields.io/travis/LegumeFederation/lorax.svg
     :target:  https://travis-ci.org/LegumeFederation/lorax
