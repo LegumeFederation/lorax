@@ -11,9 +11,9 @@ Before running this script, lorax should be configured and started.
 """
 set -e # exit on errors
 error_exit() {
-   echo "$DOC"
-   echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
-   echo "   $BASH_COMMAND"
+   >&2 echo "$DOC"
+   >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+   >&2 echo "   $BASH_COMMAND"
 }
 trap error_exit EXIT
 #
@@ -60,10 +60,10 @@ test_GET () {
       fi
       rm "$tmpfile"
    else
-      echo "FATAL ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
-      echo "Full response is:"
-      cat ${tmpfile}
-      echo ""
+      >&2 echo "ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
+      >&2 echo "Full response is:"
+      >&2 cat ${tmpfile}
+      >&2 echo ""
       rm "$tmpfile"
       trap - EXIT
       exit 1
@@ -93,10 +93,10 @@ test_GET_PASSWORD() {
       fi
       rm "$tmpfile"
    else
-      echo "FATAL ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
-      echo "Full response is:"
-      cat ${tmpfile}
-      echo ""
+      >&2 echo "ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
+      >&2 echo "Full response is:"
+      >&2 cat ${tmpfile}
+      >&2 echo ""
       rm "$tmpfile"
       trap - EXIT
       exit 1
@@ -126,10 +126,10 @@ test_DELETE() {
       fi
       rm "$tmpfile"
    else
-      echo "FATAL ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
-      echo "Full response is:"
-      cat ${tmpfile}
-      echo ""
+      >&2 echo "ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
+      >&2 echo "Full response is:"
+      >&2 cat ${tmpfile}
+      >&2 echo ""
       rm "$tmpfile"
       trap - EXIT
       exit 1

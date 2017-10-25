@@ -16,9 +16,11 @@ Example:
 # Parse option (verbose flag)
 #
 set -e
+export ARGS="$@"
 error_exit() {
-   echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
-   echo "   $BASH_COMMAND"
+   >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+   >&2 echo "   $BASH_COMMAND"
+   >&2 echo "   with arguments \"${ARGS}\"."
 }
 _V=0 
 while getopts "v" OPTION
@@ -35,24 +37,24 @@ done
 source ~/.lorax/lorax_rc
 #
 if [ ! -f "$1" ] ; then
-	echo "Must specify a readable HMM file."
+	>&2 echo "Must specify a readable HMM file."
 	exit 1
 fi
 #
 # Parse arguments.
 #
 if [ "$#" -lt 2 ]; then
-	echo "$HMM_DOC"
+	>&2 echo "$HMM_DOC"
 	exit 1
 fi
 if [ ! -f "$1" ] ; then
-	echo "HMM must specify a readable HMM definition file."
-	echo "$HMM_DOC"
+	>&2 echo "HMM must specify a readable HMM definition file."
+	>&2 echo "$HMM_DOC"
 	exit 1
 fi
 if [ -z "$2" ] ; then
-	echo "Must specify a FAMILY name."
-	echo "$HMM_DOC"
+	>&2 echo "Must specify a FAMILY name."
+	>&2 echo "$HMM_DOC"
 	exit 1
 fi
 if [ -z "${3}" ] ; then
@@ -76,10 +78,10 @@ if [ "${status}" -eq "${code}" ]; then
    fi
    rm "$tmpfile"
 else
-   echo "FATAL ERROR--PUT of ${1} to ${full_target} returned HTTP code ${status}, expected ${code}."
-   echo "Full response is:"
-   cat ${tmpfile}
-   echo ""
+   >&2 echo "ERROR--PUT of ${1} to ${full_target} returned HTTP code ${status}, expected ${code}."
+   >&2 echo "Full response is:"
+   >&2 cat ${tmpfile}
+   >&2 echo ""
    rm "$tmpfile"
    trap - EXIT
    exit 1

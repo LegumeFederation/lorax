@@ -23,9 +23,11 @@ Options:
  must be defined.
 "
 set -e
+ARGS="$@"
 error_exit() {
-   echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
-   echo "   $BASH_COMMAND"
+   >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+   >&2 echo "   $BASH_COMMAND"
+   >&2 echo "   with arguments \"${ARGS}\"."
 }
 #
 # Parse option (verbose flag)
@@ -47,7 +49,7 @@ source ~/.lorax/lorax_rc
 # Parse arguments
 #
 if [ "$#" -lt 4 ]; then
-	echo "$FASTA_DOC"
+	>&2 echo "$FASTA_DOC"
 	exit 1
 fi
 if [ "$1" == "peptide" ] ; then
@@ -55,18 +57,18 @@ if [ "$1" == "peptide" ] ; then
 elif [ "$1" == "DNA" ]; then
 	type="DNA"
 else
-	echo "TYPE must be either \"peptide\" or \"DNA\"."
-	echo "$FASTA_DOC"
+	>&2 echo "TYPE must be either \"peptide\" or \"DNA\"."
+	>&2 echo "$FASTA_DOC"
 	exit 1
 fi
 if [ ! -f "$2" ] ; then
-	echo "FASTA must specify a readable sequence file."
-	echo "$FASTA_DOC"
+	>&2 echo "FASTA must specify a readable sequence file."
+	>&2 echo "$FASTA_DOC"
 	exit 1
 fi
 if [ -z "$3" ] ; then
-	echo "Must give a FAMILY name."
-	echo "$FASTA_DOC"
+	>&2 echo "Must give a FAMILY name."
+	>&2 echo "$FASTA_DOC"
 	exit 1
 fi
 if [ "$4" == "sequences" ]; then
@@ -74,8 +76,8 @@ if [ "$4" == "sequences" ]; then
 elif [ "$4" == "alignment" ]; then
 	target="alignment"
 else
-	echo "TARGET must be either \"sequences\" or \"alignment\"."
-	echo "$FASTA_DOC"
+	>&2 echo "TARGET must be either \"sequences\" or \"alignment\"."
+	>&2 echo "$FASTA_DOC"
 	exit 1
 fi
 if [ -z "${5}" ] ; then
@@ -99,10 +101,10 @@ if [ "${status}" -eq "${code}" ]; then
    fi
    rm "$tmpfile"
 else
-   echo "FATAL ERROR--POST of ${2} to ${full_target} returned HTTP code ${status}, expected ${code}."
-   echo "Full response is:"
-   cat ${tmpfile}
-   echo ""
+   >&2 echo "ERROR--POST of ${2} to ${full_target} returned HTTP code ${status}, expected ${code}."
+   >&2 echo "Full response is:"
+   >&2 cat ${tmpfile}
+   >&2 echo ""
    rm "$tmpfile"
    trap - EXIT
    exit 1
