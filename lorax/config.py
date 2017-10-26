@@ -209,7 +209,7 @@ class BaseConfig(object):
         NGINX_LISTEN_ARGS = 'deferred'
         NGINX_EVENTS = 'use epoll;'
         import distro
-        DISTRIBUTION = distro.linux_distribution[0].split()[0]
+        DISTRIBUTION = distro.linux_distribution()[0].split()[0]
     elif system.endswith('BSD'): # pragma: no cover
         NGINX_LISTEN_ARGS = 'accept_filter=httpready'
         NGINX_EVENTS = 'use kqueue;'
