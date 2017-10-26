@@ -11,6 +11,7 @@ blinker==1.4              # via raven
 click==6.7                # via flask, flask-cli, rq
 coverage==4.4.1
 croniter==0.3.19          # via rq-scheduler
+distro==1.0.4
 flask-cli==0.4.0          # via flask-rq2
 flask-rq2[cli]==17.0
 flask==0.12.2             # via flask-cli, flask-rq2, raven, rq-dashboard
@@ -29,7 +30,7 @@ raven[flask]==6.2.1
 redis==2.10.6             # via rq, rq-dashboard
 rq-dashboard==0.3.10
 rq-scheduler==0.7.0       # via flask-rq2
-rq==0.8.2                 # via flask-rq2, rq-dashboard, rq-scheduler
+rq==0.6.0                 # via flask-rq2, rq-dashboard, rq-scheduler
 six==1.11.0               # via orderedmultidict, python-dateutil
 superlance==1.0.0
 supervisor-wildcards==0.1.3

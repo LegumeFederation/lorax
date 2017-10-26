@@ -27,7 +27,7 @@ import htpasswd
 #
 # Local imports.
 #
-from .logging import configure_logging
+from .logs import configure_logging
 from .filesystem import init_filesystem
 from .config_file import create_config_file, write_kv_to_config_file
 from .config import print_config_var
@@ -53,7 +53,7 @@ def cli():
 @cli.command()
 def run(): # pragma: no cover
     """Run a server directly."""
-    from .logging import configure_logging
+    from .logs import configure_logging
     print('Direct start, use of gunicorn is recommended for production.', file=sys.stderr)
     port = current_app.config['PORT']
     host = current_app.config['HOST']

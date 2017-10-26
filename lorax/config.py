@@ -208,15 +208,20 @@ class BaseConfig(object):
     if system == 'Linux':
         NGINX_LISTEN_ARGS = 'deferred'
         NGINX_EVENTS = 'use epoll;'
+        import distro
+        DISTRIBUTION = distro.linux_distribution[0].split()[0]
     elif system.endswith('BSD'): # pragma: no cover
         NGINX_LISTEN_ARGS = 'accept_filter=httpready'
         NGINX_EVENTS = 'use kqueue;'
+        DISTRIBUTION = None
     elif system == 'Darwin': # pragma: no cover
         NGINX_LISTEN_ARGS = ''
         NGINX_EVENTS = 'use kqueue;'
+        DISTRIBUTION = None
     else: # pragma: no cover
         NGINX_LISTEN_ARGS = ''
         NGINX_EVENTS = ''
+        DISTRIBUTION = None
     NGINX_UNIX_SOCKET = False
     #
     # gunicorn defs--these will not be used in debugging mode.
