@@ -38,7 +38,7 @@ if [ "$lrx_run" -eq 1 ]; then
   /usr/local/bin/sudo -u $lorax_user -g $lorax_group $command $rc_flags
 fi
 {% endif %}
-{% if PLATFORM is equalto("linux") %}
+{% if PLATFORM is equalto("Linux") %}
 {% if DISTRIBUTION is equalto("Gentoo") %}
 #!/sbin/openrc-rc
 description="{{NAME}} web server"

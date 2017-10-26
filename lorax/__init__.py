@@ -5,7 +5,6 @@
 # standard library imports
 #
 import os
-from collections import OrderedDict  # python 3.1
 from sys import prefix
 #
 # third-party imports

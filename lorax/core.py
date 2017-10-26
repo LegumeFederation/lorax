@@ -20,7 +20,7 @@ from Bio import SeqIO, AlignIO, Phylo
 #
 # local imports
 #
-from . import app
+from . import app, rq
 #
 # Non-configurable global constants.
 #
