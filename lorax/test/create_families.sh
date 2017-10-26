@@ -3,17 +3,10 @@
 # Get environmental variables.
 #
 source ~/.lorax/lorax_rc
-set -e
 let count=0 || true
 error_exit() {
-   if [ "$BASH_COMMAND" = "PostPut" ]; then
-      seqfile=$(cat /tmp/create_families_file.txt)
-      >&2 echo "ERROR--PostPut failed processing $seqfile"
-      rm -f /tmp/create_families_file.txt
-   else
-      >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
-      >&2 echo "   $BASH_COMMAND"
-   fi
+  >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+  >&2 echo "   $BASH_COMMAND"
 }
 #
 DOC="""Create a set of protein family definitions from unaligned peptide
@@ -43,7 +36,6 @@ printf "\rProgress (${2} families): [${_fill// /#}${_empty// /-}] ${_progress}%%
 #
 function PostPut {
     while read seqfile; do
-        echo "$seqfile" > /tmp/create_families_file.txt
         let count=${count}+1
         seqname=${seqfile##*/}
         fam=${seqname%%.*}
@@ -56,10 +48,17 @@ function PostPut {
             ProgressBar ${count} ${nfiles}
         fi
         ./post_FASTA.sh peptide ${seqfile} ${fam} sequences
-        ./put_HMM.sh ${hmmpath}/${fam}.hmm ${fam}
+        if [ "$?" -eq 1 ] ; then
+ -		    echo "POST of FASTA failed on ${fam}"
+ -		    exit 1
+ -	    fi
+ -	    ./put_HMM.sh ${hmmpath}/${fam}.hmm ${fam}
+ -	    if [ "$?" -eq 1 ] ; then
+ -		    echo "PUT of HMM failed on ${fam}"
+ -		    exit 1
+ -	    fi
         echo -e "${fam}\t${nseqs}\t${avg_len}">>families.raw
     done
-    rm -f /tmp/create_families_file.txt
 }
 #
 # Parse arguments.
@@ -77,7 +76,6 @@ if [ "$#" -lt 2   ]; then
 	>&2 echo "$DOC"
 	exit 1
 fi
-trap error_exit EXIT
 fastapath=$1
 hmmpath=$2
 #
@@ -90,6 +88,8 @@ echo -e "#family_name\tseqs\tavg_len" >families.tsv
 # Post sequences and put HMM's to server.
 #
 find ${fastapath} -name \*.faa |  PostPut
+set -e
+trap error_exit EXIT
 if [ "$_Q" -ne 0 ]; then
   echo "" # newline after progress bar
 fi
