@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Configure and run a queued web service.
+"""Core targets for this process.
 """
 #
 # standard library imports
