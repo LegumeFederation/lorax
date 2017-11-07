@@ -118,4 +118,4 @@ def test_exception(): # pragma: no cover
     raise RuntimeError('Intentional error from /test_exception')
 
 
-from .core import *
+from .core import * # noqa

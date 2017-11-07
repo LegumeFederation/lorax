@@ -55,7 +55,7 @@ def run(): # pragma: no cover
     """Run a server directly."""
     from .logs import configure_logging
     print('Direct start, use of gunicorn is recommended for production.',
-          file=sys.stderr)
+          file=sys.stderr) # noqa
     port = current_app.config['PORT']
     host = current_app.config['HOST']
     debug = current_app.config['DEBUG']
