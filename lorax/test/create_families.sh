@@ -4,10 +4,6 @@
 #
 source ~/.lorax/lorax_rc
 let count=0 || true
-error_exit() {
-  >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
-  >&2 echo "   $BASH_COMMAND"
-}
 #
 DOC="""Create a set of protein family definitions from unaligned peptide
 FASTA files and HMM's.  The HMM's may be in different directories,
@@ -48,15 +44,15 @@ function PostPut {
             ProgressBar ${count} ${nfiles}
         fi
         ./post_FASTA.sh peptide ${seqfile} ${fam} sequences
-        if [ "$?" -eq 1 ] ; then
- -		    echo "POST of FASTA failed on ${fam}"
- -		    exit 1
- -	    fi
- -	    ./put_HMM.sh ${hmmpath}/${fam}.hmm ${fam}
- -	    if [ "$?" -eq 1 ] ; then
- -		    echo "PUT of HMM failed on ${fam}"
- -		    exit 1
- -	    fi
+        if [ $? -ne 0 ]; then
+            >&2 echo "POST of FASTA failed on ${fam}"
+ 		    exit 1
+        fi
+ 	    ./put_HMM.sh ${hmmpath}/${fam}.hmm ${fam}
+ 	    if [ $? -ne 0 ]; then
+ 		    >&2 echo "PUT of HMM failed on ${fam}"
+ 		    exit 1
+ 	    fi
         echo -e "${fam}\t${nseqs}\t${avg_len}">>families.raw
     done
 }
@@ -82,14 +78,14 @@ hmmpath=$2
 # Loop over FASTA files, POST FASTA and PUT HMM.
 #
 nfiles=$(find ${fastapath} -type f | wc -l)
-rm -f families.raw
 echo -e "#family_name\tseqs\tavg_len" >families.tsv
 #
 # Post sequences and put HMM's to server.
 #
 find ${fastapath} -name \*.faa |  PostPut
-set -e
-trap error_exit EXIT
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 if [ "$_Q" -ne 0 ]; then
   echo "" # newline after progress bar
 fi

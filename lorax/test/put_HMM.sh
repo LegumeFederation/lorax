@@ -18,6 +18,7 @@ Example:
 set -e
 export ARGS="$@"
 error_exit() {
+   >&2 echo ""
    >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
    >&2 echo "   $BASH_COMMAND"
    >&2 echo "   with arguments \"${ARGS}\"."

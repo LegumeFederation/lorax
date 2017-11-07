@@ -25,7 +25,8 @@ Options:
 set -e
 ARGS="$@"
 error_exit() {
-   >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
+   >&2 echo ""
+   >&2 echo "\nERROR--unexpected exit from ${BASH_SOURCE} script at line:"
    >&2 echo "   $BASH_COMMAND"
    >&2 echo "   with arguments \"${ARGS}\"."
 }
@@ -91,7 +92,9 @@ trap error_exit EXIT
 #
 full_target="/trees/${3}/${target}"
 tmpfile=$(mktemp /tmp/post_FASTA.XXX)
-status=$(curl ${LORAX_CURL_ARGS} -s -o ${tmpfile} -w '%{http_code}' -F "${type}=@${2}" ${LORAX_CURL_URL}${full_target})
+status=$(curl ${LORAX_CURL_ARGS} -s -o ${tmpfile} -w '%{http_code}' \
+         -F "${type}=@${2}" \
+         ${LORAX_CURL_URL}${full_target})
 if [ "${status}" -eq "${code}" ]; then
    if [ "$_V" -eq 1 ]; then
       echo "POST of ${2} to ${full_target} returned HTTP code ${status} as expected."
