@@ -42,11 +42,11 @@ def configure_logging(app):
     :param app:
     :return:
     """
-    if app.config['DEBUG']: # pragma: no cover
+    if app.config['DEBUG']:  # pragma: no cover
         stderr_log_level = logging.DEBUG
     else:
         stderr_log_level = DEFAULT_STDERR_LOGLEVEL
-    if app.config['QUIET']: # pragma: no cover
+    if app.config['QUIET']:  # pragma: no cover
         file_log_level = logging.ERROR
     else:
         file_log_level = DEFAULT_FILE_LOGLEVEL
@@ -59,14 +59,14 @@ def configure_logging(app):
     #
     # Start Sentry monitoring, if SENTRY_DNS is configured.
     #
-    if app.config['SENTRY_DSN'] is not '': # pragma: no cover
+    if app.config['SENTRY_DSN'] is not '':  # pragma: no cover
         from raven.contrib.flask import Sentry
         # import logging
         Sentry(app,
                dsn=app.config['SENTRY_DSN'],
                # logging=True,
                # level=logging.ERROR
-                )
+               )
 
     #
     # Start log file.
@@ -75,14 +75,14 @@ def configure_logging(app):
         logfile_name = app.config['LOGGER_NAME'] + '_errors.log'
         app.config['LOGFILE_NAME'] = logfile_name
         logfile_path = Path(app.config['LOG']) / logfile_name
-        if app.config['DEBUG']: # pragma: no cover
+        if app.config['DEBUG']:  # pragma: no cover
             print('Logging to file "%s".' % str(logfile_path),
-                  file=sys.stderr)
+                  file=sys.stderr)  # noqa
         if not logfile_path.parent.is_dir():  # create logs/ dir
-            try: # pragma: no cover
+            try:  # pragma: no cover
                 logfile_path.parent.mkdir(mode=int(app.config['DIR_MODE'], 8),
                                           parents=True)
-            except OSError: # pragma: no cover
+            except OSError:  # pragma: no cover
                 app.logger.error('Unable to create logfile directory "%s"',
                                  logfile_path.parent)
                 raise OSError

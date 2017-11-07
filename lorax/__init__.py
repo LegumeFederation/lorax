@@ -4,12 +4,14 @@
 #
 # standard library imports
 #
+import json
 import os
 from sys import prefix
+from pathlib import Path  # python 3.4
 #
 # third-party imports
 #
-from flask import Flask, Response, request, abort
+from flask import Flask, Response
 from flask_cli import FlaskCLI
 from flask_rq2 import RQ
 import rq_dashboard
@@ -110,8 +112,10 @@ def return_log():
                        file_type='log')
     return Response(content, mimetype=TEXT_MIMETYPE)
 
+
 @app.route('/test_exception')
 def test_exception(): # pragma: no cover
     raise RuntimeError('Intentional error from /test_exception')
+
 
 from .core import *

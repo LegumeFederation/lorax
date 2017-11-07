@@ -22,8 +22,7 @@ for txtfile in "${txtfilelist[@]}" ; do
       echo "ERROR--must create ${txtfile}.txt file in this directory."
       exit 1
    else
-      varstring="$(echo $txtfile | tr /a-z/ /A-Z/)"
-      export LRX_${varstring}="$(cat ${txtfile}.txt)"
+      export LRX_$(echo $txtfile | tr /a-z/ /A-Z/)="$(cat ${txtfile}.txt)"
    fi
 done
 #
