@@ -78,6 +78,7 @@ hmmpath=$2
 # Loop over FASTA files, POST FASTA and PUT HMM.
 #
 nfiles=$(find ${fastapath} -type f | wc -l)
+rm -f families.raw
 echo -e "#family_name\tseqs\tavg_len" >families.tsv
 #
 # Post sequences and put HMM's to server.
@@ -95,11 +96,11 @@ fi
 echo "${nfiles} families created."
 sort -rgk2 families.raw >> families.tsv
 echo "Size-ordered (large to small) list of families can be found in families.tsv"
-rm -f families.raw families_histogram.tsv
+rm -f families_histogram.tsv
 echo "Histogram of family sizes can be found in families_histogram.tsv"
 echo -e "#size\tfamilies" >families_histogram.tsv
 grep -v \# families.tsv | awk '{n[$2]++} END {for (i in n) print i,"\t",n[i]}' | sort -n >>families_histogram.tsv
 IFS=',' read -r -a bigfam <<< $(grep -v \# families.tsv | head -1| tr "\\t" ",")
-echo "Largest familiy is ${bigfam[0]} with ${bigfam[1]} members of average length ${bigfam[2]}."
+echo "Largest family is ${bigfam[0]} with ${bigfam[1]} members of average length ${bigfam[2]}."
 IFS=',' read -r -a modal <<< $(grep -v \# families_histogram.tsv | sort -rgk 2 | head -1 | tr "\\t" ",")
 echo "Modal size of families is ${modal[0]} sequences, with ${modal[1]} examples."
