@@ -3,8 +3,7 @@ language: python
 python:
    - "3.5"
 before_install:
-   - curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool.sh
-   - chmod 755 lorax_tool
+   - ln -s install/lorax_tool.sh ./lorax_tool
    - ./lorax_tool create_scripts
    - ./lorax_tool init
    - export root_dir="$(python -c 'import sys;print(sys.prefix)')"
