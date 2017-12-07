@@ -7,6 +7,11 @@ if [ -z "$LORAX_BUILD_DIR" ]; then
    echo "You must source the defs script first."
    exit 1
 fi
+#
+# Uncomment the following if you wish to install to a virtualenv.
+#
+#virtualenv -p python3 $FNY_ROOT
+#source ${FNY_ROOT}/bin/activate
 mkdir -p $LORAX_BUILD_DIR
 cd $LORAX_BUILD_DIR
 curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool.sh

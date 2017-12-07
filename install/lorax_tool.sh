@@ -660,7 +660,7 @@ link_python() {
       >&1 echo "creating python ${python_version} link in ${root_bin}."
       ln -s python${python_version%.*} python
    fi
-   if [ ! -e pip_install ]; then
+   if [ ! -e pip ]; then
       >&1 echo "creating pip link in ${root_bin}."
       ln -s pip${python_version%%.*} pip
    fi

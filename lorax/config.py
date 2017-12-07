@@ -126,7 +126,7 @@ class BaseConfig(object):
     # User for rc scripts.
     #
     RC_USER = getuser()
-    RC_GROUP = ''
+    RC_GROUP = getuser()
     RC_VERBOSE = False
     #
     # Settings file name.

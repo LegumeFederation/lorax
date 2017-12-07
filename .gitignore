@@ -57,18 +57,20 @@ dist
 ################
 docs/_build/
 
-# build directory#
-##################
+# directories #
+###############
 build/
+env/
 
 # version #
 ###########
 lorax/version.py
 
-# lorax test byproducts#
-########################
-lorax/test/data
-lorax/test/var
+# files with secrets #
+######################
+crashmail_email.txt
+secret_key.txt
+sentry_dsn.txt
 
 # FastTree binary#
 ##################
