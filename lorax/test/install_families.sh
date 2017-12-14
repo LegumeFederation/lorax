@@ -14,8 +14,13 @@ install_family() {
 	./load_family.sh  ${1}/fasta/ ${1}/hmm/ $1
 	rm -rf ${1}/ ${1}.tar.gz
 }
-read -r -p "Download/install $phytozome gene families (900 MB)? [y/N] " phytozome_response
-read -r -p "Download/install $legfed  gene families (700 MB)? [y/N] " legfed_response
+if [ "$1" != "-y" ]; then
+   read -r -p "Download/install $phytozome gene families (900 MB)? [y/N] " phytozome_response
+   read -r -p "Download/install $legfed  gene families (700 MB)? [y/N] " legfed_response
+else
+  phytozome_reponse="y"
+  legfed_response="y"
+fi
 case "$phytozome_response" in
     [yY][eE][sS]|[yY]) 
         install_family $phytozome
