@@ -14,7 +14,7 @@ fi
 #source ${FNY_ROOT}/bin/activate
 mkdir -p $LORAX_BUILD_DIR
 cd $LORAX_BUILD_DIR
-curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool.sh
+curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/install/lorax_tool.sh
 chmod 755 lorax_tool
 ln -s ${LRX_SCRIPT_DIR}/my_build.sh .
 ln -s ${LRX_SCRIPT_DIR}/${LRX_STAGE}_config.sh ./my_config.sh

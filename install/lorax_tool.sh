@@ -6,6 +6,7 @@ pkg="${script_name%_tool}"
 PKG="$(echo ${pkg} | tr /a-z/ /A-Z/)"
 PKG_BUILD_DIR="${PKG}_BUILD_DIR"
 PKG_TEST_DIR="${PKG}_TEST_DIR"
+PKG_GIT_DIR="${PKG}_GIT_DIR"
 if [ -z "${!PKG_BUILD_DIR}" ]; then
    build_dir=~/.${pkg}/build
 else
@@ -411,11 +412,11 @@ cat << 'EOF'
 #./${pkg}_tool config python 3.6.3
 #./${pkg}_tool config hmmer 3.1b2
 #./${pkg}_tool config raxml 8.2.11
-#./${pkg}_tool config redis 4.0.2
+#./${pkg}_tool config redis 4.0.6
 #./${pkg}_tool config nginx 1.13.7
 #./${pkg}_tool config prometheus 2.0.0
 #./${pkg}_tool config alertmanager 0.11.0
-#./${pkg}_tool config node_exporter 0.15.1
+#./${pkg}_tool config node_exporter 0.15.2
 #./${pkg}_tool config pushgateway 0.4.0
 #
 # The following defaults are platform-specific.  Linux defaults are shown.
@@ -523,11 +524,11 @@ init() {
    set_value python 3.6.3
    set_value hmmer 3.1b2
    set_value raxml 8.2.11
-   set_value redis 4.0.2
+   set_value redis 4.0.6
    set_value nginx 1.13.7
    set_value prometheus 2.0.0
    set_value alertmanager 0.11.0
-   set_value node_exporter 0.15.1
+   set_value node_exporter 0.15.2
    set_value pushgateway 0.4.0
    if [[ "$platform" == "Linux" ]]; then
       >&1 echo "Platform is linux."
@@ -678,7 +679,15 @@ pip_install() {
    pip install -U setuptools-scm # This one is needed to work behind proxy
    pip install -U packaging  # Ditto on proxy
    pip install -e 'git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0'
-   pip install -U ${pkg}
+   if [ -z "${!PKG_GIT_DIR}" ]; then
+      pip install -U ${pkg}
+   else
+      echo "Installing from git directory \"${!PKG_GIT_DIR}\""
+      pushd ${!PKG_GIT_DIR}
+      pip install -r requirements.txt
+      pip install -e .
+      popd
+   fi
    pkg_env_path="${root}/bin/${pkg}_env"
    pkg_version="$(${pkg_env_path} ${pkg} config version)"
    set_value version $pkg_version
@@ -778,32 +787,40 @@ Interrupt this script if you do not wish to test at this time.
 }
 update() {
    #
-   # Updates self.
+   # Update self.
    #
-   rawsite="https://raw.githubusercontent.com/LegumeFederation/${pkg}/master/build_scripts"
-   printf "Checking for self-update..."
-   curl -L -s -o ${pkg}_tool.new ${rawsite}/${pkg}_tool.sh
-   chmod 755 ${pkg}_tool.new
-   if cmp -s ${pkg}_tool ${pkg}_tool.new ; then
-      rm ${pkg}_tool.new
-      >&1 echo "not needed." >&1
+   if [ -z "${!PKG_GIT_DIR}" ]; then
+     echo "Updating self via git."
+     pushd ${!PKG_GIT_DIR}
+     git pull
+     newversion=$(awk -F"'" '/^version/ {print $2 }' ${build_root_dir}/funyun/version)
+     popd
    else
-      mv ${pkg}_tool.new ${pkg}_tool
-            >&2 echo "This script was updated. Please re-build ${pkg} using"
-      if [ -e my_build.sh ] ; then
-         >&2 echo "   ./${script_name} create_scripts"
-         >&2 echo "and"
-      fi
-      >&2 echo "    ./${script_name} build"
+     rawsite="https://raw.githubusercontent.com/EagleBytes2017/${pkg}/master/install"
+     printf "Checking for self-update..."
+     curl -L -s -o ${pkg}_tool.new ${rawsite}/${pkg}_tool.sh
+     chmod 755 ${pkg}_tool.new
+     if cmp -s ${pkg}_tool ${pkg}_tool.new ; then
+        rm ${pkg}_tool.new
+        >&1 echo "not needed." >&1
+     else
+        mv ${pkg}_tool.new ${pkg}_tool
+        >&2 echo "This script was updated. Please re-build ${pkg} using"
+        if [ -e my_build.sh ] ; then
+           >&2 echo "   ./${script_name} create_scripts"
+           >&2 echo "and"
+        fi
+        >&2 echo "    ./${script_name} build"
+     fi
+     newversion=$(pypi)
    fi
-   pypi="$(pypi)"
    version="$(version)"
    if [ "${version}" == "${pkg} build not configured" ]; then
       >&1 echo "Next run \"./${script_name} build\" to build and configure ${pkg}."
-   elif [ "$pypi" == "$version" ]; then
+   elif [ "$newversion" == "$version" ]; then
       >&1 echo "The latest version of ${pkg} (${pypi}) is installed, no need for updates."
    else
-      >&1 echo "You can update from installed version (${version}) to latest (${pypi}) with"
+      >&1 echo "You can update from installed version (${version}) to latest (${newversion}) with"
       >&1 echo "   ./${script_name} pip_install"
    fi
 }
