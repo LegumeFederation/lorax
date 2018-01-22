@@ -5,7 +5,7 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 -e git+https://github.com/LegumeFederation/supervisor.git@4.0.0#egg=supervisor==4.0.0
-arrow==0.12.0             # via rq-dashboard
+arrow==0.12.1             # via rq-dashboard
 biopython==1.70
 blinker==1.4              # via raven
 click==6.7                # via flask, flask-cli, rq
