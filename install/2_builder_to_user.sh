@@ -22,9 +22,6 @@ $LRX_SUDO -u $LRX_USER  mkdir ${LRX_VAR}
 $LRX_SUDO -u $LRX_USER cp -R ${LRX_VAR}.${LRX_INSTALLER}/ ${LRX_VAR}
 rm -r ${LRX_VAR}.${LRX_INSTALLER}
 #
-echo "loading model data"
-$LRX_SUDO -u $LRX_USER cp -R ${LRX_SCRIPT_DIR}/data/ ${LRX_VAR}/data
-#
 echo "testing as $LRX_USER"
 $LRX_SUDO -u $LRX_USER ${LRX_ROOT}/bin/lorax_env -v start
 cd $LORAX_TEST_DIR

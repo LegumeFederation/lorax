@@ -14,7 +14,7 @@ by issuing the following commands::
 
     mkdir -p ~/.lorax/build
     cd ~/.lorax/build
-    curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/build_scripts/lorax_tool.sh
+    curl -L -o lorax_tool https://raw.githubusercontent.com/LegumeFederation/lorax/master/install/lorax_tool.sh
     chmod 755 lorax_tool
 
 
