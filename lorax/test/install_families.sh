@@ -3,7 +3,7 @@
 # This script downloads and installs gene familes into lorax.
 #
 phytozome="phytozome_10_2"
-legfed="legfed_v1_0"
+legfed="legfed_v1_1"
 set -e
 install_family() {
 	echo "Downloading $1 families"
