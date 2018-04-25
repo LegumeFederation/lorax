@@ -18,6 +18,7 @@ before_install:
    - ./lorax_tool make_dirs
    - ./lorax_tool install
 install:
+   - pip install --upgrade pip
    - pip install -U setuptools
    - pip install -r requirements.txt
    - pip install -e .

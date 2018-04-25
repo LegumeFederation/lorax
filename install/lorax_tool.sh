@@ -7,6 +7,7 @@ PKG="$(echo ${pkg} | tr /a-z/ /A-Z/)"
 PKG_BUILD_DIR="${PKG}_BUILD_DIR"
 PKG_TEST_DIR="${PKG}_TEST_DIR"
 PKG_GIT_DIR="${PKG}_GIT_DIR"
+PKG_GIT_URL="${PKG}_GIT_URL"
 if [ -z "${!PKG_BUILD_DIR}" ]; then
    build_dir=~/.${pkg}/build
 else
@@ -675,6 +676,7 @@ pip_install() {
       export PATH="${root}/bin:${PATH}"
    fi
    cd $root # src/ directory is left behind by git
+   pip install --upgrade pip
    pip install -U setuptools # This one is needed for parsing setup.cfg
    pip install -U setuptools-scm # This one is needed to work behind proxy
    pip install -U packaging  # Ditto on proxy
@@ -683,8 +685,22 @@ pip_install() {
       pip install -U ${pkg}
    else
       echo "Installing from git directory \"${!PKG_GIT_DIR}\""
-      pushd ${!PKG_GIT_DIR}
+      if [ ! -e "${!PKG_GIT_DIR}" ]; then
+         >&1 echo "creating git dir"
+         mkdir -p "${!PKG_GIT_DIR}"
+      fi
+      if [ -e "${!PKG_GIT_DIR}/${pkg}" ]; then
+         >&1 echo "repo already exists, updating"
+         pushd "${!PKG_GIT_DIR}/${pkg}"
+         >&1 git pull
+      else
+         pushd "${!PKG_GIT_DIR}"
+         >&1 git clone "${!PKG_GIT_URL}"
+         cd $pkg
+      fi
+      >&1 echo "doing requirements"
       pip install -r requirements.txt
+      >&1 echo "doing self"
       pip install -e .
       popd
    fi

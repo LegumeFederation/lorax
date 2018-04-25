@@ -49,6 +49,8 @@ export LRX_LOG=/var/log/lorax
 export LRX_INSTALLER_HOME=~
 export LORAX_BUILD_DIR="${LRX_ROOT}/build"
 export LORAX_TEST_DIR="${LRX_ROOT}/test"
+export LORAX_GIT_URL="https://github.com/LegumeFederation/lorax"
+export LORAX_GIT_DIR=~/lorax_repo # if defined, install from git
 #
 # The following assumes that the user has full sudo
 # privs on dev, but only sudo -u $LRX_USER on stage.
