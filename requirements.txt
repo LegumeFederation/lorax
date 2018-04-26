@@ -14,12 +14,12 @@ croniter==0.3.20          # via rq-scheduler
 distro==1.2.0
 flask-cli==0.4.0          # via flask-rq2
 flask-rq2[cli]==18.0
-flask==0.12.2             # via flask-cli, flask-rq2, raven, rq-dashboard
+flask==1.0                # via flask-cli, flask-rq2, raven, rq-dashboard
 gunicorn==19.7.1
 healthcheck==1.3.2
 htpasswd==2.3
 itsdangerous==0.24        # via flask
-jinja2==2.10             # via flask
+jinja2==2.10              # via flask
 markupsafe==1.0           # via jinja2
 meld3==1.0.2
 numpy==1.14.2             # via biopython
@@ -30,8 +30,8 @@ raven[flask]==6.7.0
 redis==2.10.6             # via rq, rq-dashboard
 rq-dashboard==0.3.10
 rq-scheduler==0.8.2       # via flask-rq2
-rq==0.10.0                 # via flask-rq2, rq-dashboard, rq-scheduler
+rq==0.10.0                # via flask-rq2, rq-dashboard, rq-scheduler
 six==1.11.0               # via orderedmultidict, python-dateutil
 superlance==1.0.0
 supervisor-wildcards==0.1.3
-werkzeug==0.14.1            # via flask
+werkzeug==0.14.1          # via flask
