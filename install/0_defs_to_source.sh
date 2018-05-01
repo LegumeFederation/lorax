@@ -49,11 +49,8 @@ export LRX_LOG=/var/log/lorax
 export LRX_INSTALLER_HOME=~
 export LORAX_BUILD_DIR="${LRX_ROOT}/build"
 export LORAX_TEST_DIR="${LRX_ROOT}/test"
-export LORAX_GIT_URL="https://github.com/LegumeFederation/lorax"
-export LORAX_GIT_DIR=~/lorax_repo # if defined, install from git
 #
-# Define the following if one wishes to install from git rather than
-# from pypi.
+# Define the following to install from git.  Default is install from pypi.
 #
 #export LORAX_GIT_DIR=~/lorax_repo
 #
