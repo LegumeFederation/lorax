@@ -5,6 +5,7 @@
 # Library imports.
 #
 import logging
+import os
 import sys
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
@@ -19,7 +20,7 @@ from flask import request
 #
 DEFAULT_FILE_LOGLEVEL = logging.INFO
 DEFAULT_STDERR_LOGLEVEL = logging.WARNING
-
+SERVICE_NAME = os.getenv('FLASK_APP', __name__.split('.')[0])
 
 class ContextualFilter(logging.Filter):
     """A logging filter with request-based info."""
@@ -72,7 +73,7 @@ def configure_logging(app):
     # Start log file.
     #
     if app.config['LOGFILE']:  # start a log file
-        logfile_name = app.config['LOGGER_NAME'] + '_errors.log'
+        logfile_name = SERVICE_NAME + '_errors.log'
         app.config['LOGFILE_NAME'] = logfile_name
         logfile_path = Path(app.config['LOG']) / logfile_name
         if app.config['DEBUG']:  # pragma: no cover
@@ -105,7 +106,7 @@ def configure_logging(app):
     #
     app.logger.debug('Command line: "%s"', ' '.join(sys.argv))
     app.logger.debug('%s version %s',
-                     app.config['LOGGER_NAME'],
+                     SERVICE_NAME,
                      app.config['VERSION'])
     app.logger.debug('Run started at %s',
                      datetime.now().strftime('%Y%m%d-%H%M%S'))

@@ -34,9 +34,9 @@ done
 export LRX_VERSION="0.94"
 export LRX_ROOT="/usr/local/www/lorax-${LRX_VERSION}"
 export LRX_DEV_HOSTNAME="legfed-dev.usda.iastate.edu"
-export LRX_DEV_IP="10.24.27.202"
+export LRX_DEV_IP="10.10.136.224"
 export LRX_STAGE_HOSTNAME="legfed-stage.usda.iastate.edu"
-export LRX_STAGE_IP="10.24.27.228"
+export LRX_STAGE_IP="10.10.136.225"
 export LRX_PROD_HOSTNAME="legfed.usda.iastate.edu"
 export LRX_PROD_IP="129.186.136.163"
 export LRX_INSTALLER=$USER
@@ -51,6 +51,11 @@ export LORAX_BUILD_DIR="${LRX_ROOT}/build"
 export LORAX_TEST_DIR="${LRX_ROOT}/test"
 export LORAX_GIT_URL="https://github.com/LegumeFederation/lorax"
 export LORAX_GIT_DIR=~/lorax_repo # if defined, install from git
+#
+# Define the following if one wishes to install from git rather than
+# from pypi.
+#
+#export LORAX_GIT_DIR=~/lorax_repo
 #
 # The following assumes that the user has full sudo
 # privs on dev, but only sudo -u $LRX_USER on stage.
