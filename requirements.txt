@@ -22,7 +22,7 @@ itsdangerous==0.24        # via flask
 jinja2==2.10              # via flask
 markupsafe==1.0           # via jinja2
 meld3==1.0.2
-numpy==1.14.3             # via biopython
+numpy==1.14.4             # via biopython
 orderedmultidict==0.7.11  # via htpasswd
 prometheus-client==0.2.0
 python-dateutil==2.7.2    # via arrow, croniter
