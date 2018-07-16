@@ -26,7 +26,7 @@ numpy==1.14.5             # via biopython
 orderedmultidict==1.0  # via htpasswd
 prometheus-client==0.3.0
 python-dateutil==2.7.3    # via arrow, croniter
-raven[flask]==6.7.0
+raven[flask]==6.9.0
 redis==2.10.6             # via rq, rq-dashboard
 rq-dashboard==0.3.11
 rq-scheduler==0.8.2       # via flask-rq2
