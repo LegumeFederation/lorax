@@ -10,7 +10,7 @@ biopython==1.71
 blinker==1.4              # via raven
 click==6.7                # via flask, flask-cli, rq
 coverage==4.5.1
-croniter==0.3.20          # via rq-scheduler
+croniter==0.3.23          # via rq-scheduler
 distro==1.2.0
 flask-cli==0.4.0          # via flask-rq2
 flask-rq2[cli]==18.0
