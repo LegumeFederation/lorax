@@ -28,7 +28,7 @@ prometheus-client==0.3.0
 python-dateutil==2.7.3    # via arrow, croniter
 raven[flask]==6.9.0
 redis==2.10.6             # via rq, rq-dashboard
-rq-dashboard==0.3.11
+rq-dashboard==0.3.12
 rq-scheduler==0.8.2       # via flask-rq2
 rq==0.10.0                 # via flask-rq2, rq-dashboard, rq-scheduler
 six==1.11.0               # via orderedmultidict, python-dateutil
