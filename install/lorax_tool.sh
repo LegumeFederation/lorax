@@ -133,15 +133,16 @@ install_raxml() {
 }
 install_hmmer() {
    >&1 echo "Installing HMMer $1 to ${2}."
-   curl -L -o hmmer-${1}-linux-intel-x86_64.tar.gz http://eddylab.org/software/hmmer3/${1}/hmmer-${1}-linux-intel-x86_64.tar.gz
-   tar xf hmmer-${1}-linux-intel-x86_64.tar.gz 
-   rm hmmer-${1}-linux-intel-x86_64.tar.gz 
-   pushd hmmer-${1}-linux-intel-x86_64/
+   curl -L -o hmmer-${1}.tar.gz http://eddylab.org/software/hmmer/hmmer-${1}.tar.gz
+   tar xf hmmer-${1}.tar.gz
+   rm hmmer-${1}.tar.gz
+   pushd hmmer-${1}/
    ./configure --prefix="${2}" CC="$3" CFLAGS='-O3 -march=native'
    ${4}
+   ${4} check
    ${4} install
    popd
-   rm -r hmmer-${1}-linux-intel-x86_64
+   rm -r hmmer-${1}
 }
 install_redis() {
    redis_cflags="$(get_value redis_cflags)"
