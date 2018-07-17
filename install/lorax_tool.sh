@@ -410,7 +410,7 @@ cat << 'EOF'
 # Version numbers of packages.  Setting these to "system" will cause them
 # not to be built.
 #
-#./${pkg}_tool config python 3.7.0
+#./${pkg}_tool config python 3.6.6
 #./${pkg}_tool config hmmer 3.2.1
 #./${pkg}_tool config raxml 8.2.12
 #./${pkg}_tool config redis 4.0.10
@@ -522,7 +522,7 @@ init() {
    set_value var_dir "$(get_value root_dir)/var"
    set_value tmp_dir "$(get_value var_dir)/tmp"
    set_value log_dir "$(get_value var_dir)/log"
-   set_value python 3.7.0
+   set_value python 3.6.6
    set_value hmmer 3.2.1
    set_value raxml 8.2.12
    set_value redis 4.0.10
