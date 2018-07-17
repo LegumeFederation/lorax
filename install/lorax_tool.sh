@@ -409,15 +409,15 @@ cat << 'EOF'
 # Version numbers of packages.  Setting these to "system" will cause them
 # not to be built.
 #
-#./${pkg}_tool config python 3.6.5
-#./${pkg}_tool config hmmer 3.1b2
-#./${pkg}_tool config raxml 8.2.11
-#./${pkg}_tool config redis 4.0.9
-#./${pkg}_tool config nginx 1.14.0
-#./${pkg}_tool config prometheus 2.2.1
-#./${pkg}_tool config alertmanager 0.14.0
-#./${pkg}_tool config node_exporter 0.15.2
-#./${pkg}_tool config pushgateway 0.4.0
+#./${pkg}_tool config python 3.7.0
+#./${pkg}_tool config hmmer 3.2.1
+#./${pkg}_tool config raxml 8.2.12
+#./${pkg}_tool config redis 4.0.10
+#./${pkg}_tool config nginx 1.15.1
+#./${pkg}_tool config prometheus 2.3.2
+#./${pkg}_tool config alertmanager 0.15.1
+#./${pkg}_tool config node_exporter 0.16.0
+#./${pkg}_tool config pushgateway 0.5.2
 #
 # The following defaults are platform-specific.  Linux defaults are shown.
 #
@@ -521,15 +521,15 @@ init() {
    set_value var_dir "$(get_value root_dir)/var"
    set_value tmp_dir "$(get_value var_dir)/tmp"
    set_value log_dir "$(get_value var_dir)/log"
-   set_value python 3.6.5
-   set_value hmmer 3.1b2
-   set_value raxml 8.2.11
-   set_value redis 4.0.9
-   set_value nginx 1.14.0
-   set_value prometheus 2.2.1
-   set_value alertmanager 0.14.0
-   set_value node_exporter 0.15.2
-   set_value pushgateway 0.4.0
+   set_value python 3.7.0
+   set_value hmmer 3.2.1
+   set_value raxml 8.2.12
+   set_value redis 4.0.10
+   set_value nginx 1.15.1
+   set_value prometheus 2.3.2
+   set_value alertmanager 0.15.1
+   set_value node_exporter 0.16.0
+   set_value pushgateway 0.5.2
    if [[ "$platform" == "Linux" ]]; then
       >&1 echo "Platform is linux."
       set_value bin_dir ~/bin
