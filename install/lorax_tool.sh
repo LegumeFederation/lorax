@@ -413,10 +413,10 @@ cat << 'EOF'
 #./${pkg}_tool config python 3.6.6
 #./${pkg}_tool config hmmer 3.2.1
 #./${pkg}_tool config raxml 8.2.12
-#./${pkg}_tool config redis 4.0.10
-#./${pkg}_tool config nginx 1.15.1
+#./${pkg}_tool config redis 4.0.11
+#./${pkg}_tool config nginx 1.15.2
 #./${pkg}_tool config prometheus 2.3.2
-#./${pkg}_tool config alertmanager 0.15.1
+#./${pkg}_tool config alertmanager 0.15.2
 #./${pkg}_tool config node_exporter 0.16.0
 #./${pkg}_tool config pushgateway 0.5.2
 #
@@ -525,10 +525,10 @@ init() {
    set_value python 3.6.6
    set_value hmmer 3.2.1
    set_value raxml 8.2.12
-   set_value redis 4.0.10
-   set_value nginx 1.15.1
+   set_value redis 4.0.11
+   set_value nginx 1.15.2
    set_value prometheus 2.3.2
-   set_value alertmanager 0.15.1
+   set_value alertmanager 0.15.2
    set_value node_exporter 0.16.0
    set_value pushgateway 0.5.2
    if [[ "$platform" == "Linux" ]]; then

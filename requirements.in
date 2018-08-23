@@ -1,5 +1,6 @@
 # requirements.in
 distro
+rq==0.10.0
 Flask_RQ2[cli]
 biopython
 rq-dashboard
