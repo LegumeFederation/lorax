@@ -6,7 +6,7 @@ blinker==1.4              # via raven
 click==7.0                # via flask, flask-cli, rq
 coverage==4.5.3
 croniter==0.3.28          # via rq-scheduler
-distro==1.3.0
+distro==1.4.0
 flask-cli==0.4.0          # via flask-rq2
 flask-rq2[cli]==18.0
 flask==1.0.2              # via flask-cli, flask-rq2, raven, rq-dashboard
