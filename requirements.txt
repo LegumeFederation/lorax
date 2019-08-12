@@ -1,6 +1,6 @@
 # supervisord from git
 -e git+https://github.com/Supervisor/supervisor.git#egg=supervisor
-arrow==0.12.1             # via rq-dashboard
+arrow==0.14.5             # via rq-dashboard
 biopython==1.72
 blinker==1.4              # via raven
 click==7.0                # via flask, flask-cli, rq
