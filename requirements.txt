@@ -16,7 +16,7 @@ htpasswd==2.3
 itsdangerous==1.1.0        # via flask
 jinja2==2.10.1              # via flask
 markupsafe==1.1.1           # via jinja2
-meld3==1.0.2
+meld3==2.0.0
 numpy==1.15.2             # via biopython
 orderedmultidict==1.0     # via htpasswd
 prometheus-client==0.4.2
