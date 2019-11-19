@@ -21,15 +21,11 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 +-------------------+------------+            +
 | Coverage          | |coverage| |            |
 +-------------------+------------+            +
-| Pythonicity       | |landscape||            |
-+-------------------+------------+            +
 | Code Grade        | |codacy|   |            |
 +-------------------+------------+            +
 | Dependencies      | |pyup|     |            |
 +-------------------+------------+            +
 | Issues            | |issues|   |            |
-+-------------------+------------+            +
-| Kanban            | |ZenHub|   |            |
 +-------------------+------------+------------+
 
 
@@ -57,10 +53,6 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
     :target:  https://travis-ci.org/LegumeFederation/lorax
     :alt: Travis CI
 
-.. |landscape| image:: https://landscape.io/github/LegumeFederation/lorax/master/landscape.svg?style=flat
-    :target: https://landscape.io/github/LegumeFederation/lorax
-    :alt: landscape.io status
-
 .. |codacy| image:: https://api.codacy.com/project/badge/Grade/2ebc65ca90f74dc7a9238c202f327981
     :target: https://www.codacy.com/app/joelb123/lorax?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=LegumeFederation/lorax&amp;utm_campaign=Badge_Grade
     :alt: Codacy.io grade
@@ -80,10 +72,6 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 .. |pyup| image:: https://pyup.io/repos/github/LegumeFederation/lorax/shield.svg
      :target: https://pyup.io/repos/github/LegumeFederation/lorax/
      :alt: pyup.io dependencies
-
-.. |ZenHub| image:: https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png
-    :target: https://zenhub.com
-    :alt: Powered by ZenHub
 
 .. _Flask: http://flask.pocoo.org/
 .. _RQ: https://github.com/nvie/rq

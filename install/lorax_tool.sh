@@ -235,7 +235,7 @@ install_pushgateway() {
 #
 build() {
    BUILD_DOC="""This command downloads, builds, and installs ${pkg} and its dependencies.
-It sources the \"my_build.sh\" script after initializaiton to allow customization.
+It sources the \"my_build.sh\" script after initialization to allow customization.
 You should stop and edit my_build.sh if you wish to:
    * install ${pkg} to non-default locations
    * use RAxML and your system has AVX or AVX2 hardware
@@ -410,15 +410,15 @@ cat << 'EOF'
 # Version numbers of packages.  Setting these to "system" will cause them
 # not to be built.
 #
-#./${pkg}_tool config python 3.6.6
-#./${pkg}_tool config hmmer 3.2.1
+#./${pkg}_tool config python 3.7.5
+#./${pkg}_tool config hmmer 3.3
 #./${pkg}_tool config raxml 8.2.12
-#./${pkg}_tool config redis 5.0.0
-#./${pkg}_tool config nginx 1.15.5
-#./${pkg}_tool config prometheus 2.4.3
-#./${pkg}_tool config alertmanager 0.15.2
-#./${pkg}_tool config node_exporter 0.16.0
-#./${pkg}_tool config pushgateway 0.5.2
+#./${pkg}_tool config redis 5.0.7
+#./${pkg}_tool config nginx 1.17.6
+#./${pkg}_tool config prometheus 2.14.0
+#./${pkg}_tool config alertmanager 0.19.0
+#./${pkg}_tool config node_exporter 0.18.1
+#./${pkg}_tool config pushgateway 1.0.0
 #
 # The following defaults are platform-specific.  Linux defaults are shown.
 #
@@ -522,15 +522,15 @@ init() {
    set_value var_dir "$(get_value root_dir)/var"
    set_value tmp_dir "$(get_value var_dir)/tmp"
    set_value log_dir "$(get_value var_dir)/log"
-   set_value python 3.6.6
-   set_value hmmer 3.2.1
+   set_value python 3.7.5
+   set_value hmmer 3.3
    set_value raxml 8.2.12
-   set_value redis 5.0.0
-   set_value nginx 1.15.5
-   set_value prometheus 2.4.3
-   set_value alertmanager 0.15.2
-   set_value node_exporter 0.16.0
-   set_value pushgateway 0.5.2
+   set_value redis 5.0.7
+   set_value nginx 1.17.6
+   set_value prometheus 2.14.0
+   set_value alertmanager 0.19.0
+   set_value node_exporter 0.18.1
+   set_value pushgateway 1.0.0
    if [[ "$platform" == "Linux" ]]; then
       >&1 echo "Platform is linux."
       set_value bin_dir ~/bin
@@ -796,10 +796,10 @@ update() {
      echo "Updating self via git."
      pushd ${!PKG_GIT_DIR}
      git pull
-     newversion=$(awk -F"'" '/^version/ {print $2 }' ${build_root_dir}/funyun/version)
+     newversion=$(awk -F"'" '/^version/ {print $2 }' ${build_root_dir}/lorax/version)
      popd
    else
-     rawsite="https://raw.githubusercontent.com/EagleBytes2017/${pkg}/master/install"
+     rawsite="https://raw.githubusercontent.com/ncgr/${pkg}/master/install"
      printf "Checking for self-update..."
      curl -L -s -o ${pkg}_tool.new ${rawsite}/${pkg}_tool.sh
      chmod 755 ${pkg}_tool.new
