@@ -4,7 +4,7 @@ arrow==0.15.5             # via rq-dashboard
 biopython==1.76
 blinker==1.4              # via raven
 click==7.1.1                # via flask, flask-cli, rq
-coverage==4.5.1
+coverage==5.1
 croniter==0.3.25          # via rq-scheduler
 distro==1.3.0
 flask-cli==0.4.0          # via flask-rq2
