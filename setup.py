@@ -33,109 +33,13 @@ else:
 from pathlib import Path  # python 3.4
 
 NAME = 'lorax'
-C_NAME = 'FastTree'
-C_VERSION = '2.1.10'
-BINARY_NAME = C_NAME + '-' + NAME
 ENV_SCRIPT_INNAME = 'server_env.sh'
 ENV_SCRIPT_OUTNAME = NAME + '_env'
 RUN_SCRIPT_INNAME = 'server_run.py'
 RUN_SCRIPT_OUTNAME = NAME + '_run.py'
-SOURCE_PATH = Path('.') / NAME / C_NAME.lower()
 BUILD_PATH = Path('.') / NAME / 'bin'
 PASSWORD_LENGTH = 12
 DIR_MODE = 0o775
-
-
-class BuildCBinaryCommand(Command):
-    """Compile C binary with custom switches."""
-    description = 'Build ' + C_NAME + ' C binary'
-    user_options = [
-        # The format is (long option, short option, description).
-        ('cc=', None, 'path to c compiler'),
-        ('cflags=', None, 'CFLAGS for compiler in use'),
-        ('libs=', None, 'Library options')
-    ]
-
-    def initialize_options(self):
-        """Set default values for options."""
-        # Each user option must be listed here with their default value.
-        system = platform.system()
-        if system == 'Linux':
-            self.cc = 'gcc'
-            self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' + \
-                          ' -O3 -march=native -DOPENMP -fopenmp'
-            self.libs = '-lm'
-        elif system == 'Darwin':
-            self.cc = 'gcc'
-            self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' + \
-                          ' -O3 -march=native -DOPENMP -fopenmp'
-            self.libs = '-lm'
-        elif system.endswith('BSD'):
-            self.cc = 'clang'
-            self.cflags = '-DUSE_DOUBLE -finline-functions -funroll-loops' + \
-                          ' -O3 -march=native'
-            self.libs = '-lm'
-        else:
-            logger.warning(
-                'Unrecognized system, using conservative default CFLAGS')
-            self.cc = 'gcc'
-            self.cflags = '-DUSE_DOUBLE'
-            self.libs = '-lm'
-
-    def finalize_options(self):
-        """Post-process options."""
-        if shutil.which(self.cc) is None:
-            raise SystemError('C compiler %s is not found on path.', self.cc)
-        self.cflag_list = self.cflags.split()
-        self.lib_list = self.libs.split()
-
-    def run(self):
-        """Build C binary."""
-        # Check if build is disabled by environmental variable.
-        if NAME.upper() + '_NO_COMPILE' in environ and \
-                environ[NAME.upper() + '_NO_COMPILE'] == 'True':
-            logger.info('skipping compile of ' + C_NAME + ' binary')
-            return
-        if (BUILD_PATH / BINARY_NAME).exists():
-            logger.info(C_NAME + ' binary already built')
-            return
-        logger.info('compiling ' + C_NAME + ' v' + C_VERSION + ' binary using')
-        command = [shutil.which(self.cc)] + \
-            self.cflag_list + ['-o',
-                               '../bin/' + BINARY_NAME,
-                               C_NAME + '-' + C_VERSION + '.c'] + \
-            self.lib_list
-        logger.info('  %s' % (' '.join(command)))
-        pipe = subprocess.Popen(command,
-                                cwd=NAME + '/' + C_NAME.lower(),
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
-        logger.debug(pipe.stdout.read().decode('UTF-8'))
-        stderr_messages = pipe.stderr.read().decode('UTF-8')
-        if stderr_messages != '':
-            logger.error(stderr_messages)
-            raise SystemError("Unable to compile C binary with command %s.",
-                              command)
-        if platform.system() == 'Darwin':
-            logger.info('fixing OpenMP file path in MacOS executable')
-            gomp_name = 'libgomp.1.dylib'
-            find_gomp_cmd = ['gcc', '-print-file-name=' + gomp_name]
-            gomp_path_str = subprocess.check_output(find_gomp_cmd).decode(
-                'UTF-8')[:-1]
-            gomp_path = Path(gomp_path_str).resolve()
-            if not gomp_path.exists():
-                raise SystemError(
-                    "Unable to find OpenMP library %s." % gomp_name)
-            try:
-                subprocess.check_call(['install_name_tool',
-                                       '-change',
-                                       '@rpath/./' + gomp_name,
-                                       str(gomp_path),
-                                       str(BUILD_PATH / BINARY_NAME)]
-                                      )
-            except subprocess.CalledProcessError:
-                raise SystemError(
-                    "Unable to install OpenMP path in FastTree binary.")
 
 
 class InstallBinariesCommand(Command):
@@ -186,9 +90,6 @@ class InstallBinariesCommand(Command):
                 environ[no_binaries] == 'True':
             logger.info('skipping install of binary files')
         else:
-            logger.info('copying binary to %s' % (str(self.bin_path)))
-            shutil.copy2(str(BUILD_PATH / BINARY_NAME),
-                         str(self.bin_path / BINARY_NAME))
             logger.info(
                 'copying environment script to %s' % (str(self.bin_path)))
             shutil.copy2(str(BUILD_PATH / ENV_SCRIPT_INNAME),
@@ -206,7 +107,6 @@ class BuildPyCommand(build_py.build_py):
     """Build C binary as part of build."""
 
     def run(self):
-        self.run_command('build_cbinary')
         build_py.build_py.run(self)
 
 
@@ -214,7 +114,6 @@ class DevelopCommand(develop.develop):
     """Build C binary as part of develop."""
 
     def run(self):
-        self.run_command('build_cbinary')
         self.run_command('install_binaries')
         develop.develop.run(self)
 
@@ -223,7 +122,6 @@ class InstallCommand(install.install):
     """Install C binary as part of install."""
 
     def run(self):
-        self.run_command('build_cbinary')
         self.run_command('install_binaries')
         install.install.run(self)
 
@@ -264,7 +162,6 @@ setup(
         'console_scripts': [NAME + ' = ' + NAME + '.cli:cli']
     },
     cmdclass={
-        'build_cbinary': BuildCBinaryCommand,
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
         'install_binaries': InstallBinariesCommand,

@@ -175,7 +175,7 @@ class BaseConfig(object):
     #
     # Binaries.
     #
-    FASTTREE_EXE = 'FastTree-' + SERVICE_NAME
+    FASTTREE_EXE = 'FastTree'
     RAXML_EXE = 'raxmlHPC'
     #
     # Current run.

@@ -2,7 +2,6 @@
 
 exclude_paths:
   - 'doc/**'
-  - 'lorax/fasttree/**'
   - 'lorax/static/**'
   - 'lorax/templates/**'
   - '*.min.js'

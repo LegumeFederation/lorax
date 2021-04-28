@@ -7,6 +7,5 @@ uses:
 autodetect: true
 ignore-paths:
   - docs
-  - lorax/fasttree
 python-targets:
   - 3

@@ -64,7 +64,7 @@ CURL_ARGS               P     Arguments for use with curl.
 
   EXPLAIN_TEMPLATE_LOADING type(bool) =  False
 
-  FASTTREE_EXE type(str) =  "FastTree-lorax"
+  FASTTREE_EXE type(str) =  "FastTree"
 
   FILE_LOG_FORMAT type(str) =  "%(levelname)s: %(message)s"
 

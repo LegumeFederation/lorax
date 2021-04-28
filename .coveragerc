@@ -10,7 +10,6 @@ omit =
     bin/*
     css/*
     etc/*
-    fasttree/*
     favicon.ico
     static/*
     templates/*
