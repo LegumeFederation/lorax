@@ -12,7 +12,6 @@ from pathlib import Path  # python 3.4
 # third-party imports
 #
 from flask import Flask, Response
-from flask_cli import FlaskCLI
 from flask_rq2 import RQ
 import rq_dashboard
 from healthcheck import HealthCheck, EnvironmentDump
@@ -44,7 +43,6 @@ app = Flask(__name__,
             instance_path=os.getenv(__name__.split('.')[0].upper() +
                                     '_ROOT', prefix),
             template_folder='templates')
-FlaskCLI(app)
 app.config.from_object(rq_dashboard.default_settings)
 configure_app(app)
 #
