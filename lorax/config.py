@@ -21,16 +21,13 @@ These definitions may be overridden via two ways:
 #
 # Library imports.
 #
+import datetime
 import os
 import platform
 import sys
 from getpass import getuser
 from socket import getfqdn
 from pathlib import Path  # python 3.4
-#
-# Third-party imports.
-#
-import arrow
 #
 # Local imports
 #
@@ -181,7 +178,7 @@ class BaseConfig(object):
     # Current run.
     #
     HOSTNAME = getfqdn()
-    DATETIME = arrow.now().format('YYYY-MM-DD HH:mm:ss')
+    DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
     #
     # supervisord defs.
     #
