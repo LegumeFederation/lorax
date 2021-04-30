@@ -9,7 +9,6 @@ distro==1.3.0
 flask-rq2==18.0
 flask==1.0.2              # via flask-rq2, raven, rq-dashboard
 gunicorn==19.9.0
-healthcheck==1.3.3
 htpasswd==2.3
 itsdangerous==0.24        # via flask
 jinja2==2.10              # via flask
@@ -18,6 +17,7 @@ meld3==1.0.2
 numpy==1.15.2             # via biopython
 orderedmultidict==1.0     # via htpasswd
 prometheus-client==0.4.2
+py-healthcheck==1.10.1
 python-dateutil==2.7.3    # via croniter
 raven[flask]==6.9.0
 redis==2.10.6             # via rq, rq-dashboard
