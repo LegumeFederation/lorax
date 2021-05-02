@@ -29,10 +29,6 @@ from getpass import getuser
 from socket import getfqdn
 from pathlib import Path  # python 3.4
 #
-# Local imports
-#
-from .version import version as __version__  # noqa
-#
 # Name of this service.
 #
 SERVICE_NAME = os.getenv('FLASK_APP', __name__.split('.')[0])
@@ -368,7 +364,6 @@ def configure_app(app):
     #
     # Set version and platform (output only, not configurable).
     #
-    app.config['VERSION'] = __version__
     app.config['PLATFORM'] = platform.system()
     #
     # Prometheus services.
