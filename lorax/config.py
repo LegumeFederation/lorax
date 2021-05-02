@@ -132,15 +132,10 @@ class BaseConfig(object):
     #
     # RQ settings.  If "RQ_ASYNC" is False, then no queueing will be done.
     #
-    RQ_ASYNC = True
     TREE_QUEUE = 'treebuilding'
     ALIGNMENT_QUEUE = 'alignment'
     START_QUEUES = []
     RQ_QUEUES = [TREE_QUEUE, ALIGNMENT_QUEUE]
-    REDIS_UNIX_SOCKET = True
-    RQ_REDIS_PORT = 58929
-    RQ_REDIS_HOST = 'localhost'
-    RQ_SCHEDULER_INTERVAL = 60
     RQ_SCHEDULER_QUEUE = ALIGNMENT_QUEUE
     ALIGNMENT_QUEUE_TIMEOUT = 24 * 60 * 60  # 24 hours, in seconds
     TREE_QUEUE_TIMEOUT = 30 * 24 * 60 * 60  # 30 days, in seconds
@@ -376,27 +371,6 @@ def configure_app(app):
                                                       if p.is_dir()][0])
         except IndexError:
             app.config[service.upper()+'_DIR'] = None
-    #
-    # Set redis socket type.
-    #
-    if app.config['REDIS_UNIX_SOCKET']:
-        app.config['RQ_REDIS_PORT'] = 0
-        app.config['RQ_REDIS_HOST'] = 'localhost'
-        app.config['RQ_REDIS_URL'] = "unix://@'" + \
-                                     app.config['VAR'] + \
-                                     '/run/redis.sock?db=0'
-        app.config['RQ_UNIXSOCKET'] = 'unixsocket %s/run/redis.sock' % (
-            app.config['VAR'])
-    else:
-        app.config['RQ_REDIS_URL'] = 'redis://' + \
-                                     app.config['RQ_REDIS_HOST'] + \
-                                     ':' +\
-                                     str(app.config['RQ_REDIS_PORT']) + \
-                                     '/0'
-        app.config['RQ_UNIXSOCKET'] = ''
-    app.config['REDIS_HOST'] = app.config['RQ_REDIS_HOST']
-    app.config['REDIS_PORT'] = app.config['RQ_REDIS_PORT']
-    app.config['REDIS_URL'] = app.config['RQ_REDIS_URL']
     #
     # Supervisord socket type.
     #

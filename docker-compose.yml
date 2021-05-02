@@ -1,0 +1,34 @@
+services:
+  flask:
+    build: .
+    image: lorax:latest
+    environment:
+      RQ_REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:5.0.12-alpine
+    healthcheck:
+      test: "redis-cli ping"
+
+  rq_worker_alignment:
+    image: lorax:latest
+    command: rq worker --url redis://redis:6379 alignment
+    depends_on:
+      redis:
+        condition: service_healthy
+# in case "flask" image is rebuilt
+      flask:
+        condition: service_started
+
+  rq_worker_treebuilding:
+    image: lorax:latest
+    command: rq worker --url redis://redis:6379 treebuilding
+    depends_on:
+      redis:
+        condition: service_healthy
+# in case "flask" image is rebuilt
+      flask:
+        condition: service_started
