@@ -3,13 +3,13 @@ services:
     build: .
     image: lorax:latest
     environment:
-      RQ_REDIS_URL: redis://redis:6379/0
+      LORAX_RQ_REDIS_URL: redis://redis:6379/0
     depends_on:
       redis:
         condition: service_healthy
 
   redis:
-    image: redis:5.0.12-alpine
+    image: redis:6.2.2-alpine3.13
     healthcheck:
       test: "redis-cli ping"
 

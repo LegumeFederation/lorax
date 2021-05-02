@@ -31,7 +31,7 @@ from pathlib import Path  # python 3.4
 #
 # Name of this service.
 #
-SERVICE_NAME = os.getenv('FLASK_APP', __name__.split('.')[0])
+SERVICE_NAME = 'lorax'
 SERVICE_ORG = 'LegumeFederation'
 #
 # Definitions that *must* be set in environmental variables.  Trying to
