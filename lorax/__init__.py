@@ -93,7 +93,6 @@ def hello_world():
     :return: JSON application data
     """
     app_data = {'name': __name__,
-                'version': app.config['VERSION'],
                 'start_date': app.config['DATETIME']}
     return Response(json.dumps(app_data), mimetype=JSON_MIMETYPE)
 

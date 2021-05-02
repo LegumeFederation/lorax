@@ -68,8 +68,5 @@ def configure_logging(app):
     # Do some logging on startup.
     #
     app.logger.debug('Command line: "%s"', ' '.join(sys.argv))
-    app.logger.debug('%s version %s',
-                     SERVICE_NAME,
-                     app.config['VERSION'])
     app.logger.debug('Run started at %s',
                      datetime.now().strftime('%Y%m%d-%H%M%S'))
