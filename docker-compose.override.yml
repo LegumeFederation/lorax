@@ -1,0 +1,10 @@
+services:
+  flask:
+    environment:
+      FLASK_APP: lorax
+      FLASK_ENV: development
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./lorax:/usr/src/app/lorax:ro
+    command: flask run --host=0.0.0.0
