@@ -1,0 +1,13 @@
+biopython
+click
+coverage
+distro
+flask>=1.0
+flask-rq2
+gunicorn
+htpasswd
+jinja2
+rq_dashboard
+setuptools
+supervisor
+py-healthcheck
