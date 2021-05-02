@@ -38,8 +38,8 @@ SERVICE_ORG = 'LegumeFederation'
 # set these from the config file would be too late, so they are
 # not settable by that mechanism.
 #
-IMMUTABLES = ('ROOT', 'VAR', 'LOG', 'TMP')
-PATHVARS = ('ROOT', 'VAR', 'LOG', 'TMP', 'DATA', 'USERDATA')
+IMMUTABLES = ('ROOT', 'VAR', 'TMP')
+PATHVARS = ('ROOT', 'VAR', 'TMP', 'DATA', 'USERDATA')
 PROMETHEUS_SERVICES = ('prometheus', 'alertmanager', 'node_exporter', 'push_gateway')
 
 def get_path(name, default):
@@ -81,7 +81,6 @@ class BaseConfig(object):
     #
     ROOT = get_path('ROOT', sys.prefix)
     VAR = get_path('VAR', ROOT + '/var')
-    LOG = get_path('LOG', VAR + '/log')
     TMP = get_path('TMP', VAR + '/tmp')
     DATA = get_path('DATA', VAR + '/data/')
     USERDATA = get_path('DATA', VAR + '/userdata/')
@@ -100,13 +99,6 @@ class BaseConfig(object):
     DEBUG = False
     PORT = 58927
     HOST = 'localhost'
-    #
-    # Create a logfile.
-    #
-    LOGFILE = True
-    LOGFILE_NAME = None
-    LOGFILE_MAXBYTES = 10000000
-    LOGFILE_BACKUPCOUNT = 1
     #
     # Log only errors.
     #
@@ -249,7 +241,6 @@ class BaseConfig(object):
     #    ip: Real IP address of the requester.
     #
     STDERR_LOG_FORMAT = '%(levelname)s: %(message)s'
-    FILE_LOG_FORMAT = '%(levelname)s: %(message)s'
 
 
 class DevelopmentConfig(BaseConfig):

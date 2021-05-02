@@ -18,7 +18,6 @@ from flask import request
 #
 # Global variables.
 #
-DEFAULT_FILE_LOGLEVEL = logging.INFO
 DEFAULT_STDERR_LOGLEVEL = logging.WARNING
 SERVICE_NAME = os.getenv('FLASK_APP', __name__.split('.')[0])
 
@@ -38,7 +37,7 @@ class ContextualFilter(logging.Filter):
 
 
 def configure_logging(app):
-    """ Configure logging to stderr and a log file.
+    """ Configure logging to stderr
 
     :param app:
     :return:
@@ -47,10 +46,6 @@ def configure_logging(app):
         stderr_log_level = logging.DEBUG
     else:
         stderr_log_level = DEFAULT_STDERR_LOGLEVEL
-    if app.config['QUIET']:  # pragma: no cover
-        file_log_level = logging.ERROR
-    else:
-        file_log_level = DEFAULT_FILE_LOGLEVEL
     app.logger.addFilter(ContextualFilter())
     app.logger.setLevel(logging.DEBUG)
     for handler in app.logger.handlers:  # set levels on existing handlers
@@ -69,38 +64,6 @@ def configure_logging(app):
                # level=logging.ERROR
                )
 
-    #
-    # Start log file.
-    #
-    if app.config['LOGFILE']:  # start a log file
-        logfile_name = SERVICE_NAME + '_errors.log'
-        app.config['LOGFILE_NAME'] = logfile_name
-        logfile_path = Path(app.config['LOG']) / logfile_name
-        if app.config['DEBUG']:  # pragma: no cover
-            print('Logging to file "%s".' % str(logfile_path),
-                  file=sys.stderr)  # noqa
-        if not logfile_path.parent.is_dir():  # create logs/ dir
-            try:  # pragma: no cover
-                logfile_path.parent.mkdir(mode=int(app.config['DIR_MODE'], 8),
-                                          parents=True)
-            except OSError:  # pragma: no cover
-                app.logger.error('Unable to create logfile directory "%s"',
-                                 logfile_path.parent)
-                raise OSError
-        log_handler = RotatingFileHandler(str(logfile_path),
-                                          maxBytes=app.config[
-                                              'LOGFILE_MAXBYTES'],
-                                          backupCount=app.config[
-                                              'LOGFILE_BACKUPCOUNT'])
-
-        log_handler.setLevel(file_log_level)
-        werkzeug_logger = logging.getLogger('werkzeug')
-        werkzeug_logger.addHandler(log_handler)
-        for handler in app.logger.handlers:  # set levels on existing handlers
-            handler.setLevel(file_log_level)
-            handler.setFormatter(
-                logging.Formatter(app.config['STDERR_LOG_FORMAT']))
-        app.logger.addHandler(log_handler)
     #
     # Do some logging on startup.
     #

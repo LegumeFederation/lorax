@@ -76,8 +76,6 @@ def get_file(subpath, file_type='data', mode='U'):
     """
     if file_type == 'data':
         file_path = Path(app.config['DATA']) / subpath
-    elif file_type == 'log':
-        file_path = Path(app.config['LOG']) / subpath
     else:
         app.logger.error('Unrecognized file type %s.', file_type)
         return
@@ -98,17 +96,6 @@ def hello_world():
                 'version': app.config['VERSION'],
                 'start_date': app.config['DATETIME']}
     return Response(json.dumps(app_data), mimetype=JSON_MIMETYPE)
-
-
-@app.route('/log.txt')
-def return_log():
-    """Return the log file.
-
-    :return: text/plain response
-    """
-    content = get_file(__name__ + '_server.log',
-                       file_type='log')
-    return Response(content, mimetype=TEXT_MIMETYPE)
 
 
 @app.route('/test_exception')

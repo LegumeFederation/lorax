@@ -7,7 +7,6 @@ from pathlib import Path  # python 3.4 or later
 from .config_file import create_config_file
 
 DIRS = ['TMP',
-        'LOG',
         'VAR',
         'DATA',
         'USERDATA']
