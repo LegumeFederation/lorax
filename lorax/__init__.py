@@ -13,7 +13,6 @@ from pathlib import Path  # python 3.4
 #
 from flask import Flask, Response
 from flask_rq2 import RQ
-import rq_dashboard
 from healthcheck import HealthCheck, EnvironmentDump
 import coverage
 #
@@ -43,14 +42,11 @@ app = Flask(__name__,
             instance_path=os.getenv(__name__.split('.')[0].upper() +
                                     '_ROOT', prefix),
             template_folder='templates')
-app.config.from_object(rq_dashboard.default_settings)
 configure_app(app)
 #
-# Create a global RQ object, with dashboard at /rq.
+# Create a global RQ object
 #
 rq = RQ(app)
-if app.config['RQ_ASYNC']:
-    app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 #
 # Application data for optional environment dump.
 #

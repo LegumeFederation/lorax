@@ -32,3 +32,16 @@ services:
 # in case "flask" image is rebuilt
       flask:
         condition: service_started
+
+# https://github.com/Parallels/rq-dashboard#installing-with-docker
+  rq_dashboard:
+    image: eoranged/rq-dashboard:v0.6.3
+    environment:
+      RQ_DASHBOARD_REDIS_URL: redis://redis:6379
+    ports:
+      - "9181:9181"
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - rq_dashboard
