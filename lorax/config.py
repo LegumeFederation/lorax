@@ -224,10 +224,6 @@ class BaseConfig(object):
     # Setting these to empty strings will cause the process to
     # not be started.
     #
-    # Monitoring at sentry.io.
-    #
-    SENTRY_DSN = ''
-    #
     # Logging formatter.  Fields that are defined are:
     #    asctime: Time with too much precision
     #    levelname: Severity level.

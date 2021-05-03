@@ -52,17 +52,6 @@ def configure_logging(app):
         handler.setLevel(stderr_log_level)
         handler.setFormatter(
             logging.Formatter(app.config['STDERR_LOG_FORMAT']))
-    #
-    # Start Sentry monitoring, if SENTRY_DNS is configured.
-    #
-    if app.config['SENTRY_DSN'] is not '':  # pragma: no cover
-        from raven.contrib.flask import Sentry
-        # import logging
-        Sentry(app,
-               dsn=app.config['SENTRY_DSN'],
-               # logging=True,
-               # level=logging.ERROR
-               )
 
     #
     # Do some logging on startup.

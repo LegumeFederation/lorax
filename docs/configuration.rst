@@ -139,7 +139,6 @@ CURL_ARGS               P     Arguments for use with curl.
   RQ_WORKER_CLASS type(str) =  "rq.worker.Worker"
   SECRET_KEY type(str) =  "b4KW2yahmcIB"  # <- from config file
   SEND_FILE_MAX_AGE_DEFAULT type(timedelta) =  12:00:00
-  SENTRY_DSN type(str) =  ""
   SERVER_NAME type(NoneType) =  None
   SESSION_COOKIE_DOMAIN type(NoneType) =  None
   SESSION_COOKIE_HTTPONLY type(bool) =  True
