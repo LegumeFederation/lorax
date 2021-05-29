@@ -223,7 +223,7 @@ def job_data_as_response(job, q):
 
     job_dict = {'id': job.id,
                 'description': job.description,
-                'status': job.status,
+                'status': job.get_status(),
                 'tasktype': job.tasktype,
                 'taskname': job.taskname,
                 'family': job.family,
