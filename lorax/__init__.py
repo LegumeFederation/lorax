@@ -56,9 +56,11 @@ def application_data():
 #
 # Create /healthcheck and /environment URLs.
 #
-health = HealthCheck(app, '/healthcheck')
-envdump = EnvironmentDump(app, '/environment')
+health = HealthCheck()
+app.add_url_rule("/healthcheck", "healthcheck", view_func=lambda: health.run())
+envdump = EnvironmentDump()
 envdump.add_section('application', application_data)
+app.add_url_rule("/environment", "environment", view_func=lambda: envdump.run())
 #
 # Helper function defs start here.
 #
