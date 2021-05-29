@@ -6,9 +6,5 @@ at multiple levels:
 =============================== ===============================
 Address                         Type of monitor
 =============================== ===============================
-SUPERVISOR_HOST:SUPERVISOR_PORT Supervisord status and controls 
-                                (password-protected).
-LORAX_HOST:LORAX_PORT/rq        RQ queue info, including errors.
+LORAX_HOST:9181                 RQ queue info, including errors.
 =============================== ===============================
-
-The default supervisord port is 58928.
