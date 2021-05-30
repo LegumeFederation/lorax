@@ -93,7 +93,6 @@ CURL_ARGS               P     Arguments for use with curl.
   LOGGER_HANDLER_POLICY type(str) =  "always"
   LOGGER_NAME type(str) =  "lorax"
   MAX_CONTENT_LENGTH type(NoneType) =  None
-  MODE type(str) =  "default"
   NAME type(str) =  "lorax"
   NGINX_EVENTS type(str) =  "use epoll;"
   NGINX_LISTEN_ARGS type(str) =  "deferred"
@@ -122,7 +121,6 @@ CURL_ARGS               P     Arguments for use with curl.
   REDIS_PORT type(int) =  0
   REDIS_UNIX_SOCKET type(bool) =  True
   REDIS_URL type(str) =  "unix://@'/home/localhost/joelb/.lorax/0.94/var/run/redis.sock?db=0"
-  ROOT type(str) =  "/home/localhost/joelb/.lorax/0.94"
   RQ_ASYNC type(bool) =  True
   RQ_JOB_CLASS type(str) =  "rq.job.Job"
   RQ_POLL_INTERVAL type(int) =  2500
