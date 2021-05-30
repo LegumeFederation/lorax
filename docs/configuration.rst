@@ -154,7 +154,6 @@ CURL_ARGS               P     Arguments for use with curl.
   TREE_QUEUE type(str) =  "treebuilding"
   TREE_QUEUE_TIMEOUT type(int) =  2592000
   URL type(str) =  "http://localhost:58927"
-  USERDATA type(str) =  "/home/localhost/joelb/.lorax/0.94/var/userdata/"
   USER_CONFIG_PATH type(str) =  "~/.lorax"
   USE_X_SENDFILE type(bool) =  False
   VAR type(str) =  "/home/localhost/joelb/.lorax/0.94/var"

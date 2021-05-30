@@ -7,7 +7,6 @@
 import logging
 import os
 import sys
-from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from pathlib import Path  # python 3.4
 #

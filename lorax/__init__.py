@@ -17,7 +17,6 @@ from flask_rq2 import RQ
 # local imports
 #
 from .config import configure_app
-from .filesystem import init_filesystem
 from .logs import configure_logging
 #
 # Non-configurable global constants.
@@ -40,7 +39,6 @@ app = Flask(__name__,
             template_folder='templates')
 configure_app(app)
 configure_logging(app)
-init_filesystem(app)
 #
 # Create a global RQ object
 #

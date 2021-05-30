@@ -37,7 +37,7 @@ SERVICE_ORG = 'LegumeFederation'
 # not settable by that mechanism.
 #
 IMMUTABLES = ('ROOT', 'VAR', 'TMP')
-PATHVARS = ('ROOT', 'VAR', 'TMP', 'DATA', 'USERDATA')
+PATHVARS = ('ROOT', 'VAR', 'TMP', 'DATA')
 
 def get_path(name, default):
     """Get path from environ, checking absoluteness."""
@@ -80,7 +80,6 @@ class BaseConfig(object):
     VAR = get_path('VAR', ROOT + '/var')
     TMP = get_path('TMP', VAR + '/tmp')
     DATA = get_path('DATA', VAR + '/data/')
-    USERDATA = get_path('DATA', VAR + '/userdata/')
     #
     # Directory/file permissions.
     #
@@ -180,7 +179,7 @@ def configure_app(app):
         if internal_key in pyfile_dict:
             del pyfile_dict[internal_key]
     if 'VAR' in pyfile_dict:  # VAR is hierarchical special case
-        for subdir in ['tmp', 'log', 'data', 'userdata']:
+        for subdir in ['tmp', 'log', 'data']:
             if not subdir.upper() in pyfile_dict:
                 pyfile_dict[subdir.upper()] = pyfile_dict['VAR'] + '/' + subdir
 
