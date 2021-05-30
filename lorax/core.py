@@ -173,19 +173,12 @@ def run_subprocess_with_status(out_path,
     :param status_path: Path to status log file
     :return: Return code of subprocess
     """
-    environ = os.environ.copy()
-    #
-    # Modify the environment to select the number of threads, if requested.
-    #
-    if app.config['THREADS'] > 0:
-        environ['OMP_NUM_THREADS'] = str(app.config['THREADS'])
     with out_path.open(mode='wb') as out_fh:
         with err_path.open(mode='wt') as err_fh:
             status = subprocess.run(cmdlist,
                                     stdout=out_fh,
                                     stderr=err_fh,
-                                    cwd=str(cwd),
-                                    env=environ)
+                                    cwd=str(cwd))
     write_status(status_path, status.returncode)
     if post_process is not None:
         post_process(out_path,
@@ -475,7 +468,7 @@ def queue_calculation(familyname,
             + ['-n',
                'production',
                '-T',
-               '%d' % app.config['THREADS'],
+               '%d' % int(os.environ.get('OMP_NUM_THREADS', 1)),
                '-s', str(alignment_input_path)]
     #
     # Log command line and initialize status files.

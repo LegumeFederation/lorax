@@ -34,10 +34,6 @@ def configure_app(app):
     #
     app.config['DIR_MODE'] = '755'  # Note interaction with process umask
     #
-    # Number of threads used in queued commands.  0 = use as many as available.
-    #
-    app.config['THREADS'] = 0
-    #
     # RQ settings.  If "RQ_ASYNC" is False, then no queueing will be done.
     #
     app.config['TREE_QUEUE'] = 'treebuilding'

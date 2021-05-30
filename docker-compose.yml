@@ -8,6 +8,8 @@ x-app: &default-rq
         condition: service_started
     environment:
       GUNICORN_CMD_ARGS: "--workers=2"
+      # number of threads for raxml & hmmalign
+      OMP_NUM_THREADS: 1
     volumes:
       - data:/usr/local/var/data
 
