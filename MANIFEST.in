@@ -1,8 +1,0 @@
-include *.txt
-include *.rst
-include lorax/bin/server_env
-include lorax/user_conf/server_rc
-recursive-include lorax/etc *
-recursive-include lorax/test *
-recursive-include lorax/static *
-recursive-include lorax/templates *
