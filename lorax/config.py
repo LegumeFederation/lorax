@@ -1,22 +1,5 @@
 # -*- coding: utf-8 -*-
 """Define and handle configuration variables.
-
-Definitions in this file are selected by the MYAPP_CONFIGURATION environmental
-variable.  This variable may take on the following values:
-
-* default: starts everything in production environment
-* development: starts in debug environment (not secure)
-* serverOnly: same as default, but without queues
-* treebuilder: starts treebuilder queue only
-* aligner: start aligner queue only
-
-
-These definitions may be overridden via two ways:
-
-1. A python file pointed to by the environmental variable MYAPP_SETTINGS.
-2. An environmental variable that starts with MYAPP_.  If its value is
-   "True" or "False", then it will be interpreted as a logical value.
-   If its value can be parsed as an integer, then it will be.
 """
 #
 # Library imports.
@@ -29,10 +12,7 @@ SERVICE_NAME = 'lorax'
 SERVICE_ORG = 'LegumeFederation'
 
 def configure_app(app):
-    """Base class for configuration objects.
-
-    Note that only values in uppercase will be stored in the app
-    configuration object.
+    """Flask app.config
     """
     #
     # Name of this service.
@@ -48,7 +28,6 @@ def configure_app(app):
     # must be absolute.  The immutable ones should be created before
     # runtime.
     #
-    app.config['TMP'] = '/usr/local/var/tmp'
     app.config['DATA'] = '/usr/local/var/data'
     #
     # Directory/file permissions.
@@ -97,10 +76,6 @@ def configure_app(app):
     # Current run.
     #
     app.config['DATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
-    #
-    # Controls of which processes get started by supervisord.
-    # Setting these to empty strings will cause the process to
-    # not be started.
     #
     # Logging formatter.  Fields that are defined are:
     #    asctime: Time with too much precision
