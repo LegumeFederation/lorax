@@ -35,9 +35,6 @@ Sections
    :caption: See the following sections for details:
 
    goals
-   installation
-   direct
-   anaconda
    test
    configuration
    running
