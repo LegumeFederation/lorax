@@ -2,11 +2,10 @@ biopython
 click
 coverage
 distro
-flask>=1.0
+flask>=1.0,<2.0
 flask-rq2
 gunicorn
 htpasswd
 jinja2
 setuptools
 supervisor
-py-healthcheck

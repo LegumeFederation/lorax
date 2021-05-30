@@ -13,7 +13,6 @@ from pathlib import Path  # python 3.4
 #
 from flask import Flask, Response
 from flask_rq2 import RQ
-from healthcheck import HealthCheck, EnvironmentDump
 import coverage
 #
 # Start coverage if COVERAGE_PROCESS_START is pointed at a config file.
@@ -23,6 +22,8 @@ coverage.process_startup()
 # local imports
 #
 from .config import configure_app
+from .filesystem import init_filesystem
+from .logs import configure_logging
 #
 # Non-configurable global constants.
 #
@@ -43,24 +44,12 @@ app = Flask(__name__,
                                     '_ROOT', prefix),
             template_folder='templates')
 configure_app(app)
+configure_logging(app)
+init_filesystem(app)
 #
 # Create a global RQ object
 #
 rq = RQ(app)
-#
-# Application data for optional environment dump.
-#
-def application_data():
-    return {'maintainer': MAINTAINER,
-            'git_repo': GIT_REPO}
-#
-# Create /healthcheck and /environment URLs.
-#
-health = HealthCheck()
-app.add_url_rule("/healthcheck", "healthcheck", view_func=lambda: health.run())
-envdump = EnvironmentDump()
-envdump.add_section('application', application_data)
-app.add_url_rule("/environment", "environment", view_func=lambda: envdump.run())
 #
 # Helper function defs start here.
 #
@@ -101,3 +90,6 @@ def test_exception(): # pragma: no cover
 
 
 from .core import * # noqa
+
+if __name__ == '__main__':
+    app.run()

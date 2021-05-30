@@ -50,8 +50,6 @@ CRASHMAIL_EVENTS        D     Defaults to "PROCESS_STATE_EXITED".
 
 CURL_ARGS               P     Arguments for use with curl.
 
-  CURL_URL type(str) =  "localhost:58927"
-
   DATA type(str) =  "/home/localhost/joelb/.lorax/0.94/var/data/"
 
   DATETIME type(str) =  "2017-09-19 13:19:07"
@@ -137,7 +135,6 @@ CURL_ARGS               P     Arguments for use with curl.
   RQ_SCHEDULER_QUEUE type(str) =  "alignment"
   RQ_UNIXSOCKET type(str) =  "unixsocket /home/localhost/joelb/.lorax/0.94/var/run/redis.sock"
   RQ_WORKER_CLASS type(str) =  "rq.worker.Worker"
-  SECRET_KEY type(str) =  "b4KW2yahmcIB"  # <- from config file
   SEND_FILE_MAX_AGE_DEFAULT type(timedelta) =  12:00:00
   SERVER_NAME type(NoneType) =  None
   SESSION_COOKIE_DOMAIN type(NoneType) =  None

@@ -4,7 +4,6 @@
 import os
 import sys
 from pathlib import Path  # python 3.4 or later
-from .config_file import create_config_file
 
 DIRS = ['TMP',
         'VAR',
@@ -32,8 +31,3 @@ def init_filesystem(app):
     """Initialize the filesystem."""
     for path in DIRS:
         create_dir(path, app=app)
-    #
-    # Config file may not exist if SETTINGS value was changed.
-    #
-    create_config_file(Path(app.config['ROOT']) / 'etc' /
-                       app.config['SETTINGS'])

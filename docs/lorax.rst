@@ -20,14 +20,6 @@ lorax\.config module
     :undoc-members:
     :show-inheritance:
 
-lorax\.config\_file module
---------------------------
-
-.. automodule:: lorax.config_file
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 lorax\.filesystem module
 ------------------------
 

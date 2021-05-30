@@ -43,10 +43,6 @@ do
    esac
 done
 #
-# Get environmental variables.
-#
-source ~/.lorax/lorax_rc
-#
 # Parse arguments
 #
 if [ "$#" -lt 4 ]; then

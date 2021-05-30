@@ -9,7 +9,7 @@ Options:
 
 Before running this script, lorax should be configured and started.
 """
-set -e # exit on errors
+set -o nounset -o errexit
 error_exit() {
    >&2 echo "$DOC"
    >&2 echo "ERROR--unexpected exit from ${BASH_SOURCE} script at line:"
@@ -31,10 +31,6 @@ do
    esac
 done
 #
-# Get environmental variables.
-#
-source ~/.lorax/lorax_rc
-#
 # Functions
 #
 test_GET () {
@@ -44,7 +40,7 @@ test_GET () {
    #         $2 - expected return code (200 if not supplied)
    #
    tmpfile=$(mktemp /tmp/lorax-test_all.XXXXX)
-   if [ -z "${2}" ] ; then
+   if [ -z "${2:-}" ] ; then
       code="200"
    else
       code="${2}"
@@ -60,40 +56,7 @@ test_GET () {
       fi
       rm "$tmpfile"
    else
-      >&2 echo "ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
-      >&2 echo "Full response is:"
-      >&2 cat ${tmpfile}
-      >&2 echo ""
-      rm "$tmpfile"
-      trap - EXIT
-      exit 1
-   fi
-}
-#
-test_GET_PASSWORD() {
-   # Tests HTTP return code of GET with password, optionally printing results.
-   # Arguments:
-   #         $1 - target URL
-   #         $2 - expected return code (200 if not supplied)
-   #
-   tmpfile=$(mktemp /tmp/lorax-test_all.XXXXX)
-   if [ -z "${2}" ] ; then
-      code="200"
-   else
-      code="${2}"
-   fi
-   status=$(curl -u lorax:${LORAX_SECRET_KEY} ${LORAX_CURL_ARGS} -s -o ${tmpfile} -w '%{http_code}' ${LORAX_CURL_URL}${1})
-   if [ "${status}" -eq "${code}" ]; then
-      echo "GET ${1} returned HTTP code ${status} as expected."
-      if [ "$_V" -eq 1 ]; then
-	 echo "Response is:"
-         cat ${tmpfile}
-         echo ""
-	 echo ""
-      fi
-      rm "$tmpfile"
-   else
-      >&2 echo "ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
+      >&2 echo "ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${code}."
       >&2 echo "Full response is:"
       >&2 cat ${tmpfile}
       >&2 echo ""
@@ -110,7 +73,7 @@ test_DELETE() {
    #         $2 - expected return code (200 if not supplied)
    #
    tmpfile=$(mktemp /tmp/lorax-test_all.XXXXX)
-   if [ -z "${2}" ] ; then
+   if [ -z "${2:-}" ] ; then
       code="200"
    else
       code="${2}"
@@ -126,7 +89,7 @@ test_DELETE() {
       fi
       rm "$tmpfile"
    else
-      >&2 echo "ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${2}."
+      >&2 echo "ERROR--GET ${LORAX_CURL_URL}${1} returned HTTP code ${status}, expected ${code}."
       >&2 echo "Full response is:"
       >&2 cat ${tmpfile}
       >&2 echo ""
@@ -152,7 +115,6 @@ echo "Testing lorax server on ${LORAX_CURL_URL}."
 # Test random non-tree targets.
 #
 test_GET /status
-test_GET /healthcheck
 test_GET /badtarget 404
 test_GET /trees/families.json
 
@@ -188,11 +150,6 @@ test_GET /trees/aspartic_peptidases.myseqs/FastTree/tree.xml
 test_GET /trees/aspartic_peptidases.myseqs/FastTree/run_log.txt
 test_DELETE /trees/aspartic_paptidases.FastTree 403  # forbidden to remove subdirs this way
 test_DELETE /trees/aspartic_peptidases.myseqs
-#
-# Passworded targets.
-#
-test_GET_PASSWORD /log.txt
-test_GET_PASSWORD /environment
 trap - EXIT
 echo "lorax tests completed successfully."
 exit 0

@@ -9,11 +9,11 @@ data will result in over-writing.
 =================================== ===========================================================
 URL                                 Interpretation
 =================================== ===========================================================
-``/log.txt``                        A ``GET`` of this URL returns the log file of the current
-                                    run.
-
 ``:9181``                           A dashboard of the queues used by RQ, if asynchronous
                                     queueing is in use. (Optional; requires `rq_dashboard` service)
+
+``/status``                         Query site status. Returns a JSON dictionary containing
+                                    application ``name`` and ``start_date``.
 
 ``/trees/families.json``            A ``GET`` of this URL returns a JSON list of defined
                                     families.

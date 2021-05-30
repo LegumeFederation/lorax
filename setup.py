@@ -26,10 +26,6 @@ from setuptools.command import build_py, develop, install
 # Version restrictions and dependencies
 if sys.version_info < (3, 4, 0, 'final', 0):
     raise SystemExit("This package requires python 3.4 or higher.")
-elif sys.version_info >= (3, 6, 0, 'final', 0):
-    from secrets import choice
-else:
-    from random import choice
 from pathlib import Path  # python 3.4
 
 NAME = 'lorax'
@@ -66,22 +62,6 @@ class InstallBinariesCommand(Command):
             logger.info('creating etc directory "%s"' % (str(self.etc_path)))
             self.etc_path.mkdir(parents=True, mode=DIR_MODE)
 
-    def create_config_file(self, file_name):
-        """Initializes config file with secret key."""
-        file_path = self.etc_path / file_name
-        if not file_path.exists():
-            with file_path.open(mode='w') as config_fh:
-                print('Creating instance config file at "%s".' % str(
-                    file_path))
-                alphabet = string.ascii_letters + string.digits
-                nchars = 0
-                secret_key = ''
-                while nchars < PASSWORD_LENGTH:
-                    secret_key += choice(alphabet) # noqa
-                    nchars += 1
-                print('SECRET_KEY = "%s" # set at install time' % (secret_key),
-                      file=config_fh) # noqa
-
     def run(self):
         """Run command."""
         # Check if build is disabled by environmental variable.
@@ -100,7 +80,6 @@ class InstallBinariesCommand(Command):
             if not my_python.exists():
                 logger.info('creating ' + str(my_python) + ' link')
                 my_python.symlink_to(sys.executable)
-            self.create_config_file(NAME + '.conf')
 
 
 class BuildPyCommand(build_py.build_py):

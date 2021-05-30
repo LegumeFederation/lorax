@@ -97,7 +97,7 @@ class BaseConfig(object):
     #           * configuration variables are printed
     #
     DEBUG = False
-    PORT = 58927
+    PORT = int(os.environ["LORAX_PORT"])
     HOST = 'localhost'
     #
     # Log only errors.
@@ -209,12 +209,6 @@ class BaseConfig(object):
     GUNICORN_LOG_LEVEL = 'debug'
     GUNICORN_UNIX_SOCKET = True
     #
-    # URL defs--these will be used in testing.
-    #
-    CURL_ARGS = ''
-    CURL_URL = HOST + ':' + str(PORT)
-    URL = ''
-    #
     # crashmail defs.
     #
     CRASHMAIL_EMAIL = getuser()
@@ -308,13 +302,6 @@ def configure_app(app):
                             app.config['SETTINGS'])
     pyfile_path = Path(app.instance_path) / 'etc' / pyfile_name
     pyfile_dict = {}
-    try:
-        with pyfile_path.open(mode='rb') as config_file:
-            exec(compile(config_file.read(), str(pyfile_path),
-                         'exec'),
-                 pyfile_dict) # noqa
-    except IOError:
-        print('Unable to load configuration file "%s".' % str(pyfile_path))
     for internal_key in ['__doc__', '__builtins__']:
         if internal_key in pyfile_dict:
             del pyfile_dict[internal_key]
@@ -359,94 +346,8 @@ def configure_app(app):
         except IndexError:
             app.config[service.upper()+'_DIR'] = None
     #
-    # Supervisord socket type.
-    #
-    if app.config['SUPERVISORD_UNIX_SOCKET']:
-        app.config['SUPERVISORD_SERVERURL'] = 'unix://%(ENV_' +\
-                                              SERVICE_NAME.upper() +\
-                                              '_VAR)s/run/supervisord.sock'
-    else:
-        app.config['SUPERVISORD_SERVERURL'] = 'http://' + \
-            app.config['SUPERVISORD_HOST'] + ':' + \
-            str(app.config['SUPERVISORD_PORT'])
-    #
-    # Gunicorn socket type.
-    #
-    if not app.config['SUPERVISORD_START_NGINX']:
-        app.config['NGINX_URL'] = 'noURL'
-        if app.config['GUNICORN_UNIX_SOCKET']:
-            app.config['URL'] = 'unix://' +\
-                                app.config['VAR'] +\
-                                '/run/gunicorn.sock'
-            app.config['GUNICORN_URL'] = 'unix://%(ENV_' +\
-                SERVICE_NAME.upper() +\
-                '_VAR)s/run/gunicorn.sock'
-            app.config['CURL_ARGS'] = '--unix-socket ' + \
-                                      app.config['VAR'] +\
-                '/run/gunicorn.sock'
-            app.config['CURL_URL'] = 'http://localhost'
-        else:
-            app.config['URL'] = 'http://' + \
-                                app.config['HOST'] + ':' + \
-                                str(app.config['PORT'])
-            app.config['GUNICORN_URL'] = app.config['HOST'] + ':' + \
-                str(app.config['PORT'])
-            app.config['CURL_URL'] = app.config['HOST'] + ':' +\
-                str(app.config['PORT'])
-    else:  # serve gunicorn to nginx through a socket
-        app.config['GUNICORN_UNIX_SOCKET'] = True
-        app.config['GUNICORN_URL'] = 'unix://%(ENV_' + \
-                                     SERVICE_NAME.upper() + \
-                                     '_VAR)s/run/gunicorn.sock'
-        if app.config['NGINX_UNIX_SOCKET']:
-            app.config['URL'] = 'unix://' + \
-                                app.config['VAR'] + \
-                                '/run/nginx.sock'
-            app.config['NGINX_URL'] = 'unix://' + \
-                app.config['VAR'] + \
-                '/run/nginx.sock'
-            app.config['CURL_ARGS'] = '--unix-socket ' + \
-                                      app.config['VAR'] + \
-                                      '/run/nginx.sock'
-            app.config['CURL_URL'] = 'http://' +\
-                app.config['NGINX_SERVER_NAME']
-        else:
-            app.config['URL'] = 'http://' + \
-                                app.config['HOST'] + ':' + \
-                                str(app.config['PORT'])
-            app.config['NGINX_URL'] = app.config['HOST'] + ':' + \
-                str(app.config['PORT'])
-            app.config['CURL_URL'] = app.config['HOST'] + ':' + \
-                str(app.config['PORT'])
-    #
     # Set queues to be started.
     #
     for queue in app.config['RQ_QUEUES']:
         if app.config['SUPERVISORD_START_' + queue.upper()]:
             app.config['START_QUEUES'].append(queue)
-
-
-def print_config_var(app, var, config_file_obj):
-    """Print configuration variable with type and provenance.
-
-    :param var:
-    :param obj:
-    :return:
-    """
-    if __name__.upper() + '_' + var in os.environ:
-        source = ' # <- from environment'
-    elif var in config_file_obj.__dict__:
-        source = ' # <- from config file'
-    else:
-        source = ''
-    val = app.config[var]
-    if isinstance(val, str):
-        quote = '"'
-    else:
-        quote = ''
-    print('  %s type(%s) =  %s%s%s %s' % (var,
-                                          type(val).__name__,
-                                          quote,
-                                          val,
-                                          quote,
-                                          source))

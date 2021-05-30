@@ -13,13 +13,13 @@ click==7.1.2
     #   rq
 coverage==5.5
     # via -r requirements.in
-croniter==1.0.12
+croniter==1.0.13
     # via rq-scheduler
 distro==1.5.0
     # via -r requirements.in
 flask-rq2==18.3
     # via -r requirements.in
-flask==1.1.2
+flask==1.1.4
     # via
     #   -r requirements.in
     #   flask-rq2
@@ -33,14 +33,12 @@ jinja2==2.11.3
     # via
     #   -r requirements.in
     #   flask
-markupsafe==1.1.1
+markupsafe==2.0.1
     # via jinja2
-numpy==1.20.2
+numpy==1.20.3
     # via biopython
 orderedmultidict==1.0.1
     # via htpasswd
-py-healthcheck==1.10.1
-    # via -r requirements.in
 python-dateutil==2.8.1
     # via
     #   croniter
@@ -51,14 +49,13 @@ redis==3.5.3
     #   rq
 rq-scheduler==0.11.0
     # via flask-rq2
-rq==1.8.0
+rq==1.8.1
     # via
     #   flask-rq2
     #   rq-scheduler
-six==1.15.0
+six==1.16.0
     # via
     #   orderedmultidict
-    #   py-healthcheck
     #   python-dateutil
 supervisor==4.2.2
     # via -r requirements.in

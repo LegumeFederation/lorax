@@ -4,9 +4,18 @@ services:
     image: lorax:latest
     environment:
       LORAX_RQ_REDIS_URL: redis://redis:6379/0
+      LORAX_PORT:
+      # testing
+      LORAX_HOST: localhost
+      LORAX_CURL_URL: localhost:${LORAX_PORT}
+      LORAX_CURL_ARGS: ''
+    ports:
+      - "${LORAX_PORT}:${LORAX_PORT}"
     depends_on:
       redis:
         condition: service_healthy
+    volumes:
+      - data:/usr/local/var/data
 
   redis:
     image: redis:6.2.2-alpine3.13
@@ -15,23 +24,31 @@ services:
 
   rq_worker_alignment:
     image: lorax:latest
+    environment:
+      LORAX_PORT:
     command: rq worker --url redis://redis:6379 alignment
     depends_on:
       redis:
         condition: service_healthy
-# in case "flask" image is rebuilt
+# in case "lorax" image is rebuilt
       flask:
         condition: service_started
+    volumes:
+      - data:/usr/local/var/data
 
   rq_worker_treebuilding:
     image: lorax:latest
+    environment:
+      LORAX_PORT:
     command: rq worker --url redis://redis:6379 treebuilding
     depends_on:
       redis:
         condition: service_healthy
-# in case "flask" image is rebuilt
+# in case "lorax" image is rebuilt
       flask:
         condition: service_started
+    volumes:
+      - data:/usr/local/var/data
 
 # https://github.com/Parallels/rq-dashboard#installing-with-docker
   rq_dashboard:
@@ -45,3 +62,6 @@ services:
         condition: service_healthy
     profiles:
       - rq_dashboard
+
+volumes:
+  data:

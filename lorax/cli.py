@@ -29,8 +29,6 @@ import htpasswd
 #
 from .logs import configure_logging
 from .filesystem import init_filesystem
-from .config_file import create_config_file, write_kv_to_config_file
-from .config import print_config_var
 #
 # Global variables.
 #
@@ -64,114 +62,6 @@ def run(): # pragma: no cover
     current_app.run(host=host,
                     port=port,
                     debug=debug)
-
-
-@cli.command()
-@click.option('--vartype',
-              help='Type of variable, if not previously defined.',
-              default=None)
-@click.option('--verbose/--no-verbose', help='Verbose provenance.')
-@click.option('--delete/--no-delete',
-              help='Deletes config file, arguments ignored.')
-@click.argument('var', required=False)
-@click.argument('value', required=False)
-def config(var, value, vartype, verbose, delete):
-    """Gets, sets, or deletes config variables."""
-    config_file_path = Path(current_app.config['ROOT']) / 'etc' /\
-        current_app.config['SETTINGS']
-    if delete:
-        if config_file_path.exists():
-            print('Deleting config file %s.' % (str(config_file_path)))
-            config_file_path.unlink()
-            create_config_file(config_file_path)
-            sys.exit(0)
-        else:
-            print('ERROR--config file %s does not exist.'
-                  % (str(config_file_path)))
-            sys.exit(1)
-    if value is None:  # No value specified, this is a get.
-        config_file_obj = types.ModuleType('config')  # noqa
-        if config_file_path.exists():
-            config_file_status = 'exists'
-            config_file_obj.__file__ = str(config_file_path)
-            try:
-                with config_file_path.open(mode='rb') as config_file:
-                    exec(compile(config_file.read(), str(config_file_path),
-                                 'exec'),
-                         config_file_obj.__dict__)
-            except IOError as e:
-                e.strerror = 'Unable to load configuration file (%s)' \
-                             % e.strerror
-                raise
-        else:
-            config_file_status = 'does not exist'
-            config_file_obj.__file__ = None
-        if var is None:  # No variable specified, list them all.
-            print('The instance-specific config file at %s %s.' % (
-                str(config_file_path),
-                config_file_status))
-            print('Listing all %d defined configuration variables:'
-                  % (len(current_app.config)))
-            for key in sorted(current_app.config):
-                print_config_var(current_app, key, config_file_obj)
-            return
-        else:
-            var = var.upper()
-            if var.startswith(__name__.upper() + '_'):
-                var = var[len(__name__) + 1:]
-            if var in current_app.config:
-                if verbose:
-                    print_config_var(current_app, var, config_file_obj)
-                else:
-                    print(current_app.config[var])
-                return
-            else:
-                print('"%s" not found in configuration variables.' % var,
-                      file=sys.stderr)
-                sys.exit(1)
-    else:  # Must be setting.
-        var = var.upper()
-        if var.startswith(__name__.upper() + '_'):
-            var = var[len(__name__) + 1:]
-        old_value = None
-        if var in current_app.config and vartype is None \
-                and not current_app.config[
-                    var] is None:  # type defaults to current type
-            old_value = current_app.config[var]
-            value_type = type(old_value)
-        else:  # get type from command line, or str if not specified
-            if vartype is None:
-                vartype = 'str'
-            value_type = locate(vartype)
-        if value_type == bool:
-            value = bool(strtobool(value))
-        elif value_type == str:
-            pass
-        else:  # load through JSON to handle dict and list types
-            try:
-                jsonobj = json.loads(value)
-            except json.decoder.JSONDecodeError:
-                print(
-                    'ERROR--Unparseable string "%s". Did you use quotes?'
-                    % value, file=sys.stderr)
-                sys.exit(1)
-            try:
-                value = value_type(jsonobj)
-            except TypeError:
-                print(
-                    'ERROR--Unable to convert "%s" of type %s to type %s.'
-                    % (value, type(jsonobj).__name__, value_type.__name__),
-                    file=sys.stderr)
-                sys.exit(1)
-        #
-        # Write key/value pair to config file.
-        #
-        create_config_file(config_file_path)
-        write_kv_to_config_file(config_file_path,
-                                var,
-                                value,
-                                value_type,
-                                old_value)
 
 
 @cli.command()
@@ -282,36 +172,6 @@ def create_instance(force, init, var):
     if init:
         init_filesystem(current_app)
 
-
-@cli.command()
-@click.option('--force/--no-force',
-              help='Force overwrites of existing files',
-              default=False)
-def set_htpasswd(force):
-    """Sets the site password to SECRET_KEY."""
-    htpasswd_file = current_app.config['ROOT'] + '/etc/nginx/htpasswd'
-    htpasswd_path = Path(htpasswd_file)
-    user = current_app.config['NAME']
-    secret_key = current_app.config['SECRET_KEY']
-    print('Setting password for user %s to %s. ' % (user, secret_key))
-    if not htpasswd_path.exists():
-        print('Creating htpasswd file.')
-        htpasswd_path.touch()
-    with htpasswd.Basic(htpasswd_file) as userdb:
-        if len(secret_key) == 0:
-            print('ERROR--must set SECRET_KEY first.')
-            sys.exit(1)
-        try:
-            userdb.add(user, secret_key)
-        except htpasswd.basic.UserExists:
-            if force:
-                print('Updating site password for existing user %s.' % user)
-                userdb.change_password(user, secret_key)
-            else:
-                print('ERROR--user %s already exists in htpasswd, use --force.')
-                sys.exit(1)
-
-
 @cli.command()
 @click.option('--force/--no-force', help='Force overwrites of existing files',
               default=False)
@@ -327,3 +187,6 @@ def create_test_files(force, configonly):
     copy_files('user_conf',
                Path(os.path.expanduser(current_app.config['USER_CONFIG_PATH'])),
                force)
+
+if __name__ == '__main__':
+    cli()

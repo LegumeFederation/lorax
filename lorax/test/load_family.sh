@@ -2,7 +2,6 @@
 #
 # Get environmental variables.
 #
-source ~/.lorax/lorax_rc
 let count=0 || true
 #
 DOC="""Create a set of protein family definitions from unaligned peptide
