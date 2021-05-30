@@ -33,10 +33,6 @@ do
    esac
 done
 #
-# Get environmental variables.
-#
-source ~/.lorax/lorax_rc
-#
 if [ ! -f "$1" ] ; then
 	>&2 echo "Must specify a readable HMM file."
 	exit 1

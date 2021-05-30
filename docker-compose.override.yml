@@ -14,3 +14,7 @@ services:
   rq_worker_treebuilding:
     volumes:
       - ./lorax:/usr/src/app/lorax:ro
+
+  test:
+    volumes:
+      - ./lorax:/usr/src/app/lorax:ro

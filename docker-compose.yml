@@ -5,10 +5,6 @@ services:
     environment:
       LORAX_RQ_REDIS_URL: redis://redis:6379/0
       LORAX_PORT:
-      # testing
-      LORAX_HOST: localhost
-      LORAX_CURL_URL: localhost:${LORAX_PORT}
-      LORAX_CURL_ARGS: ''
     ports:
       - "${LORAX_PORT}:${LORAX_PORT}"
     depends_on:
@@ -62,6 +58,25 @@ services:
         condition: service_healthy
     profiles:
       - rq_dashboard
+
+  test:
+    image: lorax:latest
+     # testing
+    environment:
+      LORAX_HOST: flask
+      LORAX_CURL_URL: flask:${LORAX_PORT}
+      LORAX_CURL_ARGS: ''
+    depends_on:
+      flask:
+        condition: service_started
+      rq_worker_alignment:
+        condition: service_started
+      rq_worker_treebuilding:
+        condition: service_started
+    working_dir: /usr/src/app/lorax/test
+    command: ./test_targets.sh
+    profiles:
+      - test
 
 volumes:
   data:

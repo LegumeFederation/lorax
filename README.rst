@@ -79,10 +79,14 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 .. _RAxML: https://github.com/stamatak/standard-RAxML
 .. _FastTree: http://www.microbesonline.org/fasttree
 
-## Running Tests
+## Running (development)
 
 ```
 docker-compose up -d
-docker-compose exec flask python -m lorax.cli create-test-files
-docker-compose exec flask ./test_targets.sh
+```
+
+## Running Tests (development)
+
+```
+docker-compose run test
 ```
