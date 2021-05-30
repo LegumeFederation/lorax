@@ -1,9 +1,6 @@
 biopython
 click
-coverage
-distro
 flask>=1.0,<2.0
 flask-rq2
 gunicorn
 jinja2
-setuptools

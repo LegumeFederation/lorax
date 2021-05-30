@@ -3,7 +3,6 @@ services:
     build: .
     image: lorax:latest
     environment:
-      LORAX_RQ_REDIS_URL: redis://redis:6379/0
       LORAX_PORT:
     ports:
       - "${LORAX_PORT}:${LORAX_PORT}"

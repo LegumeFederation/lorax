@@ -13,11 +13,6 @@ from pathlib import Path  # python 3.4
 #
 from flask import Flask, Response
 from flask_rq2 import RQ
-import coverage
-#
-# Start coverage if COVERAGE_PROCESS_START is pointed at a config file.
-#
-coverage.process_startup()
 #
 # local imports
 #

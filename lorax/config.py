@@ -25,8 +25,6 @@ import datetime
 import os
 import platform
 import sys
-from getpass import getuser
-from socket import getfqdn
 from pathlib import Path  # python 3.4
 #
 # Name of this service.
@@ -83,39 +81,10 @@ class BaseConfig(object):
     TMP = get_path('TMP', VAR + '/tmp')
     DATA = get_path('DATA', VAR + '/data/')
     USERDATA = get_path('DATA', VAR + '/userdata/')
-    USER_CONFIG_PATH = '~/.' + SERVICE_NAME
     #
     # Directory/file permissions.
     #
-    PROCESS_UMASK = '0002'
     DIR_MODE = '755'  # Note interaction with process umask
-    #
-    # The DEBUG parameter has multiple implications:
-    #           * access to python debugging via flask
-    #           * logging levels set to DEBUG
-    #           * configuration variables are printed
-    #
-    DEBUG = False
-    PORT = int(os.environ["LORAX_PORT"])
-    HOST = 'localhost'
-    #
-    # Log only errors.
-    #
-    QUIET = False
-    #
-    # Test mode, includes propagation of errors.
-    #
-    TESTING = False
-    #
-    # User for rc scripts.
-    #
-    RC_USER = getuser()
-    RC_GROUP = getuser()
-    RC_VERBOSE = False
-    #
-    # Settings file name.
-    #
-    SETTINGS = SERVICE_NAME + '.conf'
     #
     # Number of threads used in queued commands.  0 = use as many as available.
     #
@@ -125,6 +94,7 @@ class BaseConfig(object):
     #
     TREE_QUEUE = 'treebuilding'
     ALIGNMENT_QUEUE = 'alignment'
+    RQ_REDIS_URL = 'redis://redis:6379/0'
     RQ_SCHEDULER_QUEUE = ALIGNMENT_QUEUE
     ALIGNMENT_QUEUE_TIMEOUT = 24 * 60 * 60  # 24 hours, in seconds
     TREE_QUEUE_TIMEOUT = 30 * 24 * 60 * 60  # 30 days, in seconds
@@ -157,41 +127,7 @@ class BaseConfig(object):
     #
     # Current run.
     #
-    HOSTNAME = getfqdn()
     DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
-    #
-    # nginx defs.
-    #
-    NGINX_SERVER_NAME = 'localhost'
-    system = platform.system()
-    if system == 'Linux':
-        NGINX_LISTEN_ARGS = 'deferred'
-        NGINX_EVENTS = 'use epoll;'
-        import distro
-        DISTRIBUTION = distro.linux_distribution()[0].split()[0]
-    elif system.endswith('BSD'): # pragma: no cover
-        NGINX_LISTEN_ARGS = 'accept_filter=httpready'
-        NGINX_EVENTS = 'use kqueue;'
-        DISTRIBUTION = None
-    elif system == 'Darwin': # pragma: no cover
-        NGINX_LISTEN_ARGS = ''
-        NGINX_EVENTS = 'use kqueue;'
-        DISTRIBUTION = None
-    else: # pragma: no cover
-        NGINX_LISTEN_ARGS = ''
-        NGINX_EVENTS = ''
-        DISTRIBUTION = None
-    NGINX_UNIX_SOCKET = False
-    #
-    # gunicorn defs--these will not be used in debugging mode.
-    #
-    GUNICORN_LOG_LEVEL = 'debug'
-    GUNICORN_UNIX_SOCKET = True
-    #
-    # crashmail defs.
-    #
-    CRASHMAIL_EMAIL = getuser()
-    CRASHMAIL_EVENTS = 'PROCESS_STATE_EXITED'
     #
     # Controls of which processes get started by supervisord.
     # Setting these to empty strings will cause the process to
@@ -210,16 +146,6 @@ class BaseConfig(object):
     #    ip: Real IP address of the requester.
     #
     STDERR_LOG_FORMAT = '%(levelname)s: %(message)s'
-
-
-class DevelopmentConfig(BaseConfig):
-    """Start internal server, no queues."""
-    DEBUG = True
-    TESTING = True
-    RQ_ASYNC = False
-    ENVIRONMENT_DUMP = True
-    # Use debug config settings
-    SETTINGS = SERVICE_NAME + '-debug.conf'
 
 
 #
@@ -249,9 +175,6 @@ def configure_app(app):
     #
     app.instance_path = os.getenv(SERVICE_NAME.upper() + '_ROOT',
                                   app.config['ROOT'])
-    pyfile_name = os.getenv(SERVICE_NAME.upper() + '_SETTINGS',
-                            app.config['SETTINGS'])
-    pyfile_path = Path(app.instance_path) / 'etc' / pyfile_name
     pyfile_dict = {}
     for internal_key in ['__doc__', '__builtins__']:
         if internal_key in pyfile_dict:
@@ -263,21 +186,3 @@ def configure_app(app):
 
     for key in pyfile_dict:
         app.config[key] = pyfile_dict[key]
-    #
-    # Do overrides from environmental variables.
-    #
-    for my_envvar, envvar in [(i, i[6:])
-                              for i in sorted(os.environ)
-                              if i.startswith(SERVICE_NAME.upper() + '_')]:
-        value = os.environ[my_envvar]
-        if value == 'True':
-            value = True
-        elif value == 'False':
-            value = False
-        else:
-            try:
-                value = int(value)
-            except ValueError:
-                pass
-        if envvar not in PATHVARS:  # paths already configured from envvars
-            app.config[envvar] = value
