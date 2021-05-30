@@ -126,8 +126,6 @@ class BaseConfig(object):
     #
     TREE_QUEUE = 'treebuilding'
     ALIGNMENT_QUEUE = 'alignment'
-    START_QUEUES = []
-    RQ_QUEUES = [TREE_QUEUE, ALIGNMENT_QUEUE]
     RQ_SCHEDULER_QUEUE = ALIGNMENT_QUEUE
     ALIGNMENT_QUEUE_TIMEOUT = 24 * 60 * 60  # 24 hours, in seconds
     TREE_QUEUE_TIMEOUT = 30 * 24 * 60 * 60  # 30 days, in seconds
@@ -162,24 +160,6 @@ class BaseConfig(object):
     #
     HOSTNAME = getfqdn()
     DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
-    #
-    # supervisord defs.
-    #
-    SUPERVISORD_UNIX_SOCKET = True
-    SUPERVISORD_PORT = 58928
-    SUPERVISORD_HOST = 'localhost'
-    SUPERVISORD_USER = SERVICE_NAME
-    SUPERVISORD_START_REDIS = True
-    SUPERVISORD_START_SERVER = True
-    SUPERVISORD_START_REDIS = True
-    SUPERVISORD_START_ALIGNMENT = True
-    SUPERVISORD_START_TREEBUILDING = True
-    SUPERVISORD_START_CRASHMAIL = True
-    SUPERVISORD_START_NGINX = True
-    SUPERVISORD_START_PROMETHEUS = False
-    SUPERVISORD_START_ALERTMANAGER = False
-    SUPERVISORD_START_NODE_EXPORTER = False
-    SUPERVISORD_START_PUSHGATEWAY = False
     #
     # nginx defs.
     #
@@ -239,32 +219,8 @@ class DevelopmentConfig(BaseConfig):
     TESTING = True
     RQ_ASYNC = False
     ENVIRONMENT_DUMP = True
-    # Running synchronous--no need to start queues.
-    SUPERVISORD_START_REDIS = False
-    SUPERVISORD_START_ALIGNMENT = False
-    SUPERVISORD_START_TREEBUILDER = False
     # Use debug config settings
     SETTINGS = SERVICE_NAME + '-debug.conf'
-
-
-class ServerOnlyConfig(BaseConfig):
-    """Start server and redis, no queues."""
-    SUPERVISORD_START_ALIGNMENT = False
-    SUPERVISORD_START_TREEBUILDER = False
-
-
-class TreebuilderConfig(BaseConfig):
-    """Start treebuilder queue only."""
-    SUPERVISORD_START_REDIS = False
-    SUPERVISORD_START_SERVER = False
-    SUPERVISORD_START_ALIGNMENT = False
-
-
-class AlignerConfig(BaseConfig):
-    """Start alignment queue only"""
-    SUPERVISORD_START_REDIS = False
-    SUPERVISORD_START_SERVER = False
-    SUPERVISORD_START_TREEBUILDER = False
 
 
 #
@@ -273,10 +229,6 @@ class AlignerConfig(BaseConfig):
 #
 config_dict = {
     'default': SERVICE_NAME + '.config.BaseConfig',
-    'development': SERVICE_NAME + '.config.DevelopmentConfig',
-    'serverOnly': SERVICE_NAME + '.config.ServerOnlyConfig',
-    'treebuilder': SERVICE_NAME + '.config.TreebuilderConfig',
-    'aligner': SERVICE_NAME + '.config.AlignerConfig'
 }
 
 
@@ -345,9 +297,3 @@ def configure_app(app):
                                                       if p.is_dir()][0])
         except IndexError:
             app.config[service.upper()+'_DIR'] = None
-    #
-    # Set queues to be started.
-    #
-    for queue in app.config['RQ_QUEUES']:
-        if app.config['SUPERVISORD_START_' + queue.upper()]:
-            app.config['START_QUEUES'].append(queue)

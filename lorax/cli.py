@@ -23,7 +23,6 @@ import click
 from flask import current_app
 from flask.cli import FlaskGroup
 from jinja2 import Environment, PackageLoader
-import htpasswd
 #
 # Local imports.
 #

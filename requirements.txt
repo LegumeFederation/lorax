@@ -25,8 +25,6 @@ flask==1.1.4
     #   flask-rq2
 gunicorn==20.1.0
     # via -r requirements.in
-htpasswd==2.3
-    # via -r requirements.in
 itsdangerous==1.1.0
     # via flask
 jinja2==2.11.3
@@ -37,8 +35,6 @@ markupsafe==2.0.1
     # via jinja2
 numpy==1.20.3
     # via biopython
-orderedmultidict==1.0.1
-    # via htpasswd
 python-dateutil==2.8.1
     # via
     #   croniter
@@ -54,11 +50,7 @@ rq==1.8.1
     #   flask-rq2
     #   rq-scheduler
 six==1.16.0
-    # via
-    #   orderedmultidict
-    #   python-dateutil
-supervisor==4.2.2
-    # via -r requirements.in
+    # via python-dateutil
 werkzeug==1.0.1
     # via flask
 
