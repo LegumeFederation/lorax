@@ -40,7 +40,6 @@ SERVICE_ORG = 'LegumeFederation'
 #
 IMMUTABLES = ('ROOT', 'VAR', 'TMP')
 PATHVARS = ('ROOT', 'VAR', 'TMP', 'DATA', 'USERDATA')
-PROMETHEUS_SERVICES = ('prometheus', 'alertmanager', 'node_exporter', 'push_gateway')
 
 def get_path(name, default):
     """Get path from environ, checking absoluteness."""
@@ -282,18 +281,3 @@ def configure_app(app):
                 pass
         if envvar not in PATHVARS:  # paths already configured from envvars
             app.config[envvar] = value
-    #
-    # Set version and platform (output only, not configurable).
-    #
-    app.config['PLATFORM'] = platform.system()
-    #
-    # Prometheus services.
-    #
-    for service in PROMETHEUS_SERVICES:
-        root_path = Path(app.config['ROOT'])
-        try:
-            app.config[service.upper()+'_DIR'] = str([p for p in
-                                                      root_path.glob(service + '*')
-                                                      if p.is_dir()][0])
-        except IndexError:
-            app.config[service.upper()+'_DIR'] = None
