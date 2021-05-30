@@ -1,3 +1,14 @@
+x-app: &default-rq
+    image: lorax:latest
+    depends_on:
+      redis:
+        condition: service_healthy
+# in case "lorax" image is rebuilt
+      flask:
+        condition: service_started
+    volumes:
+      - data:/usr/local/var/data
+
 services:
   flask:
     build: .
@@ -18,32 +29,12 @@ services:
       test: "redis-cli ping"
 
   rq_worker_alignment:
-    image: lorax:latest
-    environment:
-      LORAX_PORT:
+    <<: *default-rq
     command: rq worker --url redis://redis:6379 alignment
-    depends_on:
-      redis:
-        condition: service_healthy
-# in case "lorax" image is rebuilt
-      flask:
-        condition: service_started
-    volumes:
-      - data:/usr/local/var/data
 
   rq_worker_treebuilding:
-    image: lorax:latest
-    environment:
-      LORAX_PORT:
+    <<: *default-rq
     command: rq worker --url redis://redis:6379 treebuilding
-    depends_on:
-      redis:
-        condition: service_healthy
-# in case "lorax" image is rebuilt
-      flask:
-        condition: service_started
-    volumes:
-      - data:/usr/local/var/data
 
 # https://github.com/Parallels/rq-dashboard#installing-with-docker
   rq_dashboard:
