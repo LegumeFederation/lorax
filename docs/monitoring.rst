@@ -1,10 +1,10 @@
 Monitoring
 ==========
-There is monitoring of ``lorax`` and associated processes via web interfaces
-at multiple levels:
+There is monitoring of ``lorax`` and associated processes via an optional web interface:
 
 =============================== ===============================
 Address                         Type of monitor
 =============================== ===============================
-LORAX_HOST:9181                 RQ queue info, including errors.
+:9181                           RQ queue info, including errors.
+                                (if rq_dashboard service has been started)
 =============================== ===============================

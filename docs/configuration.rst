@@ -102,7 +102,6 @@ CURL_ARGS               P     Arguments for use with curl.
   NODE_EXPORTER_DIR type(str) =  "/home/localhost/joelb/.lorax/0.94/node_exporter-0.14.0.linux-amd64"
   PERMANENT_SESSION_LIFETIME type(timedelta) =  31 days, 0:00:00
   PLATFORM type(str) =  "Linux"
-  PORT type(int) =  58927
   PREFERRED_URL_SCHEME type(str) =  "http"
   PRESERVE_CONTEXT_ON_EXCEPTION type(NoneType) =  None
   PROCESS_UMASK type(str) =  "0002"

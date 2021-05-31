@@ -3,10 +3,9 @@ services:
     environment:
       FLASK_APP: lorax
       FLASK_ENV: development
-      FLASK_RUN_PORT: ${PORT}
     volumes:
       - ./lorax:/usr/src/app/lorax:ro
-    command: flask run --host=0.0.0.0
+    command: flask run --host=0.0.0.0 --port=8000
 
   rq_worker_alignment:
     volumes:

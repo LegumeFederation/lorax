@@ -17,10 +17,8 @@ services:
   flask:
     build: .
     image: lorax:latest
-    environment:
-      PORT: "${PORT}"
     ports:
-      - "${PORT}:${PORT}"
+      - "${PORT}:8000"
     depends_on:
       redis:
         condition: service_healthy
@@ -57,9 +55,7 @@ services:
     image: lorax:latest
      # testing
     environment:
-      LORAX_HOST: flask
-      LORAX_CURL_URL: flask:${PORT}
-      LORAX_CURL_ARGS: ''
+      LORAX_CURL_URL: flask:8000
     depends_on:
       flask:
         condition: service_started

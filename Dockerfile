@@ -19,5 +19,7 @@ COPY lorax ./lorax
 
 USER daemon
 
-CMD ["gunicorn", "lorax:app"]
+CMD ["gunicorn", "--bind=0.0.0.0:8000", "lorax:app"]
 VOLUME ["/usr/local/var/data"]
+
+EXPOSE 8000

@@ -50,39 +50,3 @@ gene families.  Lorax uses `HMMER`_ to do multiple sequence alignments,
 .. _HMMER: http://hmmer.org
 .. _RAxML: https://github.com/stamatak/standard-RAxML
 .. _FastTree: http://www.microbesonline.org/fasttree
-
-## Running
-
-Test/development (flask, with $PWD bind-mounted into container)
-
-```
-docker-compose up -d
-```
-
-Production (gunicorn)
-
-```
-docker-compose -f docker-compose.yml up -d
-```
-
-## Running Tests
-
-Development mode (flask, with $PWD bind-mounted into container)
-
-```
-docker-compose run test
-```
-
-Production (gunicorn)
-
-```
-docker-compose -f docker-compose.yml run test
-```
-
-## (Optional) RQ dashboard
-
-```
-docker-compose up -d rq_dashbaord
-```
-
-Point your browser at http://localhost:9181 (or whatever host the dockerd is running on)

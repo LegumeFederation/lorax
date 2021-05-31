@@ -1,25 +1,27 @@
 Running lorax
 =============
 
- ``lorax`` can be run via command line with no arguments.
+To start lorax in a test/development configuration (flask, with the lorax/ subdirectory of the git working tree bind-mounted into the ``flask`` container)::
 
-If asynchronous queues are switched on (modes other than ``development``),
-then ``redis`` will need to be started at the address specified by the
-configuration variable ``RQ_REDIS_URL``.
-After that, two RQ work queues will need to be started as well::
+    docker-compose up -d
 
-    rqworker treebuilding
-    rqworker alignment
+To start lorax in a "production" configuration (gunicorn, with no bind mounting)::
 
-It is also useful to run a dashboard (via ``rq-dashboard``).
+    docker-compose -f docker-compose.yml up -d
+
+It is also useful to run an RQ dashboard (via ``docker-compose up -d rq_dashboard``).
+The resulting dashboard is then accessible via web interface on port 9181.
+
+To stop ``lorax`` (either development or production)::
+
+    docker-compose down [-v]
+
+Where the optional ``-v`` option (to remove volumes) should only be used if
+the lorax data directory (containing any generated MSAs and phylogenetic
+trees) should not persist.
 
 ``lorax`` is intended to be run in a trusted environment and contains no
 authentication.  It should be
 run on ports that are accessible only to trusted hosts.  Running ``lorax`` on
 a public port opens the
 possibility of denial-of-service attacks.
-
-We recommend that ``lorax`` be run in a virtual environment if on a shared
-server.  However, the shell scripts will work for real environments as well.
-
-

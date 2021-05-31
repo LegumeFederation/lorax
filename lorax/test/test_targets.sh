@@ -45,7 +45,7 @@ test_GET () {
    else
       code="${2}"
    fi
-   status=$(curl ${LORAX_CURL_ARGS} -s -o ${tmpfile} -w '%{http_code}' ${LORAX_CURL_URL}${1})
+   status=$(curl ${LORAX_CURL_ARGS:-} -s -o ${tmpfile} -w '%{http_code}' ${LORAX_CURL_URL}${1})
    if [ "${status}" -eq "${code}" ]; then
       echo "GET ${1} returned HTTP code ${status} as expected."
       if [ "$_V" -eq 1 ]; then
@@ -78,7 +78,7 @@ test_DELETE() {
    else
       code="${2}"
    fi
-   status=$(curl ${LORAX_CURL_ARGS} -s -o ${tmpfile} -w '%{http_code}' -X 'DELETE' ${LORAX_CURL_URL}${1})
+   status=$(curl ${LORAX_CURL_ARGS:-} -s -o ${tmpfile} -w '%{http_code}' -X 'DELETE' ${LORAX_CURL_URL}${1})
    if [ "${status}" -eq "${code}" ]; then
       echo "DELETE ${1} returned HTTP code ${status} as expected."
       if [ "$_V" -eq 1 ]; then
@@ -101,7 +101,7 @@ test_DELETE() {
 #
 poll_until_positive() {
    echo -n "Polling ${1} "
-   while [ `curl ${LORAX_CURL_ARGS} -s ${LORAX_CURL_URL}${1}` -lt 0 ]; do
+   while [ `curl ${LORAX_CURL_ARGS:-} -s ${LORAX_CURL_URL}${1}` -lt 0 ]; do
      echo -n "."
      sleep ${SLEEPTIME}
    done

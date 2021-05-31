@@ -1,21 +1,19 @@
 Testing
 =======
-If you defined the lorax host to be something other than localhost, you will
-have to define the environmental variable LORAX_HOST to match::
+To test lorax, issue the command::
 
-    export LORAX_HOST=MY_HOST_IP
+    docker-compose run test
 
-Ditto for the port address.
+This will bind-mount the lorax/ subdirectory in the git working tree
+into the container at /usr/src/app/lorax and ``run lorax/test/test_targets.sh``.
 
-To test lorax, issue the commands::
-
-    mkdir test_lorax # could be any name, will be deleted later
-    cd test_lorax
-    /path/to/lorax_env lorax create_test_files
-    ./test_targets.sh
-
-If the installation went properly, the last command should finish with
+The last command should finish with
 "lorax test completed successfully."
+
+To test a "production" deployment (not bind-mounting lorax/ in the container,
+and starting a gunicorn server instead of flask)::
+
+    docker-compose -f docker-compose.yml run test
 
 You may also wish to load a full-sized data model to work with.  The
 script ``get_big_model.sh`` will do that for you.  The model of 12
@@ -26,4 +24,5 @@ script will define some 18,000 legume gene families.
 
 If you wish to stop lorax after the tests, issue the command::
 
-    /path/to/lorax_env supervisorctl shutdown
+    docker-compose down
+
