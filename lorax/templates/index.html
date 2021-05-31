@@ -49,7 +49,7 @@
             jQuery('#foregroundColorButton').colorpicker({color: opts.foregroundColor});
             jQuery('#backgroundColorButton').colorpicker({color: opts.backgroundColor});
             d3.select("#phyd3").text("Loading...");
-            d3.xml("/trees/{{ familyname  }}/{{ method }}/tree.xml", function(xml) {
+            d3.xml("/trees/{{ familyname  }}/{{ method }}/tree.xml","application/xml",function(err, xml) {
                 d3.select("#phyd3").text(null);
                 var tree = phyd3.phyloxml.parse(xml);
                 phyd3.phylogram.build("#phyd3", tree, opts);
