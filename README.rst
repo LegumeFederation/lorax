@@ -78,3 +78,11 @@ Production (gunicorn)
 ```
 docker-compose -f docker-compose.yml run test
 ```
+
+## (Optional) RQ dashboard
+
+```
+docker-compose up -d rq_dashbaord
+```
+
+Point your browser at http://localhost:9181 (or whatever host the dockerd is running on)
