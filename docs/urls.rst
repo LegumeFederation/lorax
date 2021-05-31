@@ -68,6 +68,8 @@ URL                                 Interpretation
 
 ``/trees/<fam>/<meth>/tree.xml``    Returns already-calculated tree in phyloXML format.
 
+``/trees/<fam>/<meth>/view``        Renders tree.xml in browser using PhyD3 (NOTE: currently broken)
+
 ``/trees/<fam>/<meth>/run_log.txt`` Returns the log file, including timings, of the tree
                                     calculation.
 

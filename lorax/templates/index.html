@@ -17,8 +17,8 @@
     <script src="https://d3js.org/d3.v3.min.js"></script>
 
     <!-- phyd3 -->
-    <link rel="stylesheet" href="css/phyd3.min.css" />
-    <script src="js/phyd3.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/phyd3.min.css') }}" />
+    <script src="{{ url_for('static', filename='js/phyd3.min.js') }}"></script>
 
     <script>
         var opts = {
@@ -49,7 +49,7 @@
             jQuery('#foregroundColorButton').colorpicker({color: opts.foregroundColor});
             jQuery('#backgroundColorButton').colorpicker({color: opts.backgroundColor});
             d3.select("#phyd3").text("Loading...");
-            d3.xml("tree.xml", function(xml) {
+            d3.xml("/trees/{{ familyname  }}/{{ method }}/tree.xml", function(xml) {
                 d3.select("#phyd3").text(null);
                 var tree = phyd3.phyloxml.parse(xml);
                 phyd3.phylogram.build("#phyd3", tree, opts);
@@ -288,7 +288,7 @@
                 Download as:
                 <button class="btn btn-primary" id="linkSVG">SVG</button>
                 <button class="btn btn-primary" id="linkPNG">PNG</button>
-                <a href="tree.xml" class="btn btn-primary" id="linkXML" download >XML</a>
+                <a href="/trees/{{ familyname  }}/{{ method }}/tree.xml" class="btn btn-primary" id="linkXML" download >XML</a>
             </div>
         </div>
         <div id="phyd3" class="col-xs-9"></div>

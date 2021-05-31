@@ -15,7 +15,7 @@ from pathlib import Path  # python 3.4
 #
 # third-party imports
 #
-from flask import Response, request, abort
+from flask import Response, request, abort, render_template
 from Bio import SeqIO, AlignIO, Phylo
 #
 # local imports
@@ -737,6 +737,15 @@ for builder in list(app.config['TREEBUILDERS'].keys()):
     calculation_methods.append(bind_calculation(builder))
     calculation_methods.append(bind_calculation(builder, superfamily=True))
 
+# FIXME: currently doesn't render correctly
+@app.route('/trees/<familyname>/<method>/view', methods=['GET'])
+def phyd3(familyname, method):
+    if method not in app.config['TREEBUILDERS']:
+        abort(404)
+    inpath = Path(app.config['DATA']) / familyname / method
+    if not inpath.exists():
+        abort(404)
+    return render_template("index.html", familyname=familyname, method=method)
 
 @app.route('/trees/<familyname>/<method>/' + TREE_NAME)
 def get_existing_tree(familyname, method):
