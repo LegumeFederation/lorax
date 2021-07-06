@@ -1,4 +1,5 @@
 #!/bin/bash
+bindir=`dirname $0`
 #
 # Get environmental variables.
 #
@@ -41,12 +42,12 @@ function PostPut {
         elif [ "$_Q" -eq 0 ]; then
             ProgressBar ${count} ${nfiles}
         fi
-        ./post_FASTA.sh peptide ${seqfile} ${fam} sequences
+        ${bindir}/post_FASTA.sh peptide ${seqfile} ${fam} sequences
         if [ $? -ne 0 ]; then
             >&2 echo "POST of FASTA failed on ${fam}."
  		    exit 1
         fi
- 	    ./put_HMM.sh ${hmmpath}/${fam}.hmm ${fam}
+ 	    ${bindir}/put_HMM.sh ${hmmpath}/${fam}.hmm ${fam}
  	    if [ $? -ne 0 ]; then
  		    >&2 echo "PUT of HMM failed on ${fam}."
  		    exit 1

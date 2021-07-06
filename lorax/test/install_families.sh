@@ -2,16 +2,17 @@
 #
 # This script downloads and installs gene familes into lorax.
 #
+bindir=`dirname $0`
 phytozome="phytozome_10_2"
-legfed="legfed_v1_1"
+legfed="legfed_v1_0"
 set -e
 install_family() {
 	echo "Downloading $1 families"
-        curl -o ${1}.tar.gz http://data.comparative-legumes.org/gene_families/${1}.tar.gz
+        curl -o ${1}.tar.gz http://dev.lis.ncgr.org:50011/gene_families/${1}.tar.gz
 	echo "Unpacking $1 families"
 	tar xzf ${1}.tar.gz
 	echo "Creating $1 gene families"
-	./load_family.sh  ${1}/fasta/ ${1}/hmm/ $1
+	${bindir}/load_family.sh  ${1}/fasta/ ${1}/hmm/ $1
 	rm -rf ${1}/ ${1}.tar.gz
 }
 if [ "$1" != "-y" ]; then
