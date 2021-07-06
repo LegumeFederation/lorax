@@ -8,7 +8,7 @@ legfed="legfed_v1_0"
 set -e
 install_family() {
 	echo "Downloading $1 families"
-        curl -o ${1}.tar.gz http://dev.lis.ncgr.org:50011/gene_families/${1}.tar.gz
+        curl -o ${1}.tar.gz http://dev.lis.ncgr.org:50011/lorax_gene_families/${1}.tar.gz
 	echo "Unpacking $1 families"
 	tar xzf ${1}.tar.gz
 	echo "Creating $1 gene families"
