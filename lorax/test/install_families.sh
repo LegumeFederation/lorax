@@ -2,41 +2,28 @@
 #
 # This script downloads and installs gene familes into lorax.
 #
+set -o errexit -o nounset -o pipefail
 bindir=`dirname $0`
-phytozome="phytozome_10_2"
-legfed="legfed_v1_0"
-set -e
-install_family() {
-	echo "Downloading $1 families"
-        curl -o ${1}.tar.gz http://dev.lis.ncgr.org:50011/lorax_gene_families/${1}.tar.gz
-	echo "Unpacking $1 families"
-	tar xzf ${1}.tar.gz
-	echo "Creating $1 gene families"
-	${bindir}/load_family.sh  ${1}/fasta/ ${1}/hmm/ $1
-	rm -rf ${1}/ ${1}.tar.gz
-}
-if [ "$1" != "-y" ]; then
-   read -r -p "Download/install $phytozome gene families (900 MB)? [y/N] " phytozome_response
-   read -r -p "Download/install $legfed  gene families (700 MB)? [y/N] " legfed_response
-else
-  phytozome_reponse="y"
-  legfed_response="y"
+
+# FIXME: download & process phytozome gene families from upstream
+if [ ! -f phytozome_10_2.done ]
+then
+  # post-processed phytozome_10_2 gene families
+  curl -L https://ars-usda.box.com/shared/static/toe0is62567fxk6zpxo0uwdya93tz9nu.gz |
+    tar -xzf -
+  touch phytozome_10_2.done
 fi
-case "$phytozome_response" in
-    [yY][eE][sS]|[yY]) 
-        install_family $phytozome
-        echo ""
-        ;;
-    *)
-        echo "Skipping $phytozome install."
-        ;;
-esac
-case "$legfed_response" in
-    [yY][eE][sS]|[yY])  
-        install_family $legfed
-        ;;
-    *)
-        echo "Skipping $legfed install."
-        ;;
-esac
+
+if [ ! -f legume.genefam.fam1.M65K-families.tsv ]
+then
+  curl https://legumeinfo.org/data/v2/LEGUMES/Fabaceae/genefamilies/legume.genefam.fam1.M65K/legume.genefam.fam1.M65K.hmm.tar.gz |
+    tar -xzf -
+  curl https://legumeinfo.org/data/v2/LEGUMES/Fabaceae/genefamilies/legume.genefam.fam1.M65K/legume.genefam.fam1.M65K.family_fasta.tar.gz |
+    tar -xzf -
+  find legume.genefam.fam1.M65K.hmm -type f -exec mv {} {}.hmm \;
+  find legume.genefam.fam1.M65K.family_fasta -type f -exec mv {} {}.faa \;
+  ${bindir}/load_family.sh legume.genefam.fam1.M65K.family_fasta legume.genefam.fam1.M65K.hmm legume.genefam.fam1.M65K
+  rm -rf legume.genefam.fam1.M65K.family_fasta legume.genefam.fam1.M65K
+fi
+
 echo "Installation of families done."

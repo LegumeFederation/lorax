@@ -7,6 +7,10 @@ services:
       - ./lorax:/usr/src/app/lorax:ro
     command: flask run --host=0.0.0.0 --port=8000
 
+  load:
+    volumes:
+      - ./lorax:/usr/src/app/lorax:ro
+
   rq_worker_alignment:
     volumes:
       - ./lorax:/usr/src/app/lorax:ro

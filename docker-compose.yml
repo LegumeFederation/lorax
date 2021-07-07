@@ -17,6 +17,8 @@ services:
   flask:
     build: .
     image: lorax:latest
+    healthcheck:
+      test: "curl -q http://localhost:8000/status"
     ports:
       - "${PORT}:8000"
     depends_on:
@@ -25,8 +27,22 @@ services:
     volumes:
       - data:/usr/local/var/data
 
+  load:
+    image: lorax:latest
+    depends_on:
+      flask:
+        condition: service_healthy
+    environment:
+      LORAX_CURL_URL: flask:8000
+    working_dir: /usr/local/var/data
+    command: /usr/src/app/lorax/test/install_families.sh
+    profiles:
+      - load
+    volumes:
+      - data:/usr/local/var/data
+
   redis:
-    image: redis:6.2.2-alpine3.13
+    image: redis:6.2.4-alpine3.14
     healthcheck:
       test: "redis-cli ping"
 
