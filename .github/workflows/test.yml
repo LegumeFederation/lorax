@@ -1,0 +1,17 @@
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.rst'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+    
+      - name: Run tests
+        run: |
+          docker compose build flask
+          docker compose run test
