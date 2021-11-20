@@ -6,6 +6,7 @@ x-app: &default-rq
 # in case "lorax" image is rebuilt
       flask:
         condition: service_started
+    restart: always 
     environment:
       GUNICORN_CMD_ARGS: "--workers=2"
       # number of threads for raxml & hmmalign
@@ -19,6 +20,7 @@ services:
     image: lorax:latest
     healthcheck:
       test: "curl -q http://localhost:8000/status"
+    restart: always
     ports:
       - "${PORT}:8000"
     depends_on:
@@ -43,6 +45,7 @@ services:
 
   redis:
     image: redis:6.2.4-alpine3.14
+    restart: always
     healthcheck:
       test: "redis-cli ping"
 

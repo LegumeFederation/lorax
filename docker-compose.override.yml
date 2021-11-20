@@ -3,6 +3,7 @@ services:
     environment:
       FLASK_APP: lorax
       FLASK_ENV: development
+    restart: "no"
     volumes:
       - ./lorax:/usr/src/app/lorax:ro
     command: flask run --host=0.0.0.0 --port=8000
@@ -12,10 +13,12 @@ services:
       - ./lorax:/usr/src/app/lorax:ro
 
   rq_worker_alignment:
+    restart: "no"
     volumes:
       - ./lorax:/usr/src/app/lorax:ro
 
   rq_worker_treebuilding:
+    restart: "no"
     volumes:
       - ./lorax:/usr/src/app/lorax:ro
 
