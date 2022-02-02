@@ -23,7 +23,7 @@ then
   find legume.genefam.fam1.M65K.hmm -type f -exec mv {} {}.hmm \;
   find legume.genefam.fam1.M65K.family_fasta -type f -exec mv {} {}.faa \;
   ${bindir}/load_family.sh legume.genefam.fam1.M65K.family_fasta legume.genefam.fam1.M65K.hmm legume.genefam.fam1.M65K
-  rm -rf legume.genefam.fam1.M65K.family_fasta legume.genefam.fam1.M65K
+  rm -rf legume.genefam.fam1.M65K.family_fasta legume.genefam.fam1.M65K.hmm legume.genefam.fam1.M65K
 fi
 
 echo "Installation of families done."
