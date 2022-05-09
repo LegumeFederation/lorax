@@ -33,7 +33,8 @@ function PostPut {
     while read seqfile; do
         let count=${count}+1
         seqname=${seqfile##*/}
-        fam=${seqname%%.*}
+        fam0=${seqname%%.faa}
+        fam=${fam0##legfed_v1_0.}
         nseqs=$(grep \> ${seqfile} | wc -l)
         nchars=$(grep -v \> ${seqfile} | wc -c)
         avg_len=$(echo "$nchars $nseqs" | awk '{print int($1/$2+0.5)}')
@@ -47,7 +48,7 @@ function PostPut {
             >&2 echo "POST of FASTA failed on ${fam}."
  		    exit 1
         fi
- 	    ${bindir}/put_HMM.sh ${hmmpath}/${fam}.hmm ${fam}
+	    ${bindir}/put_HMM.sh ${hmmpath}/${fam0}.hmm ${fam}
  	    if [ $? -ne 0 ]; then
  		    >&2 echo "PUT of HMM failed on ${fam}."
  		    exit 1
