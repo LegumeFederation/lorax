@@ -35,8 +35,8 @@ then
     tar -xzf -
   find legume.genefam.fam1.M65K.trees_ML_rooted -type f -exec mv {} {}.nwk \;
   find legume.genefam.fam1.M65K.hmmalign_trim -type f -exec mv {} {}.faa \;
-  ${bindir}/copy_family.sh legume.genefam.fam1.M65K.trees_ML_rooted legume.genefam.fam1.M65K.hmmalign legume.genefam.fam1.M65K
-  rm -rf legume.genefam.fam1.M65K.trees_ML_rooted legume.genefam.fam1.M65K.hmmalign
+  ${bindir}/copy_family.sh legume.genefam.fam1.M65K.trees_ML_rooted legume.genefam.fam1.M65K.hmmalign_trim legume.genefam.fam1.M65K
+  rm -rf legume.genefam.fam1.M65K.trees_ML_rooted legume.genefam.fam1.M65K.hmmalign_trim
   rm -rf legume.genefam.fam1.M65K
 fi
 
