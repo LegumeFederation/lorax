@@ -19,7 +19,7 @@ flask==2.0.1
     #   flask-rq2
 flask-rq2==18.3
     # via -r requirements.in
-gunicorn==20.1.0
+gunicorn==21.2.0
     # via -r requirements.in
 itsdangerous==2.0.1
     # via flask
@@ -31,6 +31,8 @@ markupsafe==2.0.1
     # via jinja2
 numpy==1.21.0
     # via biopython
+packaging==23.2
+    # via gunicorn
 python-dateutil==2.8.1
     # via
     #   croniter
@@ -49,6 +51,3 @@ six==1.16.0
     # via python-dateutil
 werkzeug==2.0.1
     # via flask
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
