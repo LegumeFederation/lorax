@@ -45,6 +45,10 @@ function CopyFiles {
         cp ${treepath}/${fam0}.nwk ${famtreedir}/tree.nwk
         # MSAs
         cp ${msapath}/${fam0}.faa ${fam}/alignment.faa
+
+        # Remove files to free disk space
+        rm ${treepath}/${fam0}.nwk
+        rm ${msapath}/${fam0}.faa
     done
 }
 #

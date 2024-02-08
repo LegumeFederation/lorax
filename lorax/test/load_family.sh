@@ -54,6 +54,10 @@ function PostPut {
  		    exit 1
  	    fi
         echo -e "${fam}\t${nseqs}\t${avg_len}">>families.raw
+
+        # Remove files to free disk space
+        rm ${fastapath}/${fam0}.faa
+        rm ${hmmpath}/${fam0}.hmm
     done
 }
 #
