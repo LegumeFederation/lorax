@@ -12,7 +12,9 @@ x-app: &default-rq
       # number of threads for raxml & hmmalign
       OMP_NUM_THREADS: 1
     volumes:
-      - data:/usr/local/var/data
+      - type: bind
+        source: /falafel/lorax/data-sgr-funnotate
+        target: /usr/local/var/data
 
 services:
   flask:
@@ -27,7 +29,9 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - data:/usr/local/var/data
+      - type: bind
+        source: /falafel/lorax/data-sgr-funnotate
+        target: /usr/local/var/data
 
   load:
     image: lorax:latest
@@ -41,7 +45,9 @@ services:
     profiles:
       - load
     volumes:
-      - data:/usr/local/var/data
+      - type: bind
+        source: /falafel/lorax/data-sgr-funnotate
+        target: /usr/local/var/data
 
   redis:
     image: redis:6.2.4-alpine3.14
@@ -86,6 +92,3 @@ services:
     command: ./test_targets.sh
     profiles:
       - test
-
-volumes:
-  data:

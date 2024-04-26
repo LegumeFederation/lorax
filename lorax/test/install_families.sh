@@ -17,10 +17,10 @@ fi
 if [ ! -f legume.genefam.fam1.M65K-families.tsv ]
 then
   echo "Installing FASTA sequences and HMMs."
-  yuckified_data=https://dev.lis.ncgr.org/yuckified
-  curl $yuckified_data/legume.genefam.fam1.M65K.hmm.tgz |
+  yuckified_data=https://data.legumeinfo.org/LEGUMES/Fabaceae/genefamilies/legume.fam1.M65K
+  curl $yuckified_data/legume.fam1.M65K.hmm.tar.gz |
     tar -xzf -
-  curl $yuckified_data/legume.genefam.fam1.M65K.family_fasta.tgz |
+  curl $yuckified_data/legume.fam1.M65K.family_fasta.tar.gz |
     tar -xzf -
   find legume.genefam.fam1.M65K.hmm -type f -exec mv {} {}.hmm \;
   find legume.genefam.fam1.M65K.family_fasta -type f -exec mv {} {}.faa \;
@@ -29,9 +29,9 @@ then
 
   # also Newick trees and MSAs
   echo "Installing Newick trees and MSAs."
-  curl $yuckified_data/legume.genefam.fam1.M65K.trees_ML_rooted.tgz |
+  curl $yuckified_data/legume.fam1.M65K.trees_ML_rooted.tar.gz |
     tar -xzf -
-  curl $yuckified_data/legume.genefam.fam1.M65K.hmmalign_trim.tgz |
+  curl $yuckified_data/legume.fam1.M65K.hmmalign_trim.tar.gz |
     tar -xzf -
   find legume.genefam.fam1.M65K.trees_ML_rooted -type f -exec mv {} {}.nwk \;
   find legume.genefam.fam1.M65K.hmmalign_trim -type f -exec mv {} {}.faa \;
