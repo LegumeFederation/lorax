@@ -14,30 +14,30 @@ then
   touch phytozome_10_2.done
 fi
 
-if [ ! -f legume.genefam.fam1.M65K-families.tsv ]
+if [ ! -f legume.fam3.VLMQ-families.tsv ]
 then
   echo "Installing FASTA sequences and HMMs."
-  yuckified_data=https://data.legumeinfo.org/LEGUMES/Fabaceae/genefamilies/legume.fam1.M65K
-  curl $yuckified_data/legume.fam1.M65K.hmm.tar.gz |
+  yuckified_data=https://data.legumeinfo.org/LEGUMES/Fabaceae/genefamilies/legume.fam3.VLMQ
+  curl $yuckified_data/legume.fam3.VLMQ.baseB_hmm.tar.gz |
     tar -xzf -
-  curl $yuckified_data/legume.fam1.M65K.family_fasta.tar.gz |
+  curl $yuckified_data/legume.fam3.VLMQ.sup1B_proteomes.tar.gz |
     tar -xzf -
-  find legume.genefam.fam1.M65K.hmm -type f -exec mv {} {}.hmm \;
-  find legume.genefam.fam1.M65K.family_fasta -type f -exec mv {} {}.faa \;
-  ${bindir}/load_family.sh legume.genefam.fam1.M65K.family_fasta legume.genefam.fam1.M65K.hmm legume.genefam.fam1.M65K
-  rm -rf legume.genefam.fam1.M65K.family_fasta legume.genefam.fam1.M65K.hmm
+  find legume.fam3.VLMQ.baseB_hmm -type f -exec mv {} {}.hmm \;
+  find legume.fam3.VLMQ.sup1B_proteomes -type f -exec mv {} {}.faa \;
+  ${bindir}/load_family.sh legume.fam3.VLMQ.sup1B_proteomes legume.fam3.VLMQ.baseB_hmm legume.fam3.VLMQ
+  rm -rf legume.fam3.VLMQ.sup1B_proteomes legume.fam3.VLMQ.baseB_hmm
 
   # also Newick trees and MSAs
   echo "Installing Newick trees and MSAs."
-  curl $yuckified_data/legume.fam1.M65K.trees_ML_rooted.tar.gz |
+  curl $yuckified_data/legume.fam3.VLMQ.sup1B_trees.tar.gz |
     tar -xzf -
-  curl $yuckified_data/legume.fam1.M65K.hmmalign_trim.tar.gz |
+  curl $yuckified_data/legume.fam3.VLMQ.sup1B_hmmalign_trim2.tar.gz |
     tar -xzf -
-  find legume.genefam.fam1.M65K.trees_ML_rooted -type f -exec mv {} {}.nwk \;
-  find legume.genefam.fam1.M65K.hmmalign_trim -type f -exec mv {} {}.faa \;
-  ${bindir}/copy_family.sh legume.genefam.fam1.M65K.trees_ML_rooted legume.genefam.fam1.M65K.hmmalign_trim legume.genefam.fam1.M65K
-  rm -rf legume.genefam.fam1.M65K.trees_ML_rooted legume.genefam.fam1.M65K.hmmalign_trim
-  rm -rf legume.genefam.fam1.M65K
+  find legume.fam3.VLMQ.sup1B_trees -type f -exec mv {} {}.nwk \;
+  find legume.fam3.VLMQ.sup1B_hmmalign_trim2 -type f -exec mv {} {}.faa \;
+  ${bindir}/copy_family.sh legume.fam3.VLMQ.sup1B_trees legume.fam3.VLMQ.sup1B_hmmalign_trim2 legume.fam3.VLMQ
+  rm -rf legume.fam3.VLMQ.sup1B_trees legume.fam3.VLMQ.sup1B_hmmalign_trim2
+  rm -rf legume.fam3.VLMQ
 fi
 
 echo "Installation of families done."

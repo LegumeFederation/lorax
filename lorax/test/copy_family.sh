@@ -32,9 +32,10 @@ function CopyFiles {
         let count=${count}+1
         famname=${treefile##*/}
         fam0=${famname%%.nwk}
-        fam=${fam0##legfed_v1_0.}
+        # Replace . (which means a <family>.<superfamily> separator in Lorax) with _
+        fam=${fam0//\./_}
         if [ "$_V" -ne 0 ]; then
-	    echo "Loading family ${fam} (tree and MSA)."
+	    echo "Loading family ${fam0} (tree and MSA)."
         elif [ "$_Q" -eq 0 ]; then
             ProgressBar ${count} ${nfiles}
         fi

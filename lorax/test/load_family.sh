@@ -34,26 +34,27 @@ function PostPut {
         let count=${count}+1
         seqname=${seqfile##*/}
         fam0=${seqname%%.faa}
-        fam=${fam0##legfed_v1_0.}
+        # Replace . (which means a <family>.<superfamily> separator in Lorax) with _
+        fam=${fam0//\./_}
         nseqs=$(grep \> ${seqfile} | wc -l)
         nchars=$(grep -v \> ${seqfile} | wc -c)
         avg_len=$(echo "$nchars $nseqs" | awk '{print int($1/$2+0.5)}')
         if [ "$_V" -ne 0 ]; then
-            echo "Loading family ${fam} with ${nseqs} sequences of length ${avg_len}."
+            echo "Loading family ${fam0} with ${nseqs} sequences of length ${avg_len}."
         elif [ "$_Q" -eq 0 ]; then
             ProgressBar ${count} ${nfiles}
         fi
         ${bindir}/post_FASTA.sh peptide ${seqfile} ${fam} sequences
         if [ $? -ne 0 ]; then
-            >&2 echo "POST of FASTA failed on ${fam}."
+            >&2 echo "POST of FASTA failed on ${fam0}."
  		    exit 1
         fi
 	    ${bindir}/put_HMM.sh ${hmmpath}/${fam0}.hmm ${fam}
  	    if [ $? -ne 0 ]; then
- 		    >&2 echo "PUT of HMM failed on ${fam}."
+                   >&2 echo "PUT of HMM failed on ${fam0}."
  		    exit 1
  	    fi
-        echo -e "${fam}\t${nseqs}\t${avg_len}">>families.raw
+        echo -e "${fam0}\t${nseqs}\t${avg_len}">>families.raw
 
         # Remove files to free disk space
         rm ${fastapath}/${fam0}.faa
