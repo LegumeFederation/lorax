@@ -13,7 +13,7 @@ x-app: &default-rq
       OMP_NUM_THREADS: 1
     volumes:
       - type: bind
-        source: /falafel/lorax/data-sgr-funnotate
+        source: /falafel/lorax/data_legume.fam1.M65K_sgr-funnotate
         target: /usr/local/var/data
 
 services:
@@ -30,7 +30,7 @@ services:
         condition: service_healthy
     volumes:
       - type: bind
-        source: /falafel/lorax/data-sgr-funnotate
+        source: /falafel/lorax/data_legume.fam1.M65K_sgr-funnotate
         target: /usr/local/var/data
 
   load:
@@ -46,7 +46,7 @@ services:
       - load
     volumes:
       - type: bind
-        source: /falafel/lorax/data-sgr-funnotate
+        source: /falafel/lorax/data_legume.fam1.M65K_sgr-funnotate
         target: /usr/local/var/data
 
   redis:
