@@ -1,4 +1,4 @@
-FROM python:3.8.11-slim-buster
+FROM python:3.10.20-bookworm
 
 RUN apt update && apt install -y --no-install-recommends \
   curl \
